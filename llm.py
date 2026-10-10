@@ -128,3 +128,52 @@ def _azure(instructions, prompt, effort, max_output, deadline):
     return _text(d), {"seconds": round(time.time() - t, 1), "credits": 0,
                       "tokens_in": d.get("usage", {}).get("input_tokens"),
                       "tokens_out": d.get("usage", {}).get("output_tokens"), "model": d.get("model", FALLBACK_MODEL)}
+
+
+def stream_complete(instructions, prompt, on_delta, effort="low", max_output=4000, idle_timeout=60, total_timeout=180):
+    """Streaming call to the primary provider. on_delta(text) receives text as it arrives.
+    idle_timeout: longest silence allowed (Kie sends keep-alives while it reasons); total_timeout: hard cap."""
+    body = {"model": MODEL, "instructions": instructions, "input": prompt, "stream": True,
+            "reasoning": {"effort": effort}, "max_output_tokens": max_output}
+    req = urllib.request.Request("https://api.kie.ai/codex/v1/responses", data=json.dumps(body).encode(),
+                                 headers={"Content-Type": "application/json", "Authorization": "Bearer " + ENV["KIE_API_KEY"]})
+    t, parts, final, event = time.time(), [], None, None
+    try:
+        with urllib.request.urlopen(req, timeout=idle_timeout) as r:
+            for raw in r:
+                if time.time() - t > total_timeout:
+                    raise LLMError("timed out")
+                line = raw.decode(errors="replace").strip()
+                if line.startswith("event:"):
+                    event = line[6:].strip()
+                    continue
+                if not line.startswith("data:"):
+                    continue
+                try:
+                    d = json.loads(line[5:])
+                except ValueError:
+                    continue
+                kind = d.get("type") or event
+                if kind == "response.output_text.delta":
+                    parts.append(d.get("delta", ""))
+                    on_delta(d.get("delta", ""))
+                elif kind in ("response.completed", "response.done"):
+                    final = d.get("response", {})
+                elif kind in ("error", "response.failed"):
+                    raise LLMError(f"stream error: {json.dumps(d)[:300]}")
+    except urllib.error.HTTPError as e:
+        raise LLMError(f"HTTP {e.code}: {e.read()[:300].decode(errors='replace')}")
+    except (TimeoutError, urllib.error.URLError) as e:
+        raise LLMError(f"timed out ({e})")
+    text = "".join(parts)
+    if not text:
+        raise LLMError("stream ended without text")
+    final = final or {}
+    usage = final.get("usage", {})
+    # Kie reports no credits on streams; estimate from tokens with rates fitted to its non-stream replies.
+    est = round(0.000573 * (usage.get("input_tokens") or 0) + 0.0028 * (usage.get("output_tokens") or 0), 2)
+    return text, {"seconds": round(time.time() - t, 1), "credits": final.get("credits_consumed") or est,
+                  "credits_estimated": not final.get("credits_consumed"),
+                  "tokens_in": final.get("usage", {}).get("input_tokens"),
+                  "tokens_out": final.get("usage", {}).get("output_tokens"), "model": final.get("model", MODEL),
+                  "streamed": True}

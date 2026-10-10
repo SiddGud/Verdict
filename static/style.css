@@ -234,3 +234,5 @@ table.data th, table.data td { text-align: left; padding: .35rem .5rem; border-b
 .thread .a { white-space: pre-line; max-width: 72ch; margin: .3rem 0 0; }
 .thread .loose { font-size: .82rem; color: var(--warn); margin: .3rem 0 0; }
 .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+.brief .draft { white-space: pre-line; color: var(--muted); }
