@@ -1,5 +1,6 @@
 import hashlib
 import json
+import threading
 import os
 import time
 import urllib.error
@@ -9,6 +10,12 @@ import urllib.request
 BASE = "https://hackathon.api.qloo.com"
 CACHE = os.path.join(os.path.dirname(__file__), "cache")
 on_call = None  # optional callback(path, params, status, cached) for the agent trace
+_local = threading.local()
+
+
+def set_trace(cb):
+    """Per-thread trace callback, so concurrent runs do not mix their traces."""
+    _local.cb = cb
 
 
 def _status(data):
@@ -19,8 +26,9 @@ def _status(data):
 
 
 def _report(path, params, data, cached):
-    if on_call:
-        on_call(path, params, _status(data), cached)
+    cb = getattr(_local, "cb", None) or on_call
+    if cb:
+        cb(path, params, _status(data), cached)
 
 
 def _key():
