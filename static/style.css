@@ -236,3 +236,11 @@ table.data th, table.data td { text-align: left; padding: .35rem .5rem; border-b
 .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
 .brief .draft { white-space: pre-line; color: var(--muted); }
+
+textarea { width: 100%; font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--rule); border-radius: 4px; padding: .5rem .6rem; resize: vertical; }
+.mode-toggle { flex-wrap: wrap; border-radius: 8px; }
+.mode-toggle button { border-radius: 6px; }
+.scout-summary { margin: .4rem 0 0; font-size: .95rem; color: var(--ink); }
+.reason { grid-column: 2; font-size: .9rem; margin: .3rem 0 0; padding-left: .6rem; border-left: 3px solid var(--rule); }
+.steps .sub { margin-left: 1.7rem; font-size: .84rem; color: var(--muted); display: block; }
+.steps .sub.error { color: var(--warn); }
