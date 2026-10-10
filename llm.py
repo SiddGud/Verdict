@@ -14,12 +14,15 @@ ROOT = os.path.dirname(__file__)
 
 
 def _env():
+    """Environment variables first (the host's settings), then .env for local development."""
     vals = dict(os.environ)
-    with open(os.path.join(ROOT, ".env")) as f:
-        for line in f:
-            if "=" in line and not line.startswith("#"):
-                k, v = line.strip().split("=", 1)
-                vals.setdefault(k, v)
+    path = os.path.join(ROOT, ".env")
+    if os.path.exists(path):
+        with open(path) as f:
+            for line in f:
+                if "=" in line and not line.startswith("#"):
+                    k, v = line.strip().split("=", 1)
+                    vals.setdefault(k, v)
     return vals
 
 

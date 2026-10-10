@@ -35,7 +35,10 @@ def _key():
     key = os.environ.get("QLOO_API_KEY")
     if key:
         return key
-    with open(os.path.join(os.path.dirname(__file__), ".env")) as f:
+    path = os.path.join(os.path.dirname(__file__), ".env")
+    if not os.path.exists(path):
+        raise RuntimeError("QLOO_API_KEY is not set")
+    with open(path) as f:
         for line in f:
             if line.startswith("QLOO_API_KEY="):
                 return line.strip().split("=", 1)[1]
