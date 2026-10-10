@@ -213,3 +213,24 @@ table.data th, table.data td { text-align: left; padding: .35rem .5rem; border-b
 .sources-line .n-u { color: var(--warn); }
 .c { border-bottom: 2px solid var(--city); }
 .rank-note strong { color: var(--ink); }
+
+.mode-toggle { display: flex; width: 100%; margin-bottom: .4rem; }
+.mode-toggle button { flex: 1; padding: .4rem .5rem; font-size: .85rem; }
+.mode-toggle button[aria-checked="true"] { background: var(--ink); color: var(--surface); }
+.store { grid-column: 2; font-size: .85rem; margin: .15rem 0 0; color: var(--ink); }
+.store .tag { display: inline-block; font-size: .78rem; font-weight: 600; padding: 0 .4rem; border-radius: 999px; background: var(--city-tint); color: var(--city); margin-left: .3rem; }
+.repair-note { font-size: .88rem; color: var(--muted); margin: 1rem 0 0; padding-left: .7rem; border-left: 3px solid var(--warn); }
+.ask .chips { display: flex; flex-wrap: wrap; gap: .4rem; margin: .4rem 0 .8rem; }
+.ask .chips button { background: var(--bg); border: 1px solid var(--rule); border-radius: 999px; padding: .3rem .7rem; font-size: .85rem; color: var(--ink); }
+.ask-form { display: flex; gap: .5rem; }
+.ask-form input { flex: 1; }
+.ask-btn { width: auto; margin: 0; padding: .5rem 1rem; }
+.thread { list-style: none; margin: 1rem 0 0; padding: 0; display: grid; gap: 1rem; }
+.thread .q { background: none; border: 0; font-weight: 700; padding: 0; }
+.thread .tools { list-style: none; padding: 0; margin: .4rem 0; font-size: .84rem; color: var(--muted); display: grid; gap: .2rem; }
+.thread .tools .done::before { content: "\2713  "; color: var(--city); font-weight: 700; }
+.thread .tools .error::before { content: "\2715  "; color: var(--err); font-weight: 700; }
+.thread .tools .running::before { content: "\2026  "; }
+.thread .a { white-space: pre-line; max-width: 72ch; margin: .3rem 0 0; }
+.thread .loose { font-size: .82rem; color: var(--warn); margin: .3rem 0 0; }
+.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
