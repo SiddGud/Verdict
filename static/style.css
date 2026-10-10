@@ -243,6 +243,10 @@ textarea { width: 100%; font: inherit; color: var(--ink); background: var(--bg);
 .scout-summary { margin: .4rem 0 0; font-size: .95rem; color: var(--ink); }
 .reason { grid-column: 2; font-size: .9rem; margin: .3rem 0 0; padding-left: .6rem; border-left: 3px solid var(--rule); }
 .steps .sub { margin-left: 1.7rem; font-size: .84rem; color: var(--muted); display: block; }
+.steps .sub.thinking { font-style: italic; }
+.steps .sub.thinking::after { content: "…"; animation: pulse 1.4s ease-in-out infinite; }
+@keyframes pulse { 50% { opacity: .2; } }
+@media (prefers-reduced-motion: reduce) { .steps .sub.thinking::after { animation: none; } }
 .steps .sub.error { color: var(--warn); }
 
 .next-list { margin: .4rem 0 0; padding-left: 1.3rem; display: grid; gap: .45rem; max-width: 78ch; }

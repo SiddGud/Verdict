@@ -6,6 +6,8 @@ so we always send our own; Kie can report errors with HTTP 200, so we check the 
 """
 import json
 import os
+import queue
+import threading
 import time
 import urllib.error
 import urllib.request
@@ -232,6 +234,52 @@ def stream_response(body, idle_timeout=60, total_timeout=150):
     usage = final.get("usage", {})
     est = round(0.000573 * (usage.get("input_tokens") or 0) + 0.0028 * (usage.get("output_tokens") or 0), 2)
     return {"output": items, "credits": final.get("credits_consumed") or est, "status": "completed"}
+
+
+HEDGE_AFTER = float(ENV.get("LLM_HEDGE_AFTER", 30))
+
+
+def hedged_response(body, hedge_after=None, max_tries=3, idle_timeout=150, total_timeout=240, on_hedge=None):
+    """Kie answers most tool turns in 5 to 15 s but stalls for 1 to 4 minutes on about a third of them
+    (scout runs, Oct 11). Start the call; if none has finished after hedge_after seconds, start a duplicate,
+    up to max_tries in flight; return the first to finish. Duplicates are billed: credits for latency."""
+    hedge_after = HEDGE_AFTER if hedge_after is None else hedge_after
+    results, errors, started = queue.Queue(), [], [0]
+
+    def attempt(i):
+        try:
+            results.put((i, stream_response(body, idle_timeout, total_timeout), None))
+        except Exception as e:  # noqa: BLE001 - every failure is handed back to the caller's thread
+            results.put((i, None, e))
+
+    def start():
+        started[0] += 1
+        threading.Thread(target=attempt, args=(started[0],), daemon=True).start()
+
+    start()
+    deadline = time.time() + total_timeout + hedge_after * max_tries
+    while True:
+        left = deadline - time.time()
+        if left <= 0:
+            raise LLMError("timed out")
+        try:
+            i, d, e = results.get(timeout=min(left, hedge_after) if started[0] < max_tries else left)
+        except queue.Empty:
+            if started[0] < max_tries:
+                start()
+                if on_hedge:
+                    on_hedge(started[0])
+            continue
+        if e is None:
+            return {**d, "attempt": i, "attempts": started[0]}
+        if "402" in str(e):  # out of credits: duplicates cannot help
+            raise e
+        errors.append(e)
+        if len(errors) == started[0]:  # nothing else in flight
+            if started[0] >= max_tries:
+                raise e
+            time.sleep(3)  # e.g. 429 'too many pending requests'
+            start()
 
 
 def _raise_body(line):
