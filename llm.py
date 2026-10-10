@@ -236,10 +236,10 @@ def stream_response(body, idle_timeout=60, total_timeout=150):
     return {"output": items, "credits": final.get("credits_consumed") or est, "status": "completed"}
 
 
-HEDGE_AFTER = float(ENV.get("LLM_HEDGE_AFTER", 30))
+HEDGE_AFTER = float(ENV.get("LLM_HEDGE_AFTER", 45))
 
 
-def hedged_response(body, hedge_after=None, max_tries=3, idle_timeout=150, total_timeout=240, on_hedge=None):
+def hedged_response(body, hedge_after=None, max_tries=2, idle_timeout=150, total_timeout=240, on_hedge=None):
     """Kie answers most tool turns in 5 to 15 s but stalls for 1 to 4 minutes on about a third of them
     (scout runs, Oct 11). Start the call; if none has finished after hedge_after seconds, start a duplicate,
     up to max_tries in flight; return the first to finish. Duplicates are billed: credits for latency."""
