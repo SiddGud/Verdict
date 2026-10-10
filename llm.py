@@ -233,7 +233,8 @@ def stream_response(body, idle_timeout=60, total_timeout=150):
         raise LLMError("stream ended without a reply")
     usage = final.get("usage", {})
     est = round(0.000573 * (usage.get("input_tokens") or 0) + 0.0028 * (usage.get("output_tokens") or 0), 2)
-    return {"output": items, "credits": final.get("credits_consumed") or est, "status": "completed"}
+    return {"output": items, "credits": final.get("credits_consumed") or est, "status": "completed",
+            "model": final.get("model") or MODEL, "provider": "kie"}
 
 
 HEDGE_AFTER = float(ENV.get("LLM_HEDGE_AFTER", 45))
@@ -247,8 +248,9 @@ def hedged_response(body, hedge_after=None, max_tries=2, idle_timeout=150, total
     results, errors, started = queue.Queue(), [], [0]
 
     def attempt(i):
-        try:
-            results.put((i, stream_response(body, idle_timeout, total_timeout), None))
+        try:  # the duplicate goes to the fallback provider when one is set: a Kie stall cannot hold it up
+            d = azure_response(body, total_timeout) if i > 1 and FALLBACK_URL else stream_response(body, idle_timeout, total_timeout)
+            results.put((i, d, None))
         except Exception as e:  # noqa: BLE001 - every failure is handed back to the caller's thread
             results.put((i, None, e))
 
@@ -270,8 +272,8 @@ def hedged_response(body, hedge_after=None, max_tries=2, idle_timeout=150, total
                 if on_hedge:
                     on_hedge(started[0])
             continue
-        if e is None:
-            return {**d, "attempt": i, "attempts": started[0]}
+        if e is None:  # kie_attempts: Kie calls started, each billed (a won Azure call reports 0 credits)
+            return {**d, "attempt": i, "attempts": started[0], "kie_attempts": 1 if FALLBACK_URL else started[0]}
         if "402" in str(e):  # out of credits: duplicates cannot help
             raise e
         errors.append(e)
@@ -280,6 +282,16 @@ def hedged_response(body, hedge_after=None, max_tries=2, idle_timeout=150, total
                 raise e
             time.sleep(3)  # e.g. 429 'too many pending requests'
             start()
+
+
+def azure_response(body, timeout=240):
+    """The same Responses call (tools included) on the Azure fallback deployment, not streamed."""
+    b = {k: v for k, v in body.items() if k not in ("stream", "model")}
+    d = _post(FALLBACK_URL + "/responses", {"api-key": FALLBACK_KEY}, {**b, "model": FALLBACK_MODEL}, timeout=timeout)
+    if d.get("status") not in (None, "completed"):
+        raise LLMError(f"fallback not completed: {json.dumps(d)[:300]}")
+    return {"output": d.get("output", []), "credits": 0, "status": "completed",
+            "model": d.get("model", FALLBACK_MODEL), "provider": "azure"}
 
 
 def _raise_body(line):

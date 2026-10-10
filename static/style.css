@@ -260,3 +260,5 @@ textarea { width: 100%; font: inherit; color: var(--ink); background: var(--bg);
   .map { height: 300px; break-inside: avoid; }
   .top { padding: 0 0 8px; }
 }
+
+.steps .slow { display: block; font-size: .8rem; color: var(--muted); font-style: italic; }
