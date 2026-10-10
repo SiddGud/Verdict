@@ -62,7 +62,7 @@ def _post(url, headers, body, timeout=180, deadline=None):
             time.sleep(3)
 
 
-def complete_json(instructions, prompt, check=None, effort="low", retries=1, timeout=30):
+def complete_json(instructions, prompt, check=None, effort="low", retries=1, timeout=60):
     """Ask for JSON in the instructions and validate in code.
 
     Kie's strict json_schema mode takes about 90 s per call versus about 10 s this way.
@@ -70,8 +70,14 @@ def complete_json(instructions, prompt, check=None, effort="low", retries=1, tim
     """
     note = ""
     for attempt in range(retries + 1):
-        text, meta = complete(instructions + "\nReply with JSON only, no prose, no code fences.",
-                              prompt + note, effort=effort, timeout=timeout)
+        try:
+            text, meta = complete(instructions + "\nReply with JSON only, no prose, no code fences.",
+                                  prompt + note, effort=effort, timeout=timeout)
+        except LLMError as e:  # a slow or failed call gets one more try, like a bad reply
+            note = ""
+            if attempt == retries:
+                raise
+            continue
         try:
             obj = json.loads(text.strip().removeprefix("```json").removesuffix("```"))
             if check:
