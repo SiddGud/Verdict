@@ -244,3 +244,15 @@ textarea { width: 100%; font: inherit; color: var(--ink); background: var(--bg);
 .reason { grid-column: 2; font-size: .9rem; margin: .3rem 0 0; padding-left: .6rem; border-left: 3px solid var(--rule); }
 .steps .sub { margin-left: 1.7rem; font-size: .84rem; color: var(--muted); display: block; }
 .steps .sub.error { color: var(--warn); }
+
+.next-list { margin: .4rem 0 0; padding-left: 1.3rem; display: grid; gap: .45rem; max-width: 78ch; }
+.next-list li.specific { font-weight: 600; }
+.next-list a { font-weight: 400; font-size: .85rem; margin-left: .3rem; }
+@media print {
+  .inputs, .trace, .toggle, .ask, .evidence, .foot, .how, #print-report, .map-key, .leaflet-control-container { display: none !important; }
+  .layout { display: block; padding: 0; }
+  body { background: #fff; color: #000; }
+  .panel { border: 0; padding: 0 0 12px; break-inside: avoid; }
+  .map { height: 300px; break-inside: avoid; }
+  .top { padding: 0 0 8px; }
+}
