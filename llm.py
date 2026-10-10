@@ -30,6 +30,23 @@ def _env():
 
 ENV = _env()
 PROVIDER = ENV.get("LLM_PROVIDER", "kie")
+# Both serve GPT-6 Astra on an OpenAI Responses-compatible endpoint. CometAPI is pay-as-you-go ($8 / $40 per
+# million input / output tokens, Oct 2026); Kie bills prepaid credits.
+PROVIDERS = {"kie": ("https://api.kie.ai/codex/v1/responses", "KIE_API_KEY"),
+             "comet": ("https://api.cometapi.com/v1/responses", "COMET_API_KEY")}
+RESPONSES_URL, KEY_NAME = PROVIDERS[PROVIDER]
+
+
+SPEND = {"usd": 0.0}  # CometAPI spend this process, from token usage (Kie reports credits instead)
+
+
+def _usd(usage):
+    if PROVIDER == "comet":
+        SPEND["usd"] += 8e-6 * (usage.get("input_tokens") or 0) + 40e-6 * (usage.get("output_tokens") or 0)
+
+
+def _auth():
+    return {"Authorization": "Bearer " + ENV[KEY_NAME]}
 MODEL = ENV.get("LLM_MODEL", "gpt-6-astra")
 # Optional outage fallback (Azure OpenAI, v1 Responses API). Used only when the primary call fails or
 # times out, and every fallback is labelled in the call's meta so the trace shows it.
@@ -96,7 +113,7 @@ def complete_json(instructions, prompt, check=None, effort="low", retries=1, tim
 
 def complete(instructions, prompt, effort="low", max_output=4000, timeout=90):
     """Return (text, meta). Tries the primary provider within `timeout` seconds, then the fallback if set."""
-    if PROVIDER != "kie":
+    if PROVIDER not in PROVIDERS:
         raise LLMError(f"provider {PROVIDER} not wired yet")
     t = time.time()
     try:
@@ -123,10 +140,11 @@ def _kie(instructions, prompt, effort, max_output, deadline):
         "reasoning": {"effort": effort}, "max_output_tokens": max_output,
     }
     t = time.time()
-    d = _post("https://api.kie.ai/codex/v1/responses", {"Authorization": "Bearer " + ENV["KIE_API_KEY"]}, body,
+    d = _post(RESPONSES_URL, _auth(), body,
               deadline=deadline)
     if d.get("status") != "completed":
         raise LLMError(f"not completed: {json.dumps(d)[:400]}")
+    _usd(d.get("usage", {}))
     return _text(d), {"seconds": round(time.time() - t, 1), "credits": d.get("credits_consumed"),
                       "tokens_in": d.get("usage", {}).get("input_tokens"),
                       "tokens_out": d.get("usage", {}).get("output_tokens"), "model": d.get("model")}
@@ -149,8 +167,8 @@ def stream_complete(instructions, prompt, on_delta, effort="low", max_output=400
     idle_timeout: longest silence allowed (Kie sends keep-alives while it reasons); total_timeout: hard cap."""
     body = {"model": MODEL, "instructions": instructions, "input": prompt, "stream": True,
             "reasoning": {"effort": effort}, "max_output_tokens": max_output}
-    req = urllib.request.Request("https://api.kie.ai/codex/v1/responses", data=json.dumps(body).encode(),
-                                 headers={"Content-Type": "application/json", "Authorization": "Bearer " + ENV["KIE_API_KEY"]})
+    req = urllib.request.Request(RESPONSES_URL, data=json.dumps(body).encode(),
+                                 headers={"Content-Type": "application/json", **_auth()})
     t, parts, final, event = time.time(), [], None, None
     try:
         with urllib.request.urlopen(req, timeout=idle_timeout) as r:
@@ -187,6 +205,7 @@ def stream_complete(instructions, prompt, on_delta, effort="low", max_output=400
     final = final or {}
     usage = final.get("usage", {})
     # Kie reports no credits on streams; estimate from tokens with rates fitted to its non-stream replies.
+    _usd(usage)
     est = round(0.000573 * (usage.get("input_tokens") or 0) + 0.0028 * (usage.get("output_tokens") or 0), 2)
     return text, {"seconds": round(time.time() - t, 1), "credits": final.get("credits_consumed") or est,
                   "credits_estimated": not final.get("credits_consumed"),
@@ -199,8 +218,8 @@ def stream_response(body, idle_timeout=60, total_timeout=150):
     """Streamed Responses call for tool use: returns {"output": [items], "credits": float}.
     Items are collected from output_item.done events, so function calls arrive whole."""
     body = {**body, "stream": True}
-    req = urllib.request.Request("https://api.kie.ai/codex/v1/responses", data=json.dumps(body).encode(),
-                                 headers={"Content-Type": "application/json", "Authorization": "Bearer " + ENV["KIE_API_KEY"]})
+    req = urllib.request.Request(RESPONSES_URL, data=json.dumps(body).encode(),
+                                 headers={"Content-Type": "application/json", **_auth()})
     t, items, final, event = time.time(), [], {}, None
     try:
         with urllib.request.urlopen(req, timeout=idle_timeout) as r:
@@ -232,9 +251,10 @@ def stream_response(body, idle_timeout=60, total_timeout=150):
     if not items and not final:
         raise LLMError("stream ended without a reply")
     usage = final.get("usage", {})
+    _usd(usage)
     est = round(0.000573 * (usage.get("input_tokens") or 0) + 0.0028 * (usage.get("output_tokens") or 0), 2)
     return {"output": items, "credits": final.get("credits_consumed") or est, "status": "completed",
-            "model": final.get("model") or MODEL, "provider": "kie"}
+            "model": final.get("model") or MODEL, "provider": PROVIDER}
 
 
 HEDGE_AFTER = float(ENV.get("LLM_HEDGE_AFTER", 45))
