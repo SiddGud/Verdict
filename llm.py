@@ -160,6 +160,8 @@ def stream_complete(instructions, prompt, on_delta, effort="low", max_output=400
                     event = line[6:].strip()
                     continue
                 if not line.startswith("data:"):
+                    if line.startswith("{"):
+                        _raise_body(line)
                     continue
                 try:
                     d = json.loads(line[5:])
@@ -207,6 +209,8 @@ def stream_response(body, idle_timeout=60, total_timeout=150):
                 if line.startswith("event:"):
                     event = line[6:].strip(); continue
                 if not line.startswith("data:"):
+                    if line.startswith("{"):
+                        _raise_body(line)
                     continue
                 try:
                     d = json.loads(line[5:])
@@ -223,6 +227,19 @@ def stream_response(body, idle_timeout=60, total_timeout=150):
         raise LLMError(f"HTTP {e.code}: {e.read()[:300].decode(errors='replace')}")
     except (TimeoutError, urllib.error.URLError) as e:
         raise LLMError(f"timed out ({e})")
+    if not items and not final:
+        raise LLMError("stream ended without a reply")
     usage = final.get("usage", {})
     est = round(0.000573 * (usage.get("input_tokens") or 0) + 0.0028 * (usage.get("output_tokens") or 0), 2)
     return {"output": items, "credits": final.get("credits_consumed") or est, "status": "completed"}
+
+
+def _raise_body(line):
+    """Kie answers some failures (no credits, rate limit) with HTTP 200 and a plain JSON body."""
+    try:
+        d = json.loads(line)
+    except ValueError:
+        return
+    code = d.get("code") or (d.get("error") or {}).get("code")
+    if code not in (None, 200):
+        raise LLMError(f"provider error {code}: {str(d.get('msg') or d.get('error'))[:200]}")
