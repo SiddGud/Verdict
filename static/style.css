@@ -203,3 +203,13 @@ table.data th, table.data td { text-align: left; padding: .35rem .5rem; border-b
   :root:not([data-theme="light"]) .toggle button[aria-checked="true"] { color: var(--bg); }
 }
 :root[data-theme="dark"] .toggle button[aria-checked="true"] { color: var(--bg); }
+
+.run-hint { margin: .4rem 0 0; }
+.verdict { margin: 0; font-size: 1.05rem; max-width: 75ch; padding: .9rem 1rem; background: var(--surface); border: 1px solid var(--rule); border-left: 4px solid var(--city); border-radius: 8px; }
+.verdict b { font-family: var(--display); }
+.sources-line { margin: .2rem 0 .4rem; font-weight: 600; }
+.sources-line .n-q { color: var(--qloo); }
+.sources-line .n-c { color: var(--city); }
+.sources-line .n-u { color: var(--warn); }
+.c { border-bottom: 2px solid var(--city); }
+.rank-note strong { color: var(--ink); }
