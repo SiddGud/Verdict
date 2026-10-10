@@ -59,6 +59,12 @@ class LLMError(Exception):
     pass
 
 
+def out_of_budget(msg):
+    """Provider messages meaning no credit or too busy: Kie 402/429, CometAPI 403 'pre-consume quota failed'."""
+    m = str(msg)
+    return any(x in m for x in ("provider error 402", "provider error 429", "HTTP 429", "HTTP 402", "quota"))
+
+
 def _post(url, headers, body, timeout=180, deadline=None):
     """POST with retries on 429/5xx and connection errors, but never past `deadline` (epoch seconds).
     A timeout is not retried: a slow provider stays slow, so the caller falls back instead."""
@@ -294,7 +300,7 @@ def hedged_response(body, hedge_after=None, max_tries=2, idle_timeout=150, total
             continue
         if e is None:  # kie_attempts: Kie calls started, each billed (a won Azure call reports 0 credits)
             return {**d, "attempt": i, "attempts": started[0], "kie_attempts": 1 if FALLBACK_URL else started[0]}
-        if "402" in str(e):  # out of credits: duplicates cannot help
+        if out_of_budget(e):  # out of credits: duplicates cannot help
             raise e
         errors.append(e)
         if len(errors) == started[0]:  # nothing else in flight
