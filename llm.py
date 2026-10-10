@@ -65,7 +65,7 @@ def _post(url, headers, body, timeout=180, deadline=None):
             time.sleep(3)
 
 
-def complete_json(instructions, prompt, check=None, effort="low", retries=1, timeout=60):
+def complete_json(instructions, prompt, check=None, effort="low", retries=1, timeout=120):
     """Ask for JSON in the instructions and validate in code.
 
     Kie's strict json_schema mode takes about 90 s per call versus about 10 s this way.
@@ -98,7 +98,10 @@ def complete(instructions, prompt, effort="low", max_output=4000, timeout=90):
         raise LLMError(f"provider {PROVIDER} not wired yet")
     t = time.time()
     try:
-        return _kie(instructions, prompt, effort, max_output, deadline=t + timeout)
+        # Streamed under the hood: Kie sends keep-alives while it reasons, so only real silence (60 s) or the
+        # total cap ends a call, instead of a fixed wait that cut off slow but healthy replies.
+        return stream_complete(instructions, prompt, lambda d: None, effort=effort, max_output=max_output,
+                               idle_timeout=60, total_timeout=timeout)
     except LLMError as e:
         if not (FALLBACK_URL and FALLBACK_KEY):
             raise
@@ -186,3 +189,40 @@ def stream_complete(instructions, prompt, on_delta, effort="low", max_output=400
                   "tokens_in": final.get("usage", {}).get("input_tokens"),
                   "tokens_out": final.get("usage", {}).get("output_tokens"), "model": final.get("model", MODEL),
                   "streamed": True}
+
+
+def stream_response(body, idle_timeout=60, total_timeout=150):
+    """Streamed Responses call for tool use: returns {"output": [items], "credits": float}.
+    Items are collected from output_item.done events, so function calls arrive whole."""
+    body = {**body, "stream": True}
+    req = urllib.request.Request("https://api.kie.ai/codex/v1/responses", data=json.dumps(body).encode(),
+                                 headers={"Content-Type": "application/json", "Authorization": "Bearer " + ENV["KIE_API_KEY"]})
+    t, items, final, event = time.time(), [], {}, None
+    try:
+        with urllib.request.urlopen(req, timeout=idle_timeout) as r:
+            for raw in r:
+                if time.time() - t > total_timeout:
+                    raise LLMError("timed out")
+                line = raw.decode(errors="replace").strip()
+                if line.startswith("event:"):
+                    event = line[6:].strip(); continue
+                if not line.startswith("data:"):
+                    continue
+                try:
+                    d = json.loads(line[5:])
+                except ValueError:
+                    continue
+                kind = d.get("type") or event
+                if kind == "response.output_item.done":
+                    items.append(d.get("item", {}))
+                elif kind in ("response.completed", "response.done"):
+                    final = d.get("response", {})
+                elif kind in ("error", "response.failed"):
+                    raise LLMError(f"stream error: {json.dumps(d)[:300]}")
+    except urllib.error.HTTPError as e:
+        raise LLMError(f"HTTP {e.code}: {e.read()[:300].decode(errors='replace')}")
+    except (TimeoutError, urllib.error.URLError) as e:
+        raise LLMError(f"timed out ({e})")
+    usage = final.get("usage", {})
+    est = round(0.000573 * (usage.get("input_tokens") or 0) + 0.0028 * (usage.get("output_tokens") or 0), 2)
+    return {"output": items, "credits": final.get("credits_consumed") or est, "status": "completed"}
