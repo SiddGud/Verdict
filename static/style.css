@@ -266,3 +266,23 @@ textarea { width: 100%; font: inherit; color: var(--ink); background: var(--bg);
 .measured, .not-measured { margin: .5rem 0 0; padding: .5rem .75rem; list-style: none; border-left: 3px solid var(--muted); font-size: .88rem; }
 .measured .nm-head, .not-measured .nm-head { font-weight: 600; }
 .measured { border-left-color: var(--accent, #2a6); }
+
+/* Qloo lookups: what is around an address, and scenes */
+.around h3, .scene h3 { font-size: 1rem; margin: 1rem 0 .3rem; }
+.around-list, .scene-list { margin: .3rem 0 0; padding-left: 1.2rem; display: grid; gap: .25rem; font-size: .92rem; }
+.around-list .m, .scene-list .m { color: var(--muted); font-size: .85rem; }
+.around-list .qf { color: var(--qloo); font-weight: 600; font-variant-numeric: tabular-nums; }
+.around-list .men { color: var(--muted); }
+.around-list .nodetail { color: var(--muted); font-style: italic; font-size: .85rem; }
+.among { margin: .6rem 0 0; padding-left: .6rem; border-left: 3px solid var(--qloo); max-width: 78ch; }
+.notes { margin: 1rem 0 0; padding-left: 1.2rem; font-size: .84rem; color: var(--muted); display: grid; gap: .2rem; max-width: 82ch; }
+.scene-form { max-width: 640px; margin-top: 1rem; }
+.scene-body { margin-top: 1rem; max-width: 1300px; }
+.scene-grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 380px), 1fr)); margin-top: .6rem; }
+.scene-list { grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); column-gap: 1.6rem; }
+.scene-list .unc { color: var(--muted); }
+.scene-list .unc b { font-weight: 400; }
+.matched { margin: .6rem 0 0; }
+.taste-cols { display: grid; gap: .8rem; }
+.taste-cols h4 { margin: 0; font-size: .8rem; text-transform: uppercase; letter-spacing: .06em; color: var(--qloo); }
+.taste-cols p { margin: .15rem 0 0; }
