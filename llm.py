@@ -62,7 +62,7 @@ class LLMError(Exception):
 def out_of_budget(msg):
     """Provider messages meaning no credit or too busy: Kie 402/429, CometAPI 403 'pre-consume quota failed'."""
     m = str(msg)
-    return any(x in m for x in ("provider error 402", "provider error 429", "HTTP 429", "HTTP 402", "quota"))
+    return any(x in m for x in ("provider error 402", "provider error 429", "HTTP 429", "HTTP 402", "quota", "Qloo monthly quota"))
 
 
 def _post(url, headers, body, timeout=180, deadline=None):

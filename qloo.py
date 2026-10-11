@@ -9,6 +9,14 @@ import urllib.request
 
 BASE = "https://hackathon.api.qloo.com"
 CACHE = os.path.join(os.path.dirname(__file__), "cache")
+# Hackathon keys allow 10,000 requests a month (X-Month-RateLimit-*). Keep a reserve so a busy judging day
+# cannot use the month up: below it, uncached calls stop and live runs say so; cached and saved runs still work.
+RESERVE = int(os.environ.get("QLOO_RESERVE", "300"))
+QUOTA = {"remaining": None}
+
+
+class QuotaLow(RuntimeError):
+    pass
 on_call = None  # optional callback(path, params, status, cached) for the agent trace
 _local = threading.local()
 
@@ -53,10 +61,16 @@ def get(path, **params):
             data = json.load(f)
         _report(path, params, data, True)
         return data
+    if QUOTA["remaining"] is not None and QUOTA["remaining"] < RESERVE:
+        raise QuotaLow(f"Qloo monthly quota low ({QUOTA['remaining']} requests left); live runs are paused")
     req = urllib.request.Request(url, headers={"X-Api-Key": _key()})
     for attempt in range(4):
         try:
-            data = json.load(urllib.request.urlopen(req, timeout=90))
+            with urllib.request.urlopen(req, timeout=90) as r:
+                left = r.headers.get("X-Month-RateLimit-Remaining")
+                if left is not None:
+                    QUOTA["remaining"] = int(float(left))
+                data = json.load(r)
             break
         except urllib.error.HTTPError as e:
             if e.code in (429, 500, 502, 503) and attempt < 3:
