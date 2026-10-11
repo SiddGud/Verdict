@@ -8,7 +8,7 @@ import urllib.parse
 import urllib.request
 
 BASE = "https://hackathon.api.qloo.com"
-CACHE = os.path.join(os.path.dirname(__file__), "cache")
+CACHE = os.environ.get("QLOO_CACHE_DIR") or os.path.join(os.path.dirname(__file__), "cache")  # private server storage only
 # Hackathon keys allow 10,000 requests a month (X-Month-RateLimit-*). Keep a reserve so a busy judging day
 # cannot use the month up: below it, uncached calls stop and live runs say so; cached and saved runs still work.
 RESERVE = int(os.environ.get("QLOO_RESERVE", "300"))
