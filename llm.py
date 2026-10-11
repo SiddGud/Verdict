@@ -59,6 +59,12 @@ class LLMError(Exception):
     pass
 
 
+def busy(msg):
+    """Too many requests at once (Kie 429 'too many pending', CometAPI concurrency): worth retrying shortly."""
+    m = str(msg)
+    return "HTTP 429" in m or "provider error 429" in m or "pending" in m.lower() or "rate limit" in m.lower()
+
+
 def out_of_budget(msg):
     """Provider messages meaning no credit or too busy: Kie 402/429, CometAPI 403 'pre-consume quota failed'."""
     m = str(msg)
