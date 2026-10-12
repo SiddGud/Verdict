@@ -79,7 +79,7 @@ def get(path, **params):
             data = {"error": e.code, "body": e.read()[:300].decode()}
             _report(path, params, data, False)
             return data
-        except (TimeoutError, urllib.error.URLError):
+        except (TimeoutError, urllib.error.URLError, ConnectionError, json.JSONDecodeError):  # dropped or cut-off reply
             if attempt == 3:
                 data = {"error": "timeout"}
                 _report(path, params, data, False)
