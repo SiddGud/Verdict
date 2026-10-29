@@ -1,0 +1,17 @@
+{
+ "name": "Test bill (real artists, made-up timetable)",
+ "note": "For development only. Each stage holds one genre and acts run from smaller to bigger, as many festivals do. Replaced by a real published timetable for the demo.",
+ "stages": ["Main Stage", "Hip-Hop Stage", "Dance Tent", "Indie Stage"],
+ "slots": ["12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00"],
+ "published": {
+  "Main Stage": ["Laufey", "girl in red", "beabadoobee", "Conan Gray", "Reneé Rapp", "Clairo", "Gracie Abrams", "Chappell Roan", "Olivia Rodrigo", "Sabrina Carpenter"],
+  "Hip-Hop Stage": ["Kenny Mason", "Smino", "Rico Nasty", "Isaiah Rashad", "Earl Sweatshirt", "JPEGMAFIA", "Denzel Curry", "Baby Keem", "Doechii", "Tyler, The Creator"],
+  "Dance Tent": ["Barry Can't Swim", "Four Tet", "Kaytranada", "Disclosure", "Dom Dolla", "John Summit", "Fisher", "Odesza", "Skrillex", "Fred again.."],
+  "Indie Stage": ["The Marías", "Alvvays", "Wet Leg", "Japanese Breakfast", "Mk.gee", "Wallows", "Turnstile", "Phoebe Bridgers", "Mitski", "The Strokes"]
+ },
+ "rules": {
+  "headliners_close": true,
+  "billing_window": 2,
+  "stage_locked": {"Dance Tent": ["Barry Can't Swim", "Four Tet", "Kaytranada", "Disclosure", "Dom Dolla", "John Summit", "Fisher", "Odesza", "Skrillex", "Fred again.."]}
+ }
+}

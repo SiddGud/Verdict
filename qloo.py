@@ -30,6 +30,8 @@ def _status(data):
     if "error" in data:
         return "error"
     res = data.get("results", {})
+    if isinstance(res, list):  # /search returns a plain list
+        return "ok" if res else "empty"
     return "ok" if any(res.get(k) for k in ("entities", "tags", "heatmap", "demographics")) else "empty"
 
 
