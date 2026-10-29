@@ -22,7 +22,8 @@ try { var t = localStorage.getItem("ws-theme"); if (t === "light" || t === "dark
 <nav class="nav" aria-label="Main">
   <a class="logo" href="#top" aria-label="Clash Court, back to top"><span class="logo-mark c-mark" aria-hidden="true"></span>Clash Court</a>
   <div class="nav-links">
-    <a href="#court">The court</a>
+    <a href="#court">Festival court</a>
+    <a href="#desk">City desk</a>
     <a href="#day">Your day</a>
     <a href="#how">How it works</a>
     <a class="how" href="#evidence">How we know</a>
@@ -40,13 +41,13 @@ try { var t = localStorage.getItem("ws-theme"); if (t === "light" || t === "dark
     <div class="brand">
       <p class="eyebrow">Festival timetables <span id="fest-short">Lollapalooza Chicago</span></p>
       <h1 class="wordmark">Fans shouldn't have to <em>choose.</em></h1>
-      <p class="lede">Two acts that share fans, on two stages, at the same time: someone misses one. Clash Court finds
-        every such pair with <span class="src qloo">Qloo taste data</span>, puts each clash on trial, and rebuilds the
-        timetable within the booker's rules.</p>
+      <p class="lede">Every show fights for the same fans. Clash Court maps who shares fans across live music with
+        <span class="src qloo">Qloo taste data</span> and real listings, so shows stop fighting over the same people
+        and start finding them.</p>
       <ul class="points">
-        <li>Fan agents argue each clash with real numbers</li>
-        <li>The booker agent objects when a fix breaks a rule</li>
-        <li>The judge rules, and the whole timetable moves</li>
+        <li>Avoid: a festival timetable or a booking date with the fewest clashes</li>
+        <li>Partner: the shows whose fans are your fans, to market alongside</li>
+        <li>Book: the nights nobody is serving your audience, in 12 cities</li>
       </ul>
     </div>
 
@@ -114,6 +115,69 @@ try { var t = localStorage.getItem("ws-theme"); if (t === "light" || t === "dark
       <div class="c-transcript" id="transcript"></div>
       <ol class="c-docket" id="docket" aria-label="Docket"></ol>
     </section>
+  </div>
+</section>
+
+<section class="band c-desk" id="desk">
+  <div class="band-head">
+    <div>
+      <p class="kicker big">City desk</p>
+      <h2>A city's month, read for one audience</h2>
+    </div>
+    <p class="hint">Every music show on sale in the city (Ticketmaster), scored by how much each act shares fans with
+      yours (Qloo; Last.fm where Qloo has no data). Where our tests found a language model better, the model leads and
+      is labelled.</p>
+  </div>
+  <div class="panel">
+    <div class="c-deskbar">
+      <div class="toggle" role="radiogroup" aria-label="Tool" id="tabs">
+        <button type="button" role="radio" aria-checked="true" data-tab="book">Book a date</button>
+        <button type="button" role="radio" aria-checked="false" data-tab="portfolio">Promoter portfolio</button>
+        <button type="button" role="radio" aria-checked="false" data-tab="friends">Friends' month</button>
+        <button type="button" role="radio" aria-checked="false" data-tab="tour">Openers and tour</button>
+      </div>
+      <div class="c-where">
+        <select id="d-city" aria-label="City"></select>
+        <select id="d-month" aria-label="Month"></select>
+      </div>
+    </div>
+
+    <form class="c-tab" data-tab="book" id="f-book" autocomplete="off">
+      <div class="c-row">
+        <input id="b-artist" maxlength="60" placeholder="Artist to book, for example Clairo" aria-label="Artist to book">
+        <label class="c-check"><input type="checkbox" id="b-weekends"> Fridays and Saturdays only</label>
+        <button type="submit" class="primary c-auto">Find the night</button>
+      </div>
+      <div id="o-book" class="c-out"></div>
+    </form>
+
+    <form class="c-tab" data-tab="portfolio" id="f-port" autocomplete="off" hidden>
+      <div class="c-row">
+        <select id="p-promoter" aria-label="Promoter"></select>
+        <button type="submit" class="primary c-auto">Read the portfolio</button>
+      </div>
+      <div id="o-port" class="c-out"></div>
+    </form>
+
+    <form class="c-tab" data-tab="friends" id="f-friends" autocomplete="off" hidden>
+      <div class="c-people" id="people"></div>
+      <div class="c-row">
+        <button type="button" class="quiet small" id="add-person">Add a friend</button>
+        <button type="submit" class="primary c-auto">Plan our month</button>
+      </div>
+      <div id="o-friends" class="c-out"></div>
+    </form>
+
+    <form class="c-tab" data-tab="tour" id="f-tour" autocomplete="off" hidden>
+      <div class="c-row">
+        <input id="t-artist" maxlength="60" placeholder="Headliner, for example Clairo" aria-label="Headliner">
+        <button type="submit" class="primary c-auto">Suggest openers</button>
+      </div>
+      <p class="hint">Tour dates: pick the cities, and the model orders them; each night is then chosen from real listings.</p>
+      <div class="chips c-cities" id="t-cities"></div>
+      <button type="button" class="quiet small" id="t-route">Route the tour</button>
+      <div id="o-tour" class="c-out"></div>
+    </form>
   </div>
 </section>
 
@@ -208,5 +272,6 @@ try { var t = localStorage.getItem("ws-theme"); if (t === "light" || t === "dark
   <p><a href="/whitespace">Our earlier product, the earlier project</a></p>
 </footer>
 <script src="/static/court.js?v=1"></script>
+<script src="/static/city.js?v=1"></script>
 </body>
 </html>

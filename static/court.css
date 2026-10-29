@@ -117,3 +117,55 @@
   .c-say, .c-stamp { animation: none; }
   .c-cell { transition: none; }
 }
+
+/* ---------- city desk ---------- */
+.c-deskbar { display: flex; flex-wrap: wrap; justify-content: space-between; gap: .8rem; align-items: center; margin-bottom: 1rem; }
+.c-where { display: flex; gap: .5rem; }
+.c-where select { width: auto; }
+.c-check { display: inline-flex; align-items: center; gap: .4rem; margin: 0; font-weight: 500; font-size: .86rem; white-space: nowrap; }
+.c-check input { width: auto; }
+.c-out { margin-top: 1rem; display: grid; gap: .5rem; }
+.c-wait { color: var(--muted); }
+.c-lead { color: var(--ink-2); }
+.c-out h4 { font-size: .95rem; margin-top: .6rem; }
+.c-split { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 1.6rem; align-items: start; }
+.c-cal { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
+.c-dow { font: 500 .64rem var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); padding: 0 4px; }
+.c-dd { aspect-ratio: 1 / .82; border: 1px solid var(--rule); border-radius: 8px; padding: 5px 6px; text-align: left; display: grid; align-content: space-between;
+  background: color-mix(in srgb, var(--qloo) var(--k, 0%), var(--surface)); color: var(--ink); }
+.c-dd.blank { border: 0; background: none; }
+.c-dd .dn { font: 400 1.15rem/1 var(--display); }
+.c-dd .ds { font: 400 .58rem var(--mono); color: inherit; opacity: .75; white-space: nowrap; overflow: hidden; }
+.c-dd.few { background-image: repeating-linear-gradient(135deg, transparent 0 5px, color-mix(in srgb, var(--ink) 10%, transparent) 5px 6px); }
+.c-dd.best { box-shadow: inset 0 0 0 2px var(--ok); }
+.c-dd.worst { box-shadow: inset 0 0 0 2px var(--ink); }
+.c-dd:hover { border-color: var(--ink); }
+.sw.best { box-shadow: inset 0 0 0 2px var(--ok); } .sw.worst { box-shadow: inset 0 0 0 2px var(--ink); }
+.sw.few { background-image: repeating-linear-gradient(135deg, transparent 0 3px, var(--rule-2) 3px 4px); border: 1px solid var(--rule); }
+.c-night { margin-top: .6rem; padding-top: .6rem; border-top: 1px solid var(--rule); display: grid; gap: .35rem; }
+.c-li { display: grid; grid-template-columns: 2.6rem 1fr auto; gap: .6rem; align-items: baseline; font-size: .9rem; }
+.c-rank { font: 500 .74rem var(--mono); color: var(--muted); }
+.c-src { font: 600 .6rem var(--mono); letter-spacing: .08em; text-transform: uppercase; padding: .1rem .4rem; border-radius: 999px; border: 1px solid currentColor; }
+.c-src.qloo { color: var(--qloo); } .c-src.lastfm { color: var(--lfm); } .c-src.model { color: var(--muted); } .c-src.named { color: var(--ok); }
+.c-op .c-why, .c-op .c-play { display: block; font-size: .82rem; color: var(--muted); }
+.c-op .c-play { color: var(--ok); }
+.c-cols { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.c-colbox { border: 1px solid var(--rule); border-radius: 12px; padding: .8rem; display: grid; gap: .45rem; align-content: start; }
+.c-colbox.compete { border-top: 3px solid var(--err); } .c-colbox.sequence { border-top: 3px solid var(--qloo); } .c-colbox.copromote { border-top: 3px solid var(--ok); }
+.c-colbox h4 { margin: 0; }
+.c-pair { font-size: .82rem; padding: .45rem .55rem; background: var(--field); border-radius: 8px; display: grid; gap: .15rem; }
+.c-pair div + div::before { content: "+ "; color: var(--muted); }
+.c-people { display: grid; gap: .4rem; margin-bottom: .6rem; }
+.c-person { display: grid; grid-template-columns: 9rem 1fr; gap: .4rem; }
+.c-pick { border: 1px solid var(--rule); border-radius: 10px; padding: .6rem .8rem; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: .8rem; align-items: center; }
+.c-pt { font-weight: 600; font-size: .9rem; }
+.c-bars { display: grid; gap: .2rem; }
+.c-bar { display: grid; grid-template-columns: 4.5rem 1fr; gap: .4rem; align-items: center; font-size: .74rem; color: var(--muted); }
+.c-track { height: 6px; background: var(--field); border-radius: 3px; overflow: hidden; }
+.c-track i { display: block; height: 100%; background: var(--qloo); }
+.c-cities { margin: .4rem 0 .6rem; }
+.c-cities button[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+@media (max-width: 900px) {
+  .c-split, .c-cols, .c-pick { grid-template-columns: minmax(0, 1fr); }
+  .c-person { grid-template-columns: minmax(0, 1fr); }
+}
