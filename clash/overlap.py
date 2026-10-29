@@ -81,9 +81,10 @@ def table(fest):
     path = os.path.join(qloo.CACHE, f"clash_{fest['slug']}.json")
     if os.path.exists(path):
         t = json.load(open(path, encoding="utf-8"))
-        if t["acts"] == fest["acts"]:
+        if t["acts"] == fest["acts"] and t.get("alias", {}) == fest.get("qloo_names", {}):
             return t
-    matched = {a: e for a in fest["acts"] if (e := resolve(a))}
+    alias = fest.get("qloo_names", {})  # checked by hand: the act's name as Qloo writes it
+    matched = {a: e for a in fest["acts"] if (e := resolve(alias.get(a, a)))}
     ids = {a: e["id"] for a, e in matched.items()}
     raw = {a: _scores(ids[a], [ids[b] for b in matched if b != a]) for a in matched}
     overlap = {a: {} for a in matched}
@@ -94,7 +95,7 @@ def table(fest):
                 two += [raw[b][ids[a]]] if ids[a] in raw[b] else []
                 s = sum(two) / len(two) if two else 0.0
                 overlap[a][b] = overlap[b][a] = round(s, 4)
-    t = {"acts": fest["acts"], "matched": matched, "overlap": overlap}
+    t = {"acts": fest["acts"], "alias": alias, "matched": matched, "overlap": overlap}
     os.makedirs(qloo.CACHE, exist_ok=True)
     json.dump(t, open(path, "w", encoding="utf-8"), ensure_ascii=False)
     return t

@@ -1,0 +1,293 @@
+{
+ "name": "Lollapalooza Chicago, Saturday August 1, 2026 (published set times)",
+ "note": "Set times as published (Time Out Chicago, read Oct 29, 2026). Kidzapalooza, the children's stage, is left out. Olivia Dean's end time was not listed; 10:00pm is assumed, when the other closing set ends.",
+ "source": "https://www.timeout.com/chicago/news/lollapalooza-2026-lineup-updated-set-times-and-streaming-schedule-the-full-list-to-keep-track-of-072926",
+ "stages": [
+  "T-Mobile",
+  "Bud Light",
+  "Perry's",
+  "Allianz",
+  "Tito's",
+  "Airbnb",
+  "BMI"
+ ],
+ "sets": [
+  {
+   "stage": "T-Mobile",
+   "act": "Lucy Bedroque",
+   "start": "13:10",
+   "end": "13:55"
+  },
+  {
+   "stage": "T-Mobile",
+   "act": "Cortis",
+   "start": "14:55",
+   "end": "15:45"
+  },
+  {
+   "stage": "T-Mobile",
+   "act": "Leon Thomas",
+   "start": "16:30",
+   "end": "17:30"
+  },
+  {
+   "stage": "T-Mobile",
+   "act": "The Neighbourhood",
+   "start": "18:30",
+   "end": "19:30"
+  },
+  {
+   "stage": "T-Mobile",
+   "act": "Olivia Dean",
+   "start": "20:30",
+   "end": "22:00"
+  },
+  {
+   "stage": "Bud Light",
+   "act": "Ric Wilson",
+   "start": "13:15",
+   "end": "14:00"
+  },
+  {
+   "stage": "Bud Light",
+   "act": "Wolf Alice",
+   "start": "15:00",
+   "end": "16:00"
+  },
+  {
+   "stage": "Bud Light",
+   "act": "Clipse",
+   "start": "17:00",
+   "end": "18:00"
+  },
+  {
+   "stage": "Bud Light",
+   "act": "Ethel Cain",
+   "start": "19:00",
+   "end": "20:00"
+  },
+  {
+   "stage": "Bud Light",
+   "act": "Jennie",
+   "start": "20:55",
+   "end": "22:00"
+  },
+  {
+   "stage": "Perry's",
+   "act": "Peace Control",
+   "start": "12:00",
+   "end": "12:30"
+  },
+  {
+   "stage": "Perry's",
+   "act": "MC4D",
+   "start": "12:45",
+   "end": "13:30"
+  },
+  {
+   "stage": "Perry's",
+   "act": "OMNOM",
+   "start": "13:45",
+   "end": "14:45"
+  },
+  {
+   "stage": "Perry's",
+   "act": "AYYBO",
+   "start": "15:00",
+   "end": "16:00"
+  },
+  {
+   "stage": "Perry's",
+   "act": "Whethan",
+   "start": "16:15",
+   "end": "17:15"
+  },
+  {
+   "stage": "Perry's",
+   "act": "Max Styler",
+   "start": "17:45",
+   "end": "18:45"
+  },
+  {
+   "stage": "Perry's",
+   "act": "Alison Wonderland",
+   "start": "19:00",
+   "end": "20:00"
+  },
+  {
+   "stage": "Perry's",
+   "act": "Disco Lines",
+   "start": "20:30",
+   "end": "21:45"
+  },
+  {
+   "stage": "Allianz",
+   "act": "Sunday (1994)",
+   "start": "12:25",
+   "end": "13:10"
+  },
+  {
+   "stage": "Allianz",
+   "act": "Wisp",
+   "start": "13:55",
+   "end": "14:55"
+  },
+  {
+   "stage": "Allianz",
+   "act": "Khamari",
+   "start": "15:45",
+   "end": "16:30"
+  },
+  {
+   "stage": "Allianz",
+   "act": "Spacey Jane",
+   "start": "17:30",
+   "end": "18:30"
+  },
+  {
+   "stage": "Allianz",
+   "act": "Geese",
+   "start": "19:30",
+   "end": "20:30"
+  },
+  {
+   "stage": "Tito's",
+   "act": "Chezile",
+   "start": "12:30",
+   "end": "13:15"
+  },
+  {
+   "stage": "Tito's",
+   "act": "Goldie Boutilier",
+   "start": "14:00",
+   "end": "15:00"
+  },
+  {
+   "stage": "Tito's",
+   "act": "Momma",
+   "start": "16:00",
+   "end": "17:00"
+  },
+  {
+   "stage": "Tito's",
+   "act": "bbno$",
+   "start": "18:00",
+   "end": "19:00"
+  },
+  {
+   "stage": "Tito's",
+   "act": "Chicago Youth Symphony Orchestra",
+   "start": "20:00",
+   "end": "20:55"
+  },
+  {
+   "stage": "Airbnb",
+   "act": "Nat Myers",
+   "start": "12:00",
+   "end": "12:30"
+  },
+  {
+   "stage": "Airbnb",
+   "act": "Villanelle",
+   "start": "12:50",
+   "end": "13:30"
+  },
+  {
+   "stage": "Airbnb",
+   "act": "Die Spitz",
+   "start": "13:50",
+   "end": "14:30"
+  },
+  {
+   "stage": "Airbnb",
+   "act": "Frost Children",
+   "start": "14:50",
+   "end": "15:30"
+  },
+  {
+   "stage": "Airbnb",
+   "act": "Quadeca",
+   "start": "16:00",
+   "end": "16:45"
+  },
+  {
+   "stage": "Airbnb",
+   "act": "Sienna Spiro",
+   "start": "17:15",
+   "end": "18:00"
+  },
+  {
+   "stage": "Airbnb",
+   "act": "KWN",
+   "start": "18:30",
+   "end": "19:15"
+  },
+  {
+   "stage": "Airbnb",
+   "act": "Cameron Whitcomb",
+   "start": "19:45",
+   "end": "20:30"
+  },
+  {
+   "stage": "Airbnb",
+   "act": "DJ Trixie Mattel",
+   "start": "21:00",
+   "end": "22:00"
+  },
+  {
+   "stage": "BMI",
+   "act": "The Creekers",
+   "start": "13:00",
+   "end": "13:40"
+  },
+  {
+   "stage": "BMI",
+   "act": "Next of Kin",
+   "start": "14:10",
+   "end": "14:50"
+  },
+  {
+   "stage": "BMI",
+   "act": "Ink",
+   "start": "15:20",
+   "end": "16:00"
+  },
+  {
+   "stage": "BMI",
+   "act": "Calder Allen",
+   "start": "16:30",
+   "end": "17:10"
+  },
+  {
+   "stage": "BMI",
+   "act": "Jae Stephens",
+   "start": "17:40",
+   "end": "18:20"
+  },
+  {
+   "stage": "BMI",
+   "act": "Ryman",
+   "start": "18:50",
+   "end": "19:30"
+  }
+ ],
+ "rules": {
+  "headliners_close": true,
+  "billing_window": 2,
+  "stage_locked": {
+   "Perry's": [
+    "Peace Control",
+    "MC4D",
+    "OMNOM",
+    "AYYBO",
+    "Whethan",
+    "Max Styler",
+    "Alison Wonderland",
+    "Disco Lines"
+   ]
+  }
+ },
+ "qloo_names": {
+  "DJ Trixie Mattel": "Trixie Mattel"
+ }
+}
