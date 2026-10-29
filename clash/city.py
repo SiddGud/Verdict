@@ -17,7 +17,10 @@ import urllib.request
 import qloo
 from clash import overlap as ov
 
-CITIES = {"new-york": ("New York", "NY"), "chicago": ("Chicago", "IL"), "los-angeles": ("Los Angeles", "CA")}
+CITIES = {"new-york": ("New York", "NY"), "chicago": ("Chicago", "IL"), "los-angeles": ("Los Angeles", "CA"),
+          "boston": ("Boston", "MA"), "philadelphia": ("Philadelphia", "PA"), "washington": ("Washington", "DC"),
+          "atlanta": ("Atlanta", "GA"), "nashville": ("Nashville", "TN"), "austin": ("Austin", "TX"),
+          "denver": ("Denver", "CO"), "seattle": ("Seattle", "WA"), "san-francisco": ("San Francisco", "CA")}
 TM = "https://app.ticketmaster.com/discovery/v2/events.json"
 SKIP = ("tribute", "karaoke", "open mic", "brunch", "tour package", "parking", "vip", "upgrade")
 
@@ -56,7 +59,7 @@ def shows(city, start, end):
         d = _tm({"city": name, "stateCode": state, "classificationName": "music", "size": 200, "page": page,
                  "sort": "date,asc", "startDateTime": f"{start}T00:00:00Z", "endDateTime": f"{end}T23:59:59Z"})
         for e in d.get("_embedded", {}).get("events", []):
-            acts = [a["name"] for a in e.get("_embedded", {}).get("attractions", [])]
+            acts = [a["name"] for a in e.get("_embedded", {}).get("attractions", []) if a.get("name")]
             date = e["dates"]["start"].get("localDate")
             venue = (e.get("_embedded", {}).get("venues") or [{}])[0].get("name", "")
             if (not acts or not date or not start <= date <= end  # the search window is in UTC; keep local dates
