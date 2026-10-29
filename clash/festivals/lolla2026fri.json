@@ -1,0 +1,294 @@
+{
+ "name": "Lollapalooza Chicago, Friday July 31, 2026 (published set times)",
+ "note": "Set times as published (Time Out Chicago, read Oct 29, 2026). Kidzapalooza, the children's stage, is left out. Charli XCX's end time was not listed; 10:00pm is assumed, when the other closing set ends.",
+ "source": "https://www.timeout.com/chicago/news/lollapalooza-2026-lineup-updated-set-times-and-streaming-schedule-the-full-list-to-keep-track-of-072926",
+ "stages": [
+  "T-Mobile",
+  "Bud Light",
+  "Perry's",
+  "Allianz",
+  "Tito's",
+  "Airbnb",
+  "BMI"
+ ],
+ "sets": [
+  {
+   "stage": "T-Mobile",
+   "act": "Partyof2",
+   "start": "12:55",
+   "end": "13:40"
+  },
+  {
+   "stage": "T-Mobile",
+   "act": "I-DLE",
+   "start": "14:40",
+   "end": "15:40"
+  },
+  {
+   "stage": "T-Mobile",
+   "act": "Zara Larsson",
+   "start": "16:40",
+   "end": "17:40"
+  },
+  {
+   "stage": "T-Mobile",
+   "act": "Lil Uzi Vert",
+   "start": "18:40",
+   "end": "19:40"
+  },
+  {
+   "stage": "T-Mobile",
+   "act": "Charli XCX",
+   "start": "20:40",
+   "end": "22:00"
+  },
+  {
+   "stage": "Perry's",
+   "act": "Bradeazy",
+   "start": "12:00",
+   "end": "12:30"
+  },
+  {
+   "stage": "Perry's",
+   "act": "Avello",
+   "start": "12:45",
+   "end": "13:30"
+  },
+  {
+   "stage": "Perry's",
+   "act": "Lyny",
+   "start": "13:45",
+   "end": "14:45"
+  },
+  {
+   "stage": "Perry's",
+   "act": "RØZ",
+   "start": "15:00",
+   "end": "16:00"
+  },
+  {
+   "stage": "Perry's",
+   "act": "Notion",
+   "start": "16:15",
+   "end": "17:15"
+  },
+  {
+   "stage": "Perry's",
+   "act": "Sidepiece",
+   "start": "17:45",
+   "end": "18:45"
+  },
+  {
+   "stage": "Perry's",
+   "act": "Mustard",
+   "start": "19:00",
+   "end": "20:00"
+  },
+  {
+   "stage": "Perry's",
+   "act": "Major Lazer",
+   "start": "20:30",
+   "end": "21:45"
+  },
+  {
+   "stage": "Allianz",
+   "act": "The Army, The Navy",
+   "start": "12:10",
+   "end": "12:55"
+  },
+  {
+   "stage": "Allianz",
+   "act": "Claire Rosinkranz",
+   "start": "13:40",
+   "end": "14:40"
+  },
+  {
+   "stage": "Allianz",
+   "act": "Skye Newman",
+   "start": "15:40",
+   "end": "16:40"
+  },
+  {
+   "stage": "Allianz",
+   "act": "Suki Waterhouse",
+   "start": "17:40",
+   "end": "18:40"
+  },
+  {
+   "stage": "Allianz",
+   "act": "Not For Radio",
+   "start": "19:40",
+   "end": "20:40"
+  },
+  {
+   "stage": "BMI",
+   "act": "Valencia Grace",
+   "start": "13:00",
+   "end": "13:40"
+  },
+  {
+   "stage": "BMI",
+   "act": "Ella Boh",
+   "start": "14:10",
+   "end": "14:50"
+  },
+  {
+   "stage": "BMI",
+   "act": "Emi Grace",
+   "start": "15:20",
+   "end": "16:00"
+  },
+  {
+   "stage": "BMI",
+   "act": "Ivri",
+   "start": "16:30",
+   "end": "17:10"
+  },
+  {
+   "stage": "BMI",
+   "act": "Ella Red",
+   "start": "17:40",
+   "end": "18:20"
+  },
+  {
+   "stage": "BMI",
+   "act": "Whitney Whitney",
+   "start": "18:50",
+   "end": "19:30"
+  },
+  {
+   "stage": "Airbnb",
+   "act": "Beno",
+   "start": "12:00",
+   "end": "12:30"
+  },
+  {
+   "stage": "Airbnb",
+   "act": "Day We Ran",
+   "start": "12:50",
+   "end": "13:30"
+  },
+  {
+   "stage": "Airbnb",
+   "act": "Love Spells",
+   "start": "13:50",
+   "end": "14:30"
+  },
+  {
+   "stage": "Airbnb",
+   "act": "54 Ultra",
+   "start": "14:50",
+   "end": "15:30"
+  },
+  {
+   "stage": "Airbnb",
+   "act": "Finn Wolfhard",
+   "start": "16:00",
+   "end": "16:45"
+  },
+  {
+   "stage": "Airbnb",
+   "act": "Oklou",
+   "start": "17:30",
+   "end": "18:15"
+  },
+  {
+   "stage": "Airbnb",
+   "act": "Balu Brigada",
+   "start": "18:45",
+   "end": "19:30"
+  },
+  {
+   "stage": "Airbnb",
+   "act": "Horsegiirl",
+   "start": "20:00",
+   "end": "20:45"
+  },
+  {
+   "stage": "Airbnb",
+   "act": "Freddie Gibbs",
+   "start": "21:15",
+   "end": "22:00"
+  },
+  {
+   "stage": "Tito's",
+   "act": "Chicago Made",
+   "start": "12:30",
+   "end": "13:15"
+  },
+  {
+   "stage": "Tito's",
+   "act": "Julia Wolf",
+   "start": "14:00",
+   "end": "14:45"
+  },
+  {
+   "stage": "Tito's",
+   "act": "Mother Mother",
+   "start": "15:30",
+   "end": "16:30"
+  },
+  {
+   "stage": "Tito's",
+   "act": "Loathe",
+   "start": "17:30",
+   "end": "18:30"
+  },
+  {
+   "stage": "Tito's",
+   "act": "Nettspend",
+   "start": "19:30",
+   "end": "20:30"
+  },
+  {
+   "stage": "Bud Light",
+   "act": "High Vis",
+   "start": "13:15",
+   "end": "14:00"
+  },
+  {
+   "stage": "Bud Light",
+   "act": "Slayyyter",
+   "start": "14:45",
+   "end": "15:30"
+  },
+  {
+   "stage": "Bud Light",
+   "act": "The Story So Far",
+   "start": "16:30",
+   "end": "17:30"
+  },
+  {
+   "stage": "Bud Light",
+   "act": "Yungblud",
+   "start": "18:30",
+   "end": "19:30"
+  },
+  {
+   "stage": "Bud Light",
+   "act": "The Smashing Pumpkins",
+   "start": "20:30",
+   "end": "22:00"
+  }
+ ],
+ "rules": {
+  "headliners_close": true,
+  "billing_window": 2,
+  "stage_locked": {
+   "Perry's": [
+    "Bradeazy",
+    "Avello",
+    "Lyny",
+    "RØZ",
+    "Notion",
+    "Sidepiece",
+    "Mustard",
+    "Major Lazer"
+   ]
+  }
+ },
+ "qloo_names": {
+  "I-DLE": "(G)I‐DLE",
+  "Mustard": "DJ Mustard"
+ }
+}

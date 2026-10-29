@@ -84,10 +84,14 @@ class Session(BaseModel):
     session: str = Field(max_length=40)
 
 
+ORDER = ["lolla2026sun", "lolla2026thu", "lolla2026fri", "lolla2026sat"]  # the first one opens by default
+
+
 @router.get("/api/clash/festivals")
 def festivals():
-    return [{"slug": os.path.splitext(os.path.basename(p))[0], "name": ov.load(p)["name"]}
-            for p in sorted(glob.glob(os.path.join(FESTIVALS, "*.json")))]
+    slugs = [os.path.splitext(os.path.basename(p))[0] for p in glob.glob(os.path.join(FESTIVALS, "*.json"))]
+    slugs.sort(key=lambda x: (ORDER.index(x) if x in ORDER else len(ORDER), x))
+    return [{"slug": x, "name": ov.load(os.path.join(FESTIVALS, f"{x}.json"))["name"]} for x in slugs]
 
 
 @router.post("/api/clash/load")

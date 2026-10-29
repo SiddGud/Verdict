@@ -1,0 +1,290 @@
+{
+ "name": "Lollapalooza Chicago, Thursday July 30, 2026 (published set times)",
+ "note": "Set times as published (Time Out Chicago, read Oct 29, 2026). Kidzapalooza, the children's stage, is left out. Lorde's end time was not listed; 10:00pm is assumed, when the other closing set ends. The source page lists Devault twice (Perry's at 1:45pm and Tito's at 7:30pm); the second listing is kept under a label and has no Qloo data.",
+ "source": "https://www.timeout.com/chicago/news/lollapalooza-2026-lineup-updated-set-times-and-streaming-schedule-the-full-list-to-keep-track-of-072926",
+ "stages": [
+  "T-Mobile",
+  "Bud Light",
+  "Perry's",
+  "Allianz",
+  "Tito's",
+  "Airbnb",
+  "BMI"
+ ],
+ "sets": [
+  {
+   "stage": "T-Mobile",
+   "act": "Asha Banks",
+   "start": "12:45",
+   "end": "13:30"
+  },
+  {
+   "stage": "T-Mobile",
+   "act": "Haute & Freddy",
+   "start": "14:30",
+   "end": "15:30"
+  },
+  {
+   "stage": "T-Mobile",
+   "act": "5 Seconds of Summer",
+   "start": "16:30",
+   "end": "17:30"
+  },
+  {
+   "stage": "T-Mobile",
+   "act": "Sombr",
+   "start": "18:30",
+   "end": "19:30"
+  },
+  {
+   "stage": "T-Mobile",
+   "act": "Lorde",
+   "start": "20:30",
+   "end": "22:00"
+  },
+  {
+   "stage": "Perry's",
+   "act": "KLO",
+   "start": "12:00",
+   "end": "12:30"
+  },
+  {
+   "stage": "Perry's",
+   "act": "Know Good",
+   "start": "12:45",
+   "end": "13:30"
+  },
+  {
+   "stage": "Perry's",
+   "act": "Devault",
+   "start": "13:45",
+   "end": "14:45"
+  },
+  {
+   "stage": "Perry's",
+   "act": "MPH",
+   "start": "15:00",
+   "end": "16:00"
+  },
+  {
+   "stage": "Perry's",
+   "act": "Boys Noize",
+   "start": "16:15",
+   "end": "17:15"
+  },
+  {
+   "stage": "Perry's",
+   "act": "Boris Brejcha",
+   "start": "17:45",
+   "end": "18:45"
+  },
+  {
+   "stage": "Perry's",
+   "act": "Kettama",
+   "start": "19:00",
+   "end": "20:00"
+  },
+  {
+   "stage": "Perry's",
+   "act": "Worship",
+   "start": "20:30",
+   "end": "21:45"
+  },
+  {
+   "stage": "Allianz",
+   "act": "Pearly Drops",
+   "start": "12:00",
+   "end": "12:45"
+  },
+  {
+   "stage": "Allianz",
+   "act": "Bad Nerves",
+   "start": "13:30",
+   "end": "14:30"
+  },
+  {
+   "stage": "Allianz",
+   "act": "SB19",
+   "start": "15:30",
+   "end": "16:30"
+  },
+  {
+   "stage": "Allianz",
+   "act": "Audrey Hobert",
+   "start": "17:30",
+   "end": "18:30"
+  },
+  {
+   "stage": "Allianz",
+   "act": "Wet Leg",
+   "start": "19:30",
+   "end": "20:30"
+  },
+  {
+   "stage": "BMI",
+   "act": "The Braymores",
+   "start": "13:00",
+   "end": "13:40"
+  },
+  {
+   "stage": "BMI",
+   "act": "Simon Grossmann",
+   "start": "14:10",
+   "end": "14:50"
+  },
+  {
+   "stage": "BMI",
+   "act": "Elizabeth Nichols",
+   "start": "15:20",
+   "end": "16:00"
+  },
+  {
+   "stage": "BMI",
+   "act": "Bella Kay",
+   "start": "16:30",
+   "end": "17:10"
+  },
+  {
+   "stage": "BMI",
+   "act": "Chalk",
+   "start": "17:40",
+   "end": "18:20"
+  },
+  {
+   "stage": "BMI",
+   "act": "Evening Elephants",
+   "start": "18:50",
+   "end": "19:30"
+  },
+  {
+   "stage": "Airbnb",
+   "act": "Kim Theory",
+   "start": "12:00",
+   "end": "12:30"
+  },
+  {
+   "stage": "Airbnb",
+   "act": "Penelope Road",
+   "start": "12:50",
+   "end": "13:30"
+  },
+  {
+   "stage": "Airbnb",
+   "act": "Marlon Funaki",
+   "start": "13:50",
+   "end": "14:30"
+  },
+  {
+   "stage": "Airbnb",
+   "act": "Ecca Vandal",
+   "start": "14:50",
+   "end": "15:30"
+  },
+  {
+   "stage": "Airbnb",
+   "act": "Ninajirachi",
+   "start": "16:00",
+   "end": "16:45"
+  },
+  {
+   "stage": "Airbnb",
+   "act": "Amble",
+   "start": "17:15",
+   "end": "18:00"
+  },
+  {
+   "stage": "Airbnb",
+   "act": "CMAT",
+   "start": "18:30",
+   "end": "19:15"
+  },
+  {
+   "stage": "Airbnb",
+   "act": "Snow Strippers",
+   "start": "19:45",
+   "end": "20:30"
+  },
+  {
+   "stage": "Airbnb",
+   "act": "Viagra Boys",
+   "start": "21:00",
+   "end": "22:00"
+  },
+  {
+   "stage": "Tito's",
+   "act": "Faouzia",
+   "start": "12:15",
+   "end": "13:00"
+  },
+  {
+   "stage": "Tito's",
+   "act": "Kingfishr",
+   "start": "13:45",
+   "end": "14:45"
+  },
+  {
+   "stage": "Tito's",
+   "act": "Paris Paloma",
+   "start": "15:45",
+   "end": "16:45"
+  },
+  {
+   "stage": "Tito's",
+   "act": "Little Simz",
+   "start": "17:45",
+   "end": "18:30"
+  },
+  {
+   "stage": "Tito's",
+   "act": "Devault (listed twice on the source page)",
+   "start": "19:30",
+   "end": "20:30"
+  },
+  {
+   "stage": "Bud Light",
+   "act": "Bixby",
+   "start": "13:00",
+   "end": "13:45"
+  },
+  {
+   "stage": "Bud Light",
+   "act": "Between Friends",
+   "start": "14:45",
+   "end": "15:45"
+  },
+  {
+   "stage": "Bud Light",
+   "act": "Blood Orange",
+   "start": "16:45",
+   "end": "17:45"
+  },
+  {
+   "stage": "Bud Light",
+   "act": "Empire of the Sun",
+   "start": "18:30",
+   "end": "19:30"
+  },
+  {
+   "stage": "Bud Light",
+   "act": "John Summit",
+   "start": "20:30",
+   "end": "22:00"
+  }
+ ],
+ "rules": {
+  "headliners_close": true,
+  "billing_window": 2,
+  "stage_locked": {
+   "Perry's": [
+    "KLO",
+    "Know Good",
+    "Devault",
+    "MPH",
+    "Boys Noize",
+    "Boris Brejcha",
+    "Kettama",
+    "Worship"
+   ]
+  }
+ }
+}

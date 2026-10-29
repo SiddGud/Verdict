@@ -27,11 +27,14 @@
 ## Where a model alone falls short (shown on the page)
 
 Asked the same question twice with no Qloo, a frontier model's pair scores changed enough that the timetables built
-from its two answers differ in about 24 of 40 set times. Qloo returns the same scores every time, for every act it
-holds, including small acts a model has little text about.
+from its two answers differ in about 24 of 40 set times (on a 40-act test bill). Qloo returns the same scores every
+time for every act it holds.
 
 ## Honest limits
 
+- Qloo does not hold every act. On the four real Lollapalooza 2026 days it matched 24 to 28 of 43 acts by exact
+  name; most missing acts are small early-afternoon sets, but some are new breakout acts. Missing acts are shown as
+  "no data" and count as no clash, so "fewer clashes" refers to the acts Qloo knows.
 - Qloo's raw affinity scores are bunched (unrelated acts and near-twins score close together), so each act's scores are
   ranked against the rest of the bill before use.
 - A real timetable has reasons a score cannot see (contracts, production, travel). The booker states them as rules;

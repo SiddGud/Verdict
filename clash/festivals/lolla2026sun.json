@@ -1,0 +1,290 @@
+{
+ "name": "Lollapalooza Chicago, Sunday August 2, 2026 (published set times)",
+ "note": "Set times as published (Time Out Chicago, read Oct 29, 2026). Kidzapalooza, the children's stage, is left out. Tate McRae's end time was not listed; 10:00pm is assumed, when the other closing set ends.",
+ "source": "https://www.timeout.com/chicago/news/lollapalooza-2026-lineup-updated-set-times-and-streaming-schedule-the-full-list-to-keep-track-of-072926",
+ "stages": [
+  "T-Mobile",
+  "Bud Light",
+  "Perry's",
+  "Allianz",
+  "Tito's",
+  "Airbnb",
+  "BMI"
+ ],
+ "sets": [
+  {
+   "stage": "T-Mobile",
+   "act": "New Constellations",
+   "start": "13:15",
+   "end": "14:00"
+  },
+  {
+   "stage": "T-Mobile",
+   "act": "ADÉLA",
+   "start": "15:00",
+   "end": "15:45"
+  },
+  {
+   "stage": "T-Mobile",
+   "act": "MUNA",
+   "start": "16:45",
+   "end": "17:45"
+  },
+  {
+   "stage": "T-Mobile",
+   "act": "beabadoobee",
+   "start": "18:45",
+   "end": "19:45"
+  },
+  {
+   "stage": "T-Mobile",
+   "act": "Tate McRae",
+   "start": "20:45",
+   "end": "22:00"
+  },
+  {
+   "stage": "Perry's",
+   "act": "Zack Martino",
+   "start": "12:00",
+   "end": "12:30"
+  },
+  {
+   "stage": "Perry's",
+   "act": "Jackie Hollander",
+   "start": "12:45",
+   "end": "13:30"
+  },
+  {
+   "stage": "Perry's",
+   "act": "Westend",
+   "start": "13:45",
+   "end": "14:45"
+  },
+  {
+   "stage": "Perry's",
+   "act": "Riordan",
+   "start": "15:00",
+   "end": "16:00"
+  },
+  {
+   "stage": "Perry's",
+   "act": "Dombresky",
+   "start": "16:15",
+   "end": "17:15"
+  },
+  {
+   "stage": "Perry's",
+   "act": "Duke Dumont",
+   "start": "17:45",
+   "end": "18:45"
+  },
+  {
+   "stage": "Perry's",
+   "act": "Eli Brown",
+   "start": "19:00",
+   "end": "20:00"
+  },
+  {
+   "stage": "Perry's",
+   "act": "The Chainsmokers",
+   "start": "20:30",
+   "end": "21:45"
+  },
+  {
+   "stage": "Allianz",
+   "act": "Squirrel Flower",
+   "start": "12:30",
+   "end": "13:15"
+  },
+  {
+   "stage": "Allianz",
+   "act": "Destin Conrad",
+   "start": "14:00",
+   "end": "15:00"
+  },
+  {
+   "stage": "Allianz",
+   "act": "Amber Mark",
+   "start": "15:45",
+   "end": "16:45"
+  },
+  {
+   "stage": "Allianz",
+   "act": "Jade",
+   "start": "17:45",
+   "end": "18:45"
+  },
+  {
+   "stage": "Allianz",
+   "act": "aespa",
+   "start": "19:45",
+   "end": "20:45"
+  },
+  {
+   "stage": "BMI",
+   "act": "Snacktime",
+   "start": "13:00",
+   "end": "13:40"
+  },
+  {
+   "stage": "BMI",
+   "act": "Surfing for Daisy",
+   "start": "14:10",
+   "end": "14:50"
+  },
+  {
+   "stage": "BMI",
+   "act": "Case Oats",
+   "start": "15:20",
+   "end": "16:00"
+  },
+  {
+   "stage": "BMI",
+   "act": "Justine Skye",
+   "start": "16:30",
+   "end": "17:10"
+  },
+  {
+   "stage": "BMI",
+   "act": "Porch Light",
+   "start": "17:40",
+   "end": "18:20"
+  },
+  {
+   "stage": "BMI",
+   "act": "Will Swinton",
+   "start": "18:50",
+   "end": "19:30"
+  },
+  {
+   "stage": "Airbnb",
+   "act": "Sunshine Benzi",
+   "start": "12:00",
+   "end": "12:30"
+  },
+  {
+   "stage": "Airbnb",
+   "act": "The Bends",
+   "start": "12:50",
+   "end": "13:30"
+  },
+  {
+   "stage": "Airbnb",
+   "act": "After",
+   "start": "13:50",
+   "end": "14:30"
+  },
+  {
+   "stage": "Airbnb",
+   "act": "Water From Your Eyes",
+   "start": "14:50",
+   "end": "15:30"
+  },
+  {
+   "stage": "Airbnb",
+   "act": "Inji",
+   "start": "16:00",
+   "end": "16:45"
+  },
+  {
+   "stage": "Airbnb",
+   "act": "Los Retros",
+   "start": "17:15",
+   "end": "18:00"
+  },
+  {
+   "stage": "Airbnb",
+   "act": "Monaleo",
+   "start": "18:30",
+   "end": "19:15"
+  },
+  {
+   "stage": "Airbnb",
+   "act": "Stella Lefty",
+   "start": "19:45",
+   "end": "20:30"
+  },
+  {
+   "stage": "Airbnb",
+   "act": "Ado",
+   "start": "21:15",
+   "end": "22:00"
+  },
+  {
+   "stage": "Tito's",
+   "act": "Easy Honey",
+   "start": "12:45",
+   "end": "13:30"
+  },
+  {
+   "stage": "Tito's",
+   "act": "Cruz Beckham and the Breakers",
+   "start": "14:15",
+   "end": "15:00"
+  },
+  {
+   "stage": "Tito's",
+   "act": "Wunderhorse",
+   "start": "16:00",
+   "end": "17:00"
+  },
+  {
+   "stage": "Tito's",
+   "act": "Hot Mulligan",
+   "start": "18:00",
+   "end": "19:00"
+  },
+  {
+   "stage": "Tito's",
+   "act": "Vandelux",
+   "start": "20:00",
+   "end": "20:45"
+  },
+  {
+   "stage": "Bud Light",
+   "act": "Whatmore",
+   "start": "13:30",
+   "end": "14:15"
+  },
+  {
+   "stage": "Bud Light",
+   "act": "Waylon Wyatt",
+   "start": "15:00",
+   "end": "16:00"
+  },
+  {
+   "stage": "Bud Light",
+   "act": "YOASOBI",
+   "start": "17:00",
+   "end": "18:00"
+  },
+  {
+   "stage": "Bud Light",
+   "act": "Turnstile",
+   "start": "19:00",
+   "end": "20:00"
+  },
+  {
+   "stage": "Bud Light",
+   "act": "The xx",
+   "start": "20:45",
+   "end": "22:00"
+  }
+ ],
+ "rules": {
+  "headliners_close": true,
+  "billing_window": 2,
+  "stage_locked": {
+   "Perry's": [
+    "Zack Martino",
+    "Jackie Hollander",
+    "Westend",
+    "Riordan",
+    "Dombresky",
+    "Duke Dumont",
+    "Eli Brown",
+    "The Chainsmokers"
+   ]
+  }
+ }
+}
