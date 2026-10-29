@@ -84,3 +84,9 @@ usage policy" (the prompt holds only artist names and the instructions above). N
 outcome had been computed. Rule added: if any model call for a bill is refused by a provider's policy filter, that bill
 is set aside and reported, and bills keep being drawn in the same seeded sequence until 10 bills are complete, with at
 most 20 drawn. Fewer than 10 complete: the analysis runs on those complete, and says so.
+
+## Amendment 2 (2026-10-29, before any outcome was computed)
+
+Google's API timed out on every retry of the small model's call for the first bill. The remaining small-model calls
+run on the same model (gemini-3.8-flash) and prompts through CometAPI instead of Google's API. Answers already made
+are kept. No bill had finished and no outcome had been computed.
