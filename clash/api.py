@@ -31,15 +31,23 @@ def _festival(slug):
 
 def _state(s, feed=None, rule=None):
     fest, t, w, pos = s["fest"], s["table"], s["w"], s["pos"]
-    grid = [[None] * len(fest["slots"]) for _ in fest["stages"]]
-    for a, (st, k) in pos.items():
-        others = sorted(((w.get(a, {}).get(b, 0.0), b) for b, (_, k2) in pos.items() if b != a and k2 == k), reverse=True)
-        grid[st][k] = {"act": a, "matched": a in t["matched"], "clashes": [{"act": b, "weight": x} for x, b in others if x >= 0.2]}
+    h = sc._hours(fest)
+    at = {i: a for a, i in pos.items()}
+    sets = []
+    for i, c in enumerate(fest["cells"]):
+        a = at.get(i)
+        others = sorted(((w.get(a, {}).get(b, 0.0), b, round(h[i][j] * 60)) for b, j in pos.items() if a and b != a and h[i][j]),
+                        reverse=True)
+        sets.append({"cell": i, "stage": c["stage"], "start": c["start"], "end": c["end"], "act": a,
+                     "matched": bool(a) and a in t["matched"],
+                     "clashes": [{"act": b, "weight": x, "minutes": m} for x, b, m in others if x >= 0.2]})
     pub = sc.published(fest)
     return {"session": s["id"], "version": s["version"], "festival": {"slug": fest["slug"], "name": fest["name"],
-            "note": fest.get("note", ""), "stages": fest["stages"], "slots": fest["slots"]},
-            "grid": grid, "score": sc.clash_score(pos, w), "published_score": sc.clash_score(pub, w),
-            "worst": [{"weight": x, "acts": [a, b], "slot": fest["slots"][k]} for x, a, b, k in sc.worst(pos, w, 5)],
+            "note": fest.get("note", ""), "stages": fest["stages"], "day": fest["day"]},
+            "sets": sets, "score": sc.clash_score(pos, w, fest), "published_score": sc.clash_score(pub, w, fest),
+            "worst": [{"weight": wt, "acts": [a, b], "minutes": m,
+                       "from": ov.clock(max(fest["cells"][pos[a]]["start"], fest["cells"][pos[b]]["start"]))}
+                      for x, wt, a, b, m in sc.worst(pos, w, fest, 5)],
             "rules": [{**r, "reads_as": ag.describe(r, fest)} for r in s["rules"]],
             "unmatched": [a for a in fest["acts"] if a not in t["matched"]],
             "fan_demand": _demand(s),
@@ -51,7 +59,7 @@ def _demand(s):
     count = {}
     for picks in s.get("fans", []):
         for k, (a, b) in picks.items():
-            if s["pos"].get(a, [0, -1])[1] == s["pos"].get(b, [0, -2])[1]:
+            if a in s["pos"] and b in s["pos"] and sc._hours(s["fest"])[s["pos"][a]][s["pos"][b]]:
                 count[(a, b)] = count.get((a, b), 0) + 1
     return [{"acts": list(p), "fans": n} for p, n in sorted(count.items(), key=lambda x: -x[1])[:5]]
 
@@ -153,7 +161,7 @@ def route(req: Route):
     r = fr.route(s["fest"], s["pos"], favs)
     if "error" not in r:
         with LOCK:
-            s["fans"].append({h["slot"]: (h["act"], h["clash_with"]["act"]) for h in r["hours"] if h["clash_with"]})
+            s["fans"].append({h["start"]: (h["act"], h["clash_with"]["act"]) for h in r["sets"] if h["clash_with"]})
             s["version"] += 1
     return {**r, "state": _state(s)}
 

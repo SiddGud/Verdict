@@ -1,6 +1,8 @@
 // Clash Court page. The server holds the timetable; every reply carries the full state and a version, and the page
-// redraws from it. Referee moves in a feed are replayed on the grid one by one, then the final state is drawn.
+// redraws from it. Sets are drawn on a time axis (one column per stage). Referee moves in a feed are replayed on the
+// timetable one by one, then the final state is drawn.
 const $ = (id) => document.getElementById(id);
+const PX = 1.15; // pixels per minute
 let state = null, busy = false, latest = -1;
 
 async function post(path, body) {
@@ -9,37 +11,60 @@ async function post(path, body) {
   return r.json();
 }
 
-function heat(cell) {
-  const w = cell && cell.clashes.length ? cell.clashes[0].weight : 0;
-  return w >= 0.45 ? "hot" : w >= 0.2 ? "warm" : "";
-}
-
-function drawGrid(s, moved = new Set()) {
-  const g = $("grid"), f = s.festival;
-  g.style.gridTemplateColumns = `56px repeat(${f.stages.length}, minmax(120px, 1fr))`;
-  g.innerHTML = "";
-  g.append(el("div", "h", ""));
-  f.stages.forEach((st) => g.append(el("div", "h", st)));
-  f.slots.forEach((slot, k) => {
-    g.append(el("div", "t", slot));
-    f.stages.forEach((_, si) => {
-      const c = s.grid[si][k];
-      const d = el("div", "cell " + (c ? heat(c) : "empty") + (c && !c.matched ? " nodata" : "") + (c && moved.has(c.act) ? " moved" : ""));
-      if (c) {
-        d.append(el("div", "a", c.act));
-        if (c.clashes.length) d.append(el("div", "c", "vs " + c.clashes.map((x) => `${x.act} ${x.weight.toFixed(2)}`).join(", ")));
-        d.title = c.clashes.length ? `${c.act} shares fans with ${c.clashes.map((x) => x.act).join(", ")} at ${slot}` : `${c.act}: no real clash at ${slot}`;
-      }
-      g.append(d);
-    });
-  });
-}
-
 function el(tag, cls, text) {
   const e = document.createElement(tag);
   if (cls) e.className = cls;
   if (text !== undefined) e.textContent = text;
   return e;
+}
+
+const clock = (m) => `${String(Math.floor(m / 60) % 24).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}`;
+
+function heat(set) {
+  const w = set.clashes.length ? set.clashes[0].weight : 0;
+  return w >= 0.45 ? "hot" : w >= 0.2 ? "warm" : "";
+}
+
+function drawGrid(s, moved = new Set()) {
+  const g = $("grid"), f = s.festival, [d0, d1] = f.day;
+  const height = (d1 - d0) * PX;
+  g.innerHTML = "";
+  g.style.gridTemplateColumns = `48px repeat(${f.stages.length}, minmax(120px, 1fr))`;
+  g.append(el("div", "h", ""));
+  f.stages.forEach((st) => g.append(el("div", "h", st)));
+  const axis = el("div", "axis");
+  axis.style.height = height + "px";
+  for (let m = Math.ceil(d0 / 60) * 60; m <= d1; m += 60) {
+    const t = el("div", "tick", clock(m));
+    t.style.top = (m - d0) * PX + "px";
+    axis.append(t);
+  }
+  g.append(axis);
+  f.stages.forEach((_, si) => {
+    const col = el("div", "col");
+    col.style.height = height + "px";
+    for (let m = Math.ceil(d0 / 60) * 60; m <= d1; m += 60) {
+      const line = el("div", "line");
+      line.style.top = (m - d0) * PX + "px";
+      col.append(line);
+    }
+    s.sets.filter((x) => x.stage === si).forEach((x) => {
+      const d = el("div", "cell " + (x.act ? heat(x) : "empty") + (x.act && !x.matched ? " nodata" : "") + (x.act && moved.has(x.act) ? " moved" : ""));
+      d.style.top = (x.start - d0) * PX + 1 + "px";
+      d.style.height = Math.max(18, (x.end - x.start) * PX - 3) + "px";
+      if (x.act) {
+        d.append(el("div", "a", x.act));
+        d.append(el("div", "c", `${clock(x.start)} to ${clock(x.end)}` + (x.clashes.length ? "  vs " + x.clashes.map((c) => `${c.act} ${c.weight.toFixed(2)}`).join(", ") : "")));
+        d.title = x.clashes.length
+          ? `${x.act} shares fans with ${x.clashes.map((c) => `${c.act} (${c.minutes} min overlap)`).join(", ")}`
+          : `${x.act}: no real clash`;
+      } else {
+        d.append(el("div", "c", `${clock(x.start)} empty`));
+      }
+      col.append(d);
+    });
+    g.append(col);
+  });
 }
 
 function drawScore(s, now = s.score) {
@@ -53,7 +78,7 @@ function drawSide(s) {
   $("worst").innerHTML = "";
   if (s.worst.length) {
     $("worst").append(el("h3", "", "Worst clashes now"));
-    s.worst.forEach((w) => $("worst").append(el("div", "", `${w.slot}  ${w.acts[0]} vs ${w.acts[1]}  (${w.weight.toFixed(2)})`)));
+    s.worst.forEach((w) => $("worst").append(el("div", "", `${w.from}  ${w.acts[0]} vs ${w.acts[1]}: weight ${w.weight.toFixed(2)}, ${w.minutes} minutes`)));
   }
   $("rules").innerHTML = "";
   s.rules.forEach((r) => $("rules").append(el("span", "", r.reads_as)));
@@ -77,20 +102,19 @@ function say(who, text) {
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-// Replay the feed: messages appear in turn and each referee move is applied to a copy of the old grid.
+// Replay the feed: messages appear in turn and each referee move is applied to a copy of the old timetable.
 async function play(old, s) {
-  if (!s.feed.length) return;
-  const g = old.grid.map((col) => col.map((c) => (c ? { ...c, clashes: [] } : null)));
-  const view = { ...old, grid: g };
+  const sets = old.sets.map((x) => ({ ...x, clashes: [] }));
+  const cancelled = new Set(s.rules.filter((r) => r.type === "cancel").map((r) => r.act));
+  sets.forEach((x) => { if (cancelled.has(x.act)) x.act = null; });
+  const view = { ...old, sets };
+  drawGrid(view);
   for (const f of s.feed) {
     say(f.who, f.text);
     if (f.to) {
-      const cells = Object.entries(f.to).map(([act, [st, k]]) => [act, st, k]);
-      const from = {};
-      g.forEach((col, si) => col.forEach((c, k) => { if (c && f.to[c.act]) from[c.act] = [si, k]; }));
-      cells.forEach(([act]) => { if (from[act]) g[from[act][0]][from[act][1]] = null; });
-      cells.forEach(([act, st, k]) => { g[st][k] = { act, matched: true, clashes: [] }; });
-      drawGrid(view, new Set(cells.map((c) => c[0])));
+      Object.keys(f.to).forEach((act) => sets.forEach((x) => { if (x.act === act) x.act = null; }));
+      Object.entries(f.to).forEach(([act, cell]) => { sets[cell].act = act; sets[cell].matched = true; });
+      drawGrid(view, new Set(Object.keys(f.to)));
       drawScore(s, f.score);
       await sleep(320);
     } else {
@@ -134,7 +158,7 @@ async function load(slug) {
   latest = -1;
   state = null;
   await show(post("/api/clash/load", { festival: slug }));
-  say("referee", "This is the timetable as published. Red cells share many fans with an act on another stage at the same hour. Press 'Run the war-room' or give the booker an order.");
+  say("referee", "This is the timetable as published. Red sets share many fans with a set on another stage at the same time. Press 'Run the war-room' or give the booker an order.");
 }
 
 async function planDay(e) {
@@ -147,9 +171,9 @@ async function planDay(e) {
     $("route").innerHTML = "";
     if (r.error) { $("route").textContent = r.error; return; }
     if (r.not_found.length) $("route").append(el("div", "note", "Not found in Qloo: " + r.not_found.join(", ")));
-    r.hours.forEach((h) => {
+    r.sets.forEach((h) => {
       const row = el("div", "r" + (h.top ? " top" : ""));
-      row.append(el("span", "t", h.slot));
+      row.append(el("span", "t", h.start));
       const txt = el("span", "", `${h.act} on ${h.stage} (fit ${h.fit.toFixed(2)})`);
       if (h.clash_with) txt.append(el("span", "must", `  must choose: ${h.clash_with.act} (${h.clash_with.fit.toFixed(2)})`));
       row.append(txt);
@@ -182,6 +206,6 @@ $("festival").addEventListener("change", (e) => { load(e.target.value); proof(e.
   list.forEach((f) => { const o = el("option", "", f.name); o.value = f.slug; $("festival").append(o); });
   await load(list[0].slug);
   proof(list[0].slug);
-  const cmd = new URLSearchParams(location.search).get("cmd"); // e.g. /clash?cmd=Run, for demo links
+  const cmd = new URLSearchParams(location.search).get("cmd"); // e.g. /?cmd=Run, for demo links
   if (cmd) send(cmd);
 })();

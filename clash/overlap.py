@@ -16,12 +16,43 @@ def _norm(name):
     return n[4:] if n.startswith("the ") else n
 
 
+def minutes(hhmm):
+    """'17:30' -> 1050. Times before 06:00 count as after midnight (a set at 00:30 ends the same festival day)."""
+    h, m = (int(x) for x in hhmm.split(":"))
+    return (h + (24 if h < 6 else 0)) * 60 + m
+
+
+def clock(mins):
+    return f"{(mins // 60) % 24:02d}:{mins % 60:02d}"
+
+
 def load(path):
-    """A festival file: stages, slots, the published timetable (stage -> act per slot, null for an empty slot), rules."""
+    """A festival file in either form:
+    - "sets": [{"stage", "act", "start": "HH:MM", "end": "HH:MM"}], a real timetable with any set times;
+    - "slots" + "published": {stage: [act per slot, or null]}, hourly slots (each set runs to the next slot).
+    Either way the result has "cells" (stage index, start and end in minutes), "home" (act -> its published cell),
+    "acts", "stages" and "rules"."""
     f = json.load(open(path, encoding="utf-8"))
     f["slug"] = os.path.splitext(os.path.basename(path))[0]
-    f["acts"] = [a for st in f["stages"] for a in f["published"][st] if a]
+    if "sets" in f:
+        rows = f["sets"]
+        f.setdefault("stages", list(dict.fromkeys(r["stage"] for r in rows)))
+    else:
+        rows = [{"stage": st, "act": a, "start": t, "end": clock(minutes(t) + 60)}
+                for st in f["stages"] for t, a in zip(f["slots"], f["published"][st]) if a]
+    rows = sorted(rows, key=lambda r: (f["stages"].index(r["stage"]), minutes(r["start"])))
+    f["cells"] = [{"stage": f["stages"].index(r["stage"]), "start": minutes(r["start"]), "end": minutes(r["end"])} for r in rows]
+    f["home"] = {r["act"]: i for i, r in enumerate(rows)}
+    f["acts"] = [r["act"] for r in rows]
     assert len(set(f["acts"])) == len(f["acts"]), "an act is listed twice"
+    assert all(c["end"] > c["start"] for c in f["cells"]), "a set ends before it starts"
+    f["day"] = [min(c["start"] for c in f["cells"]), max(c["end"] for c in f["cells"])]
+    last = {}
+    for i, c in enumerate(f["cells"]):
+        if c["stage"] not in last or c["start"] > f["cells"][last[c["stage"]]]["start"]:
+            last[c["stage"]] = i
+    f["closing"] = set(last.values())
+    f.setdefault("rules", {})
     return f
 
 

@@ -26,16 +26,20 @@ def _act(text, fest):
     return names[hit[0]] if hit else None
 
 
-def _slot(text, fest):
-    """'5pm', '17:00', '5 pm', '17' -> slot index, or None if the time is not a slot of this festival."""
+def _time(text, fest):
+    """'5pm', '17:00', '5:30 pm', '17' -> minutes, or None if it is not within this festival's day."""
     m = re.search(r"(\d{1,2})(?::(\d{2}))?\s*(am|pm)?", text.lower())
     if not m:
         return None
     h = int(m.group(1)) % 12 + (12 if m.group(3) == "pm" else 0) if m.group(3) else int(m.group(1))
-    if not m.group(3) and h < 10:
+    if not m.group(3) and 1 <= h < 10:
         h += 12  # "play after 5" at a festival means 5 pm
-    label = f"{h:02d}:{m.group(2) or '00'}"
-    return fest["slots"].index(label) if label in fest["slots"] else None
+    t = ov.minutes(f"{h:02d}:{int(m.group(2) or 0):02d}")
+    return t if fest["day"][0] <= t <= fest["day"][1] else None
+
+
+def _span(fest):
+    return f"{ov.clock(fest['day'][0])} to {ov.clock(fest['day'][1])}"
 
 
 def _stage(text, fest):
@@ -58,7 +62,8 @@ PATTERNS = [
 
 def parse(text, fest):
     """A booker command -> {"type": ..., ...} checked against this festival, or {"error": "..."}.
-    Types: cancel, not_after, not_before, apart, on_stage, at_slot (the schedule.violations rule types)."""
+    Types: cancel, not_after, not_before, end_by, apart, on_stage, at_time (the schedule.violations rule types).
+    Times are minutes from midnight."""
     t = text.strip().rstrip(".!").replace("’", "'")
     for pat, kind in PATTERNS:
         m = re.match(pat, t, re.I)
@@ -80,28 +85,28 @@ def parse(text, fest):
                 return {"type": "on_stage", "act": a, "stage": s}
             continue
         if kind == "at_or_on":
-            k = _slot(m.group(2), fest)
+            k = _time(m.group(2), fest)
             if k is not None:
-                return {"type": "at_slot", "act": a, "slot": k}
+                return {"type": "at_time", "act": a, "time": k}
             s = _stage(m.group(2), fest)
             if s is not None:
                 return {"type": "on_stage", "act": a, "stage": s}
             continue
-        k = _slot(m.group(2), fest)
+        k = _time(m.group(2), fest)
         if k is None:
-            return {"error": f"{m.group(2)} is not a set time at this festival ({fest['slots'][0]} to {fest['slots'][-1]})"}
-        if kind == "not_after_strict":  # "must finish by 5pm": the set must start before 5
-            return {"type": "not_after", "act": a, "slot": k - 1}
-        return {"type": kind, "act": a, "slot": k}
+            return {"error": f"{m.group(2)} is not within this festival's day ({_span(fest)})"}
+        if kind == "not_after_strict":  # "must finish by 5pm"
+            return {"type": "end_by", "act": a, "time": k}
+        return {"type": kind, "act": a, "time": k}
     return _parse_with_model(t, fest)
 
 
 def _parse_with_model(text, fest):
     instr = ("You turn a festival booker's command into one rule. Types: cancel {act}; not_after {act, time} (the set "
-             "may not start after time); not_before {act, time}; apart {act, other}; on_stage {act, stage}; at_slot "
-             "{act, time}. Use names exactly as listed. If the command is none of these, return "
+             "may not start after time); not_before {act, time}; end_by {act, time} (the set must be over by "
+             "time); apart {act, other}; on_stage {act, stage}; at_time {act, time}. Use names exactly as listed. If the command is none of these, return "
              '{"type": "unknown"}. Reply as {"type": ..., "act": ..., "other": ..., "time": "HH:MM", "stage": ...}.')
-    prompt = (f"Acts: {', '.join(fest['acts'])}\nStages: {', '.join(fest['stages'])}\nSet times: {', '.join(fest['slots'])}"
+    prompt = (f"Acts: {', '.join(fest['acts'])}\nStages: {', '.join(fest['stages'])}\nFestival day: {_span(fest)}"
               f"\n\nCommand: {text}")
     try:
         o = llm.complete_json(instr, prompt, retries=2, timeout=60)[0]
@@ -111,7 +116,7 @@ def _parse_with_model(text, fest):
                          "'keep Mitski and Clairo apart', 'put Wallows on the Main Stage'."}
     kind = {"before": "not_after", "by": "not_after", "after": "not_before"}.get(o.get("type"), o.get("type"))
     a = _act(o.get("act") or "", fest)
-    if kind not in ("cancel", "not_after", "not_before", "apart", "on_stage", "at_slot") or not a:
+    if kind not in ("cancel", "not_after", "not_before", "end_by", "apart", "on_stage", "at_time") or not a:
         return {"error": "I could not read that command as a rule about an act on this bill."}
     rule = {"type": kind, "act": a}
     if kind == "apart":
@@ -125,10 +130,10 @@ def _parse_with_model(text, fest):
             return {"error": "I could not find that stage."}
         rule["stage"] = s
     elif kind != "cancel":
-        k = fest["slots"].index(o["time"]) if o.get("time") in fest["slots"] else None
+        k = _time(str(o.get("time") or ""), fest)
         if k is None:
-            return {"error": "That is not a set time at this festival."}
-        rule["slot"] = k
+            return {"error": f"That time is not within this festival's day ({_span(fest)})."}
+        rule["time"] = k
     rule["read_by_model"] = True
     return rule
 
@@ -136,11 +141,12 @@ def _parse_with_model(text, fest):
 def describe(rule, fest):
     t, a = rule["type"], rule.get("act")
     return {"cancel": lambda: f"{a} is cancelled",
-            "not_after": lambda: f"{a} cannot start after {fest['slots'][rule['slot']]}",
-            "not_before": lambda: f"{a} cannot start before {fest['slots'][rule['slot']]}",
-            "apart": lambda: f"{a} and {rule.get('other')} must not play at the same time",
+            "not_after": lambda: f"{a} cannot start after {ov.clock(rule['time'])}",
+            "not_before": lambda: f"{a} cannot start before {ov.clock(rule['time'])}",
+            "end_by": lambda: f"{a} must be off stage by {ov.clock(rule['time'])}",
+            "apart": lambda: f"{a} and {rule.get('other')} must not overlap",
             "on_stage": lambda: f"{a} plays {fest['stages'][rule.get('stage', 0)]}",
-            "at_slot": lambda: f"{a} plays at {fest['slots'][rule.get('slot', 0)]}"}[t]()
+            "at_time": lambda: f"{a} starts at {ov.clock(rule['time'])}"}[t]()
 
 
 # ---------- fan agents and the referee ----------
@@ -153,19 +159,20 @@ def _rank(w, a, b):
 def complaints(pos, fest, w, n=5):
     """Fan agents of the acts in the n worst clashes speak, with their numbers."""
     out = []
-    for s, a, b, k in sc.worst(pos, w, n):
-        if s <= 0:
+    for x, wt, a, b, mins in sc.worst(pos, w, fest, n):
+        if x <= 0:
             break
-        out.append({"who": f"fan:{a}", "act": a, "other": b, "slot": k, "weight": s,
-                    "text": (f"My fans rank {b} number {_rank(w, a, b)} of {len(w[a])} on this bill, and you have us "
-                             f"head to head at {fest['slots'][k]} (clash weight {s:.2f}). Move one of us.")})
+        when = ov.clock(max(fest["cells"][pos[a]]["start"], fest["cells"][pos[b]]["start"]))
+        out.append({"who": f"fan:{a}", "act": a, "other": b, "weight": wt,
+                    "text": (f"My fans rank {b} number {_rank(w, a, b)} of {len(w[a])} on this bill, and our sets "
+                             f"overlap for {mins} minutes from {when} (clash weight {wt:.2f}). Move one of us.")})
     return out
 
 
 def run(pos, fest, w, rules=(), seconds=2.0):
     """One round: fan agents complain, the booker's rules are read out, the referee moves sets.
     Returns (new timetable, feed). Cancelled acts leave the grid first."""
-    pos = {a: list(v) for a, v in pos.items()}
+    pos = dict(pos)
     feed = []
     for r in rules:
         if r["type"] == "cancel" and r["act"] in pos:
@@ -173,7 +180,7 @@ def run(pos, fest, w, rules=(), seconds=2.0):
     for r in rules:
         feed.append({"who": "booker", "text": describe(r, fest) + "."})
     feed += complaints(pos, fest, w)
-    before = sc.clash_score(pos, w)
+    before = sc.clash_score(pos, w, fest)
     extra = [r for r in rules if r["type"] != "cancel"]
     broken = sc.violations(pos, fest, extra)
     if broken:
@@ -186,11 +193,10 @@ def run(pos, fest, w, rules=(), seconds=2.0):
             return pos, feed
     new, log = sc.optimise(pos, fest, w, extra, seconds=seconds)
     for m in log:
-        moved = ", ".join(f"{a} to {fest['stages'][new_cell[0]]} at {fest['slots'][new_cell[1]]}"
-                          for a, new_cell in m["to"].items())
+        moved = ", ".join(f"{a} to {sc.where(fest, i)}" for a, i in m["to"].items())
         feed.append({"who": "referee", "text": f"Moved {moved}: clash score {m['before']:.2f} to {m['after']:.2f}.",
                      "acts": m["acts"], "to": m["to"], "score": m["after"]})
-    after = sc.clash_score(new, w)
+    after = sc.clash_score(new, w, fest)
     cut = 100 * (before - after) / before if before else 0
     feed.append({"who": "referee", "text": f"Done. Clash score {before:.2f} to {after:.2f} ({cut:.0f}% lower), "
                  f"{len(log)} moves, every rule kept."})
@@ -201,23 +207,22 @@ def _repair(pos, fest, w, extra):
     """Swap cells until no rule is broken, choosing the swap that leaves the fewest broken rules, then the lowest
     clash score."""
     import itertools
-    cells = [(s, k) for s in range(len(fest["stages"])) for k in range(len(fest["slots"]))]
     for _ in range(40):
         cur = len(sc.violations(pos, fest, extra))
         if not cur:
             break
-        at = {tuple(v): a for a, v in pos.items()}
+        at = {i: a for a, i in pos.items()}
         best = None
-        for c1, c2 in itertools.combinations(cells, 2):
+        for c1, c2 in itertools.combinations(range(len(fest["cells"])), 2):
             a, b = at.get(c1), at.get(c2)
             if not a and not b:
                 continue
-            trial = {x: list(v) for x, v in pos.items()}
+            trial = dict(pos)
             if a:
-                trial[a] = list(c2)
+                trial[a] = c2
             if b:
-                trial[b] = list(c1)
-            key = (len(sc.violations(trial, fest, extra)), sc.clash_score(trial, w))
+                trial[b] = c1
+            key = (len(sc.violations(trial, fest, extra)), sc.clash_score(trial, w, fest))
             if key[0] < cur and (best is None or key < best[0]):
                 best = (key, trial)
         if not best:
@@ -229,9 +234,10 @@ def _repair(pos, fest, w, extra):
 def main(args):
     sys.stdout.reconfigure(encoding="utf-8")
     fest = ov.load("clash/festivals/testbill.json")
-    if args and args[0] == "--feed":
+    if args and args[0] == "--feed":  # --feed <festival> [command ...]
+        fest = ov.load(f"clash/festivals/{args[1]}.json")
         w = ov.weights(ov.table(fest))
-        rules = [parse(t, fest) for t in args[1:]]
+        rules = [parse(t, fest) for t in args[2:]]
         new, feed = run(sc.published(fest), fest, w, [r for r in rules if "error" not in r])
         for f in feed:
             print(f"[{f['who']}] {f['text']}")

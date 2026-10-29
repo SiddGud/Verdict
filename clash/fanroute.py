@@ -1,12 +1,15 @@
-"""A fan's route through the day: up to 5 favourite artists in, the best act at each hour out, with the clashes the
-fan cannot avoid flagged.
+"""A fan's route through the day: up to 5 favourite artists in, the best path of sets that do not overlap out, with
+the clashes the fan cannot avoid flagged.
 
 python -m clash.fanroute testbill "Phoebe Bridgers" "Clairo" "Frank Ocean"
 Favourites need not play the festival. One Qloo call scores the whole bill against all of them at once."""
+import bisect
 import sys
 
 import qloo
 from clash import overlap as ov
+
+WALK = 10  # minutes a fan may leave a set early to reach the next one
 
 
 def fit(fest, favourites):
@@ -34,29 +37,44 @@ def fit(fest, favourites):
     return scores, found, missing
 
 
+def best_path(sets):
+    """Weighted interval scheduling: the sets whose total value is highest, where each next set starts no more than
+    WALK minutes before the last one ends. sets: [(start, end, value, act)]."""
+    sets = sorted(sets, key=lambda x: x[1])
+    ends = [s[1] for s in sets]
+    best = [(0.0, [])]
+    for i, (st, en, v, a) in enumerate(sets):
+        j = bisect.bisect_right(ends, st + WALK, 0, i)  # sets that end by then: leave up to WALK minutes early
+        take = (best[j][0] + v, best[j][1] + [i])
+        best.append(max(best[i], take, key=lambda x: x[0]))
+    return [sets[i] for i in best[-1][1]]
+
+
 def route(fest, pos, favourites):
-    """For each hour: the fan's best act on the current timetable, and a clash flag when the second best act at the
-    same hour is nearly as good (within 0.03 of the best and in the fan's top quarter of the bill)."""
+    """The fan's best path through the current timetable. A set's value is the fan's fit above their median for this
+    bill, so only acts they like more than usual are worth a walk. A chosen set is flagged when an overlapping set is
+    nearly as good (within 0.03) and in the fan's top quarter of the bill: a clash they cannot avoid."""
     scores, found, missing = fit(fest, favourites)
     if not scores:
         return {"error": "None of those artists were found. Try exact names, for example 'Phoebe Bridgers'.",
                 "missing": missing}
     ranked = sorted(scores.values(), reverse=True)
-    top_q = ranked[max(0, len(ranked) // 4 - 1)]
-    hours = []
-    for k, slot in enumerate(fest["slots"]):
-        here = sorted(((scores.get(a, 0.0), a, fest["stages"][st]) for a, (st, kk) in pos.items() if kk == k and a in scores),
-                      reverse=True)
-        if not here:
-            continue
-        best = here[0]
-        rival = here[1] if len(here) > 1 and here[1][0] >= top_q and best[0] - here[1][0] <= 0.03 else None
-        hours.append({"slot": slot, "act": best[1], "stage": best[2], "fit": round(best[0], 3), "top": best[0] >= top_q,
-                      "clash_with": {"act": rival[1], "stage": rival[2], "fit": round(rival[0], 3)} if rival else None})
-    must = [h for h in hours if h["top"]]
-    return {"favourites": [e["name"] for e in found], "not_found": missing, "hours": hours,
-            "summary": f"{len(must)} sets in your top quarter of the bill; "
-                       f"{sum(1 for h in must if h['clash_with'])} hours where you must choose."}
+    median, top_q = ranked[len(ranked) // 2], ranked[max(0, len(ranked) // 4 - 1)]
+    cells = fest["cells"]
+    sets = [(cells[i]["start"], cells[i]["end"], scores[a] - median, a) for a, i in pos.items()
+            if a in scores and scores[a] > median]
+    out = []
+    for st, en, v, a in sorted(best_path(sets)):
+        rivals = sorted(((scores[b], b) for b, j in pos.items() if b != a and b in scores and
+                         min(en, cells[j]["end"]) > max(st, cells[j]["start"])), reverse=True)
+        r = rivals[0] if rivals and rivals[0][0] >= top_q and scores[a] - rivals[0][0] <= 0.03 else None
+        out.append({"start": ov.clock(st), "end": ov.clock(en), "act": a, "stage": fest["stages"][cells[pos[a]]["stage"]],
+                    "fit": round(scores[a], 3), "top": scores[a] >= top_q,
+                    "clash_with": {"act": r[1], "fit": round(r[0], 3)} if r else None})
+    must = [h for h in out if h["top"]]
+    return {"favourites": [e["name"] for e in found], "not_found": missing, "sets": out,
+            "summary": f"{len(out)} sets on your route, {len(must)} of them in your top quarter of the bill; "
+                       f"{sum(1 for h in out if h['clash_with'])} where you must choose."}
 
 
 def main(args):
@@ -67,10 +85,10 @@ def main(args):
     if "error" in r:
         print(r["error"]); return
     print("Favourites found:", ", ".join(r["favourites"]), "| not found:", ", ".join(r["not_found"]) or "none")
-    for h in r["hours"]:
+    for h in r["sets"]:
         mark = "*" if h["top"] else " "
         c = f"   MUST CHOOSE: {h['clash_with']['act']} ({h['clash_with']['fit']:.2f})" if h["clash_with"] else ""
-        print(f"{mark} {h['slot']}  {h['act']} on {h['stage']} ({h['fit']:.2f}){c}")
+        print(f"{mark} {h['start']}-{h['end']}  {h['act']} on {h['stage']} ({h['fit']:.2f}){c}")
     print(r["summary"])
 
 
