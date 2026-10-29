@@ -203,6 +203,64 @@ def run(pos, fest, w, rules=(), seconds=2.0):
     return new, feed
 
 
+def court(old, new, fest, w, extra=(), n=5):
+    """The worst clashes on the timetable before the referee moved anything, argued as cases: each side's fan agent
+    states its numbers, the booker objects if the most direct fix breaks a rule (found by trying it), and the ruling
+    says where the two acts ended up after the whole re-plan."""
+    h, cells = sc._hours(fest), fest["cells"]
+    at = {i: a for a, i in old.items()}
+    start = sc.clash_score(old, w, fest)
+    cases = []
+    for x, wt, a, b, mins in sc.worst(old, w, fest, n):
+        if x <= 0 or a not in new or b not in new:
+            continue
+        when = ov.clock(max(cells[old[a]]["start"], cells[old[b]]["start"]))
+        legal = broken = None  # (gain, mover, cell, why)
+        window = 60 * fest["rules"].get("billing_window", 99)
+        for mover, other in ((a, b), (b, a)):
+            for c in range(len(cells)):  # fixes a booker would try: a free hour near the act's billed time
+                occ = at.get(c)
+                if (c == old[mover] or occ == other or h[c][old[other]]
+                        or abs(cells[c]["start"] - cells[old[mover]]["start"]) > window):
+                    continue
+                trial = dict(old)
+                trial[mover] = c
+                if occ:
+                    trial[occ] = old[mover]
+                gain = start - sc.clash_score(trial, w, fest)
+                why = sc.violations(trial, fest, extra)
+                if why and (broken is None or gain > broken[0]):
+                    broken = (gain, mover, c, why[0])
+                if not why and (legal is None or gain > legal[0]):
+                    legal = (gain, mover, c, None)
+        objection = None
+        if broken and (legal is None or broken[0] > legal[0]):
+            objection = (f"Objection. The quickest fix is moving {broken[1]} to {sc.where(fest, broken[2])}, but "
+                         f"{broken[3]}.")
+        left = round(h[new[a]][new[b]] * 60)
+        moved = [f"{y} to {sc.where(fest, new[y])}" for y in (a, b) if new[y] != old[y]]
+        if not left:
+            ruling = f"Sustained. {' and '.join(moved) if moved else 'Other sets moved'}: {a} and {b} no longer overlap."
+            outcome = "resolved"
+        elif left < mins:
+            ruling = f"Partly sustained. {' and '.join(moved) or 'Other sets moved'}: the overlap drops from {mins} to {left} minutes."
+            outcome = "eased"
+        elif fest["rules"].get("headliners_close") and {fest["home"][a], fest["home"][b]} <= fest["closing"]:
+            ruling = f"Overruled. {a} and {b} both headline, and headliners close their stages, so they must overlap."
+            outcome = "stands"
+        else:
+            ruling = "Overruled. Every way to separate them breaks a rule or makes a worse clash elsewhere."
+            outcome = "stands"
+        cases.append({"acts": [a, b], "weight": wt, "minutes": mins, "when": when, "minutes_after": left,
+                      "plaintiff": f"{b} is number {_rank(w, a, b)} of {len(w[a])} on this bill for our fans, and we "
+                                   f"overlap {mins} minutes from {when}. Move one of us.",
+                      "defendant": f"{a} is number {_rank(w, b, a)} of {len(w[b])} for ours too. We were billed on "
+                                   f"{sc.where(fest, old[b])}: move them, not us.",
+                      "objection": objection, "ruling": ruling, "outcome": outcome,
+                      "from": {a: old[a], b: old[b]}, "to": {a: new[a], b: new[b]}})
+    return cases
+
+
 def _repair(pos, fest, w, extra):
     """Swap cells until no rule is broken, choosing the swap that leaves the fewest broken rules, then the lowest
     clash score."""

@@ -1,0 +1,119 @@
+/* Clash Court on the the earlier project design. Pink marks Qloo (fan overlap); blue marks Last.fm, which fills in for acts
+   Qloo does not hold. Amber is the booker's objection; ink is the court. */
+:root { --lfm: var(--city); --lfm-tint: var(--city-tint); --obj: var(--warn); --px: 1.05px; }
+
+.c-mark { position: relative; }
+.c-mark::after { content: ""; position: absolute; inset: 2px 2px 2px 6px; background: var(--qloo); }
+
+/* ---------- the bench (hero form) ---------- */
+.c-bench h2 { font: 400 1.9rem/1.05 var(--display); letter-spacing: -.01em; }
+.c-score { display: grid; grid-template-columns: auto auto auto; align-items: end; gap: .2rem 1rem; margin-top: 1.1rem; }
+.c-score > div { display: grid; }
+.c-k { font: 500 .66rem var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+.c-n { font: 400 2.6rem/1 var(--display); font-variant-numeric: tabular-nums; }
+.c-arrow { color: var(--faint); padding-bottom: .4rem; }
+.c-cut { grid-column: 1 / -1; font: 600 .9rem var(--body); color: var(--ok); min-height: 1.3em; }
+.c-scorehint { margin-top: 0; }
+.c-bench .primary { margin-top: .6rem; }
+.c-row { display: flex; gap: .5rem; align-items: stretch; }
+.c-row input { flex: 1; min-width: 0; }
+.c-cmd { margin-top: .4rem; }
+.c-cmd .chips { margin-top: .55rem; }
+.c-reset { margin-top: .9rem; }
+.c-auto { width: auto; white-space: nowrap; padding-inline: 1.2rem; }
+
+/* ---------- court band ---------- */
+.c-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(340px, 440px); gap: 20px; align-items: start; }
+.c-tablehead { display: flex; flex-wrap: wrap; justify-content: space-between; gap: .5rem 1rem; align-items: baseline; margin-bottom: .8rem; }
+.c-legend { display: flex; flex-wrap: wrap; gap: .3rem 1rem; font-size: .76rem; color: var(--muted); }
+.c-legend span { display: inline-flex; align-items: center; gap: .4rem; }
+.sw { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+.sw.hot { background: var(--qloo); }
+.sw.warm { background: var(--qloo-tint); border: 1px solid color-mix(in srgb, var(--qloo) 45%, transparent); }
+.sw.lfm { border: 1.5px dashed var(--lfm); }
+
+.c-scroll { overflow-x: auto; margin: 0 -6px; padding: 0 6px 6px; }
+.c-grid { display: grid; gap: 4px; min-width: 760px; align-items: start; }
+.c-h { font: 500 .66rem var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); padding: 0 4px 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.c-axis, .c-col { position: relative; }
+.c-col { background: var(--field); border-radius: 8px; }
+.c-tick { position: absolute; left: 0; font: 400 .68rem var(--mono); color: var(--faint); transform: translateY(-.45em); }
+.c-line { position: absolute; left: 0; right: 0; border-top: 1px dashed var(--rule); }
+.c-cell {
+  position: absolute; left: 3px; right: 3px; border-radius: 7px; padding: 3px 7px; overflow: hidden;
+  background: var(--surface); border: 1px solid var(--rule); color: var(--ink);
+  transition: background .35s ease, border-color .35s ease, box-shadow .35s ease, opacity .35s ease;
+}
+.c-cell .a { font-weight: 600; font-size: .8rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.3; }
+.c-cell .t { font: 400 .66rem var(--mono); color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.c-cell.warm { background: var(--qloo-tint); border-color: color-mix(in srgb, var(--qloo) 40%, transparent); }
+.c-cell.hot { background: var(--qloo); border-color: var(--qloo); color: #fff; }
+.c-cell.hot .t { color: rgba(255, 255, 255, .82); }
+.c-cell.lfm { border-style: dashed; border-color: var(--lfm); border-width: 1.5px; }
+.c-cell.nodata { opacity: .55; }
+.c-cell.empty { background: none; border-style: dashed; color: var(--faint); }
+.c-grid.trial .c-cell:not(.on-trial) { opacity: .28; }
+.c-cell.on-trial { box-shadow: 0 0 0 2px var(--ink), 0 10px 24px -10px rgba(0, 0, 0, .45); z-index: 2; opacity: 1; }
+.c-cell.landed { box-shadow: 0 0 0 2px var(--ok); }
+
+/* ---------- courtroom ---------- */
+.c-room { position: sticky; top: calc(var(--nav) + 14px); }
+.c-roomhead { display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
+#case-no { font: 500 .7rem var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+.c-caption { font: 400 1.7rem/1.1 var(--display); letter-spacing: -.01em; margin: .5rem 0 1rem; text-wrap: balance; }
+.c-caption .v { font-style: italic; color: var(--muted); }
+.c-transcript { display: grid; gap: .6rem; min-height: 120px; }
+.c-say { display: grid; gap: .2rem; padding: .7rem .85rem; border-radius: 12px; border: 1px solid var(--rule); background: var(--field);
+  animation: c-in .35s ease both; font-size: .9rem; }
+.c-say .who { font: 600 .66rem var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.c-say.p { border-left: 3px solid var(--qloo); margin-right: 2.2rem; }
+.c-say.d { border-right: 3px solid var(--qloo); margin-left: 2.2rem; }
+.c-say.p.lfm { border-left-color: var(--lfm); } .c-say.d.lfm { border-right-color: var(--lfm); }
+.c-say.o { border-color: color-mix(in srgb, var(--obj) 45%, transparent); background: color-mix(in srgb, var(--obj) 9%, var(--surface)); }
+.c-say.o .who { color: var(--obj); }
+.c-say.j { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.c-say.j .who { color: color-mix(in srgb, var(--bg) 65%, transparent); }
+.c-say.e { border-color: var(--ink); background: var(--surface); }
+.c-stamp { justify-self: start; margin-top: .3rem; font: 600 .72rem var(--mono); letter-spacing: .16em; text-transform: uppercase;
+  padding: .25rem .6rem; border: 2px solid currentColor; border-radius: 6px; transform: rotate(-3deg); animation: c-stamp .3s ease both; }
+.c-stamp.resolved { color: var(--ok); } .c-stamp.eased { color: var(--warn); } .c-stamp.stands { color: var(--err); }
+.c-say.j .c-stamp.resolved { color: #5FD08F; } .c-say.j .c-stamp.eased { color: #E6B552; } .c-say.j .c-stamp.stands { color: #FF8078; }
+.c-docket { list-style: none; margin: 1.1rem 0 0; padding: .9rem 0 0; border-top: 1px solid var(--rule); display: grid; gap: .35rem; font-size: .82rem; }
+.c-docket li { display: grid; grid-template-columns: 1.6rem 1fr auto; gap: .5rem; align-items: baseline; color: var(--muted); }
+.c-docket li.now { color: var(--ink); font-weight: 600; }
+.c-docket .n { font: 400 .7rem var(--mono); }
+.c-docket .tag { font: 600 .62rem var(--mono); letter-spacing: .1em; text-transform: uppercase; }
+.c-docket .tag.resolved { color: var(--ok); } .c-docket .tag.eased { color: var(--warn); } .c-docket .tag.stands { color: var(--err); }
+@keyframes c-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@keyframes c-stamp { from { opacity: 0; transform: rotate(-3deg) scale(1.6); } to { opacity: 1; transform: rotate(-3deg) scale(1); } }
+
+/* ---------- your day ---------- */
+.c-route { display: grid; gap: .4rem; margin-top: 1rem; }
+.c-route .r { display: grid; grid-template-columns: 6.5rem 1fr; gap: .8rem; padding: .6rem .8rem; border: 1px solid var(--rule); border-radius: 10px; background: var(--field); align-items: baseline; }
+.c-route .r.top { border-left: 3px solid var(--qloo); }
+.c-route .r.lfm.top { border-left-color: var(--lfm); }
+.c-route .tm { font: 400 .78rem var(--mono); color: var(--muted); }
+.c-route .must { display: block; color: var(--err); font-size: .84rem; margin-top: .15rem; }
+.c-route .note { color: var(--muted); font-size: .86rem; }
+
+/* ---------- evidence ---------- */
+.c-evidence table { width: 100%; border-collapse: collapse; font-size: .92rem; }
+.c-evidence th { text-align: left; font: 500 .68rem var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); padding: .5rem .6rem; border-bottom: 1px solid var(--rule); }
+.c-evidence td { padding: .55rem .6rem; border-bottom: 1px solid var(--rule); font-variant-numeric: tabular-nums; }
+.c-evidence td + td, .c-evidence th + th { text-align: right; }
+.c-evidence tr.c-q td:first-child { border-left: 3px solid var(--qloo); }
+.c-festnote { margin-top: .9rem; font-size: .78rem; }
+.c-claims { margin: 1.1rem 0 .6rem; padding-left: 1.1rem; display: grid; gap: .35rem; }
+
+@media (max-width: 1060px) {
+  .c-layout { grid-template-columns: minmax(0, 1fr); }
+  .c-room { position: static; }
+}
+@media (max-width: 900px) {
+  .hero { grid-template-columns: minmax(0, 1fr); }
+  .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .c-say, .c-stamp { animation: none; }
+  .c-cell { transition: none; }
+}

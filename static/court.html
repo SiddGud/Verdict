@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Clash Court</title>
+<meta name="description" content="AI agents argue every festival clash in court, then rebuild the timetable so fans do not have to choose between two acts they love.">
+<meta name="theme-color" content="#0A0A0B">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230A0A0B'/%3E%3Crect x='7' y='9' width='8' height='14' fill='none' stroke='%23fff' stroke-width='2.5'/%3E%3Crect x='17' y='9' width='8' height='14' fill='%23FF7FB0'/%3E%3C/svg%3E">
+<script>
+try { var t = localStorage.getItem("ws-theme"); if (t === "light" || t === "dark") document.documentElement.dataset.theme = t; } catch (_) {}
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400..700&family=Geist+Mono:wght@400..600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/style.css?v=6">
+<link rel="stylesheet" href="/static/court.css?v=1">
+</head>
+<body>
+<a class="skip" href="#court">Skip to the court</a>
+
+<nav class="nav" aria-label="Main">
+  <a class="logo" href="#top" aria-label="Clash Court, back to top"><span class="logo-mark c-mark" aria-hidden="true"></span>Clash Court</a>
+  <div class="nav-links">
+    <a href="#court">The court</a>
+    <a href="#day">Your day</a>
+    <a href="#how">How it works</a>
+    <a class="how" href="#evidence">How we know</a>
+  </div>
+  <div class="nav-tools">
+    <button type="button" id="theme-toggle" class="icon-btn" aria-label="Switch between light and dark" title="Switch between light and dark">
+      <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 3.5a8.5 8.5 0 0 1 0 17z" fill="currentColor"/></svg>
+    </button>
+  </div>
+</nav>
+
+<header class="top" id="top">
+  <div class="grid-art" aria-hidden="true"></div>
+  <div class="hero">
+    <div class="brand">
+      <p class="eyebrow">Festival timetables <span id="fest-short">Lollapalooza Chicago</span></p>
+      <h1 class="wordmark">Fans shouldn't have to <em>choose.</em></h1>
+      <p class="lede">Two acts that share fans, on two stages, at the same time: someone misses one. Clash Court finds
+        every such pair with <span class="src qloo">Qloo taste data</span>, puts each clash on trial, and rebuilds the
+        timetable within the booker's rules.</p>
+      <ul class="points">
+        <li>Fan agents argue each clash with real numbers</li>
+        <li>The booker agent objects when a fix breaks a rule</li>
+        <li>The judge rules, and the whole timetable moves</li>
+      </ul>
+    </div>
+
+    <div class="panel c-bench">
+      <h2>Convene the court</h2>
+      <label for="festival">Festival day</label>
+      <select id="festival" aria-label="Festival day"></select>
+      <div class="c-score" aria-live="polite">
+        <div><span class="c-k">Published timetable</span><span class="c-n" id="pub">0.00</span></div>
+        <div class="c-arrow" aria-hidden="true">to</div>
+        <div><span class="c-k">After the court</span><span class="c-n" id="now">0.00</span></div>
+        <div class="c-cut" id="cut"></div>
+      </div>
+      <p class="hint c-scorehint">Clash score: shared fans times hours of overlap, summed over every pair on the bill.</p>
+      <button type="button" id="convene" class="primary">Convene the court</button>
+      <form id="cmd" class="c-cmd" autocomplete="off">
+        <label for="text">Booker's emergency</label>
+        <div class="c-row">
+          <input id="text" maxlength="300" placeholder="An act just cancelled">
+          <button type="submit" class="quiet">Send</button>
+        </div>
+        <div class="chips" id="examples" aria-label="Example emergencies"></div>
+      </form>
+      <p class="form-error" id="err" hidden></p>
+      <button type="button" id="reset" class="quiet small c-reset">Back to the published timetable</button>
+    </div>
+  </div>
+  <dl class="stats" aria-label="This festival day">
+    <div><dt>Acts on the bill</dt><dd id="st-acts">0</dd></div>
+    <div><dt>Stages</dt><dd id="st-stages">0</dd></div>
+    <div><dt>Pairs scored</dt><dd id="st-pairs">0</dd></div>
+    <div><dt>Clashes cut</dt><dd id="st-cut">0%</dd></div>
+  </dl>
+</header>
+
+<section class="band c-courtband" id="court">
+  <div class="band-head">
+    <div>
+      <p class="kicker big">In session</p>
+      <h2 id="court-title">The worst clashes, on trial</h2>
+    </div>
+    <p class="hint">Each case is a pair of acts that share many fans and overlap on two stages. The fan agents argue,
+      the booker objects, the court rules; then the whole timetable moves.</p>
+  </div>
+  <div class="c-layout">
+    <section class="panel c-table" aria-label="Timetable">
+      <div class="c-tablehead">
+        <p class="ph">Timetable</p>
+        <div class="c-legend">
+          <span><i class="sw hot"></i>Shares many fans with a set it overlaps</span>
+          <span><i class="sw warm"></i>Some shared fans</span>
+          <span><i class="sw lfm"></i>From Last.fm (Qloo has no data)</span>
+        </div>
+      </div>
+      <div class="c-scroll"><div class="c-grid" id="grid"></div></div>
+      <p class="hint c-festnote" id="festnote"></p>
+    </section>
+
+    <section class="panel c-room" aria-label="The courtroom" aria-live="polite">
+      <div class="c-roomhead">
+        <p class="ph" id="case-no">Court is not yet in session</p>
+        <button type="button" class="quiet small" id="skip" hidden>Skip to the verdict</button>
+      </div>
+      <h3 class="c-caption" id="case-title">Press "Convene the court" to put the worst clashes on trial.</h3>
+      <div class="c-transcript" id="transcript"></div>
+      <ol class="c-docket" id="docket" aria-label="Docket"></ol>
+    </section>
+  </div>
+</section>
+
+<section class="band" id="day">
+  <div class="band-head">
+    <div>
+      <p class="kicker big">For fans</p>
+      <h2>Your day, and your case</h2>
+    </div>
+    <p class="hint">Name up to five artists you love; they need not play here. Every act on the bill is scored for you
+      and your best path through the day is planned. Any clash you cannot avoid is filed with the court and weighs the
+      next ruling.</p>
+  </div>
+  <div class="panel c-day">
+    <form id="routeform" class="c-row" autocomplete="off">
+      <input id="favs" maxlength="300" placeholder="Phoebe Bridgers, Clairo, Frank Ocean" aria-label="Your favourite artists">
+      <button type="submit" class="primary c-auto">Plan my day</button>
+    </form>
+    <div id="route" class="c-route"></div>
+  </div>
+</section>
+
+<section class="band how-it" id="how">
+  <div class="band-head">
+    <div>
+      <p class="kicker big">How it works</p>
+      <h2>Who is in the room</h2>
+    </div>
+    <p class="hint">Code builds the timetable; the agents argue, object and explain. Nothing an agent says can move a set
+      that breaks a rule.</p>
+  </div>
+  <ol class="flow">
+    <li><h3>The clerk reads the bill</h3><p>Every act is matched to Qloo by exact name. Qloo scores how much each pair's fans are the same people, for the whole bill.</p></li>
+    <li><h3>Fan agents file cases</h3><p>The worst clashes become cases. Each side's agent argues with its numbers: where the other act ranks for its fans, and how long the sets overlap.</p></li>
+    <li><h3>The booker objects</h3><p>The booker agent tries the quickest fix and objects when it breaks a rule: headliners close, no act moves more than two hours, set lengths and stage sizes stay.</p></li>
+    <li><h3>The judge rules</h3><p>An optimiser searches thousands of swaps for the timetable with the least clash that keeps every rule, then each ruling says where the two acts ended up.</p></li>
+    <li><h3>Emergencies</h3><p>Type "Tyla just cancelled" or "Kesha arrives at 4pm". The booker reads it into a checked rule and the court sits again.</p></li>
+    <li><h3>Fans weigh in</h3><p>A fan's route flags the clashes they cannot avoid. Each report adds weight to that pair the next time the court sits.</p></li>
+  </ol>
+  <div class="band-head second">
+    <div>
+      <p class="kicker big">Sources</p>
+      <h2>Where every number comes from</h2>
+    </div>
+  </div>
+  <div class="sources">
+    <article class="s-qloo"><span class="tagline">Qloo taste graph</span><h3>Which acts share fans</h3>
+      <p>Qloo's affinity between every pair of acts on the bill, and between a fan's favourites and every act. Same answer every time, no model call.</p></article>
+    <article class="s-city"><span class="tagline">Last.fm listening data</span><h3>The few acts Qloo lacks</h3>
+      <p>New and small acts that Qloo does not hold yet get their overlap from Last.fm's similar artists, and are labelled on the timetable.</p></article>
+    <article><span class="tagline">Published set times</span><h3>The real timetable</h3>
+      <p>Lollapalooza Chicago, as published by Time Out Chicago. Stage sizes and the dance stage lock are the booker's rules.</p></article>
+  </div>
+</section>
+
+<section class="band evidence" id="evidence">
+  <div class="band-head">
+    <div>
+      <p class="kicker big">How we know</p>
+      <h2>Tested before we built on it</h2>
+    </div>
+    <p class="hint">Test 28 was written down and committed before any result: 10 bills of 30 real artists, judged on
+      how many listeners each pair truly shares (Last.fm). Higher is better.</p>
+  </div>
+  <div class="panel c-evidence">
+    <table>
+      <thead><tr><th>Who scores fan overlap</th><th>Matches real fans</th><th>Timetable quality</th></tr></thead>
+      <tbody>
+        <tr class="c-q"><td>Qloo alone</td><td>0.72</td><td>0.66</td></tr>
+        <tr><td>Popularity only</td><td>0.39</td><td>0.04</td></tr>
+        <tr><td>Frontier model alone (GPT-6 Astra)</td><td>0.70</td><td>0.67</td></tr>
+        <tr class="c-q"><td>Frontier model with Qloo</td><td>0.73</td><td>0.70</td></tr>
+        <tr><td>Small model alone (gemini-3.8-flash)</td><td>0.70</td><td>0.69</td></tr>
+        <tr class="c-q"><td>Small model with Qloo</td><td>0.72</td><td>0.67</td></tr>
+      </tbody>
+    </table>
+    <ul class="c-claims">
+      <li>Qloo alone matches a frontier model on real fan overlap, and is far beyond popularity.</li>
+      <li>Adding Qloo made both models' fan overlap scores closer to real fans.</li>
+      <li>Timetables built from the model with Qloo were not shown to be better than the model alone. We say so.</li>
+      <li>Qloo needs no model call: instant, cheap and the same every time.</li>
+    </ul>
+    <p class="hint">Limits, stated before the result: the listening data is from about 2011 and holds each listener's
+      top 50 artists. Full protocol: PREREGISTRATION_28.md.</p>
+  </div>
+</section>
+
+<footer class="foot">
+  <a class="logo" href="#top"><span class="logo-mark c-mark" aria-hidden="true"></span>Clash Court</a>
+  <p>Qloo Agentic Hackathon 2026, by Athmeeya M Kashyap and Siddhant Gudwani. Fan overlap from Qloo's taste graph, and
+    from Last.fm for acts Qloo does not hold; an act neither holds is shown as no data and never guessed.</p>
+  <p><a href="/whitespace">Our earlier product, the earlier project</a></p>
+</footer>
+<script src="/static/court.js?v=1"></script>
+</body>
+</html>

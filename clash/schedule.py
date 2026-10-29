@@ -63,7 +63,7 @@ def violations(pos, fest, extra=()):
             out.append(f"{a} would get a set of a different length")
     tiers = r.get("stage_tiers")  # stage -> size class; an act may move only between stages of its own class
     if tiers:
-        out += [f"{a} must stay on a stage the size of {fest['stages'][cells[home[a]]['stage']]}" for a, i in pos.items()
+        out += [f"{a} must stay on a {tiers.get(fest['stages'][cells[home[a]]['stage']])} stage" for a, i in pos.items()
                 if tiers.get(fest["stages"][cells[i]["stage"]]) != tiers.get(fest["stages"][cells[home[a]]["stage"]])]
     for st, acts in r.get("stage_locked", {}).items():
         out += [f"{a} must stay on {st}" for a in acts if a in pos and fest["stages"][cells[pos[a]]["stage"]] != st]

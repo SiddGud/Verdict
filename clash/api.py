@@ -54,7 +54,7 @@ def _state(s, feed=None, rule=None):
             "unmatched": [a for a in fest["acts"] if a not in t["matched"] and a not in t.get("lastfm", {})],
             "from_lastfm": [a for a in fest["acts"] if a in t.get("lastfm", {})],
             "fan_demand": _demand(s),
-            "feed": feed or [], "rule": rule}
+            "feed": feed or [], "cases": s.get("cases", []) if feed else [], "rule": rule}
 
 
 def _demand(s):
@@ -121,6 +121,9 @@ def _apply(s):
         if a in w and b in w[a]:
             w[a][b] = w[b][a] = min(1.0, w[a][b] + 0.1 * n)
     new, feed = ag.run(base, s["fest"], w, s["rules"])
+    gone = {r["act"] for r in s["rules"] if r["type"] == "cancel"}
+    s["cases"] = ag.court({a: i for a, i in base.items() if a not in gone}, new, s["fest"], w,
+                          [r for r in s["rules"] if r["type"] != "cancel"])
     if reported:
         feed.insert(0, {"who": "booker", "text": f"{sum(reported.values())} fan route clash reports are counted as "
                         "extra weight on those pairs."})
