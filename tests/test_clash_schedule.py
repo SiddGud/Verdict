@@ -63,3 +63,11 @@ def test_set_length_is_kept():
 def test_fan_path_skips_overlaps():
     path = fr.best_path([(720, 780, 1.0, "a"), (750, 810, 0.5, "b"), (775, 840, 0.8, "c")])
     assert [p[3] for p in path] == ["a", "c"]  # c starts 5 minutes before a ends: leave a little early
+
+
+def test_stage_size_is_kept():
+    g = fest([("Main", "big", "12:00", "13:00"), ("Small", "tiny", "13:00", "14:00"), ("Main", "x", "13:00", "14:00")],
+             {"stage_tiers": {"Main": "main", "Small": "small"}})
+    swapped = {"big": 1, "tiny": 0, "x": 2}  # big act to the small stage and back
+    assert any("stage the size of Main" in v for v in sc.violations(swapped, g))
+    assert not sc.violations(sc.published(g), g)

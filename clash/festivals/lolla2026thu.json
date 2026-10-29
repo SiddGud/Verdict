@@ -1,6 +1,6 @@
 {
  "name": "Lollapalooza Chicago, Thursday July 30, 2026 (published set times)",
- "note": "Set times as published (Time Out Chicago, read Oct 29, 2026). Kidzapalooza, the children's stage, is left out. Lorde's end time was not listed; 10:00pm is assumed, when the other closing set ends. The source page lists Devault twice (Perry's at 1:45pm and Tito's at 7:30pm); the second listing is kept under a label and has no Qloo data.",
+ "note": "Set times as published (Time Out Chicago, read Oct 29, 2026). Kidzapalooza, the children's stage, is left out. Lorde's end time was not listed; 10:00pm is assumed, when the other closing set ends. The source page lists Devault twice (Perry's at 1:45pm and Tito's at 7:30pm); the second listing is kept under a label and has no Qloo data. Stage sizes are our own grouping (main: T-Mobile and Bud Light; mid: Allianz, Tito's and Airbnb; small: BMI; Perry's keeps its dance acts): an act moves only between stages of its size.",
  "source": "https://www.timeout.com/chicago/news/lollapalooza-2026-lineup-updated-set-times-and-streaming-schedule-the-full-list-to-keep-track-of-072926",
  "stages": [
   "T-Mobile",
@@ -285,6 +285,15 @@
     "Kettama",
     "Worship"
    ]
+  },
+  "stage_tiers": {
+   "T-Mobile": "main",
+   "Bud Light": "main",
+   "Perry's": "dance",
+   "Allianz": "mid",
+   "Tito's": "mid",
+   "Airbnb": "mid",
+   "BMI": "small"
   }
  }
 }
