@@ -1,0 +1,49 @@
+# Clash Court
+
+> An AI war-room that builds a music festival timetable so fans do not have to choose between two acts they love.
+> Qloo's taste graph scores how much every pair of acts on the bill shares fans; code builds the timetable that keeps
+> those pairs apart within the booker's rules; language-model agents read the booker's plain-word orders and explain
+> every move. Entry for the Qloo Agentic Hackathon 2026 by Athmeeya M Kashyap and Siddhant Gudwani. MIT licence.
+
+## What it does
+
+- Loads a festival day: stages, real set times and the published timetable.
+- Matches every act to a Qloo artist (exact names only; acts Qloo does not hold are shown as "no data", never guessed).
+- Asks Qloo how much each pair of acts shares fans, for the whole bill. Clash = shared fans times minutes of overlap.
+- Moves sets between existing slots to cut clashes, keeping the rules: headliners close, no act moves more than two
+  hours from its billed time, set lengths stay the same, locked stages stay locked, plus any rule the booker adds.
+- A booker agent turns orders such as "Mitski just cancelled" or "Doechii arrives at 3pm" into checked rules. Fan
+  agents argue for their acts with Qloo's numbers. A referee makes each move and explains it.
+- A fan names up to five artists they love; Qloo scores every act on the bill for them and the page plans their best
+  path through the day, flagging the clashes they cannot avoid. Those reports weigh the next re-plan.
+
+## How Qloo is used
+
+- `/search` (artist) to resolve each act by exact name.
+- `/v2/insights` with `filter.type=urn:entity:artist`, one act as `signal.interests.entities` and the rest of the bill
+  in `filter.results.entities`: the pair overlap table (about one call per act, cached).
+- The same endpoint with a fan's favourites as the signal: the fan's fit for every act on the bill (one call).
+
+## Where a model alone falls short (shown on the page)
+
+Asked the same question twice with no Qloo, a frontier model's pair scores changed enough that the timetables built
+from its two answers differ in about 24 of 40 set times. Qloo returns the same scores every time, for every act it
+holds, including small acts a model has little text about.
+
+## Honest limits
+
+- Qloo's raw affinity scores are bunched (unrelated acts and near-twins score close together), so each act's scores are
+  ranked against the rest of the bill before use.
+- A real timetable has reasons a score cannot see (contracts, production, travel). The booker states them as rules;
+  the tool never claims its plan is final.
+- Every claim the team tests is pre-registered before data is seen; see the PREREGISTRATION files and PROJECT_LOG.md.
+
+## Code
+
+- [clash/overlap.py](clash/overlap.py): festival files, Qloo matching, the pair table and clash weights
+- [clash/schedule.py](clash/schedule.py): clash score on real set times, rules, optimiser
+- [clash/agents.py](clash/agents.py): booker command reader, fan agents, referee
+- [clash/fanroute.py](clash/fanroute.py): a fan's best path through the day
+- [clash/baseline.py](clash/baseline.py): the model-alone comparison
+- [clash/api.py](clash/api.py), [static/clash.html](static/clash.html): the web app
+- [tests/test_clash_schedule.py](tests/test_clash_schedule.py): engine tests
