@@ -54,3 +54,15 @@ button:hover { border-color: var(--accent); }
 .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
 .chips button { font-size: 12px; padding: 4px 8px; }
 footer { color: var(--muted); font-size: 12px; padding: 4px 20px 24px; max-width: 900px; }
+.fan h2, .proof h2 { margin: 0 0 6px; font-size: 16px; }
+.route { margin-top: 10px; display: grid; gap: 4px; }
+.route .r { display: grid; grid-template-columns: 52px 1fr; gap: 8px; padding: 6px 8px; background: #0d1117; border-radius: 6px; }
+.route .r.top { border-left: 3px solid var(--good); }
+.route .must { color: var(--warm); font-weight: 600; }
+.route .t { color: var(--muted); font-variant-numeric: tabular-nums; }
+.proof .big { font-size: 22px; font-weight: 700; color: var(--warm); }
+.proof p { margin: 6px 0; }
+main { grid-template-areas: "board room" "fan proof"; }
+.board:not(.fan) { grid-area: board; } .fan { grid-area: fan; }
+.room:not(.proof) { grid-area: room; } .proof { grid-area: proof; }
+@media (max-width: 1000px) { main { grid-template-areas: "board" "room" "fan" "proof"; } }

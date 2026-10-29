@@ -59,6 +59,11 @@ function drawSide(s) {
   s.rules.forEach((r) => $("rules").append(el("span", "", r.reads_as)));
   if (s.unmatched.length) $("rules").append(el("div", "", "No Qloo data (treated as no clash): " + s.unmatched.join(", ")));
   $("festnote").textContent = s.festival.note;
+  $("demand").innerHTML = "";
+  if (s.fan_demand && s.fan_demand.length) {
+    $("demand").append(el("div", "", "From fans' routes, still forced to choose:"));
+    s.fan_demand.forEach((d) => $("demand").append(el("span", "", `${d.acts[0]} or ${d.acts[1]}: ${d.fans} fan${d.fans > 1 ? "s" : ""}`)));
+  }
 }
 
 function say(who, text) {
@@ -132,14 +137,51 @@ async function load(slug) {
   say("referee", "This is the timetable as published. Red cells share many fans with an act on another stage at the same hour. Press 'Run the war-room' or give the booker an order.");
 }
 
+async function planDay(e) {
+  e.preventDefault();
+  const favs = $("favs").value.split(",").map((x) => x.trim()).filter(Boolean).slice(0, 5);
+  if (!favs.length || !state) return;
+  $("route").textContent = "Asking Qloo...";
+  try {
+    const r = await post("/api/clash/route", { session: state.session, favourites: favs });
+    $("route").innerHTML = "";
+    if (r.error) { $("route").textContent = r.error; return; }
+    if (r.not_found.length) $("route").append(el("div", "note", "Not found in Qloo: " + r.not_found.join(", ")));
+    r.hours.forEach((h) => {
+      const row = el("div", "r" + (h.top ? " top" : ""));
+      row.append(el("span", "t", h.slot));
+      const txt = el("span", "", `${h.act} on ${h.stage} (fit ${h.fit.toFixed(2)})`);
+      if (h.clash_with) txt.append(el("span", "must", `  must choose: ${h.clash_with.act} (${h.clash_with.fit.toFixed(2)})`));
+      row.append(txt);
+      $("route").append(row);
+    });
+    $("route").append(el("div", "note", r.summary));
+    state = r.state; latest = r.state.version; drawSide(state);
+  } catch (err) { $("route").textContent = "Something went wrong: " + err.message; }
+}
+
+async function proof(slug) {
+  const r = await (await fetch("/api/clash/baseline?festival=" + encodeURIComponent(slug))).json();
+  const b = $("baseline"), s = r.summary;
+  b.innerHTML = "";
+  if (!s) { b.textContent = "The model-alone comparison has not been computed for this festival."; return; }
+  b.append(el("p", "", "We asked a frontier language model, with no Qloo, to score how much every pair of acts shares fans. Twice, the same question."));
+  b.append(el("div", "big", `${s.set_times_that_differ} of ${s.acts}`));
+  b.append(el("p", "", "set times differ between the timetables built from its two answers."));
+  b.append(el("p", "", `${s.pairs_changed_by_10_or_more} of ${s.pairs} pair scores moved by 10 points or more between the two runs. Qloo gives the same score every time.`));
+  b.append(el("p", "", s.unknown.length ? `Acts it said it does not know: ${s.unknown.join(", ")}.` : "It said it knew every act on this bill."));
+}
+
+$("routeform").addEventListener("submit", planDay);
 $("cmd").addEventListener("submit", (e) => { e.preventDefault(); const t = $("text").value; $("text").value = ""; send(t); });
 document.querySelectorAll(".chips button").forEach((b) => b.addEventListener("click", () => send(b.dataset.cmd)));
-$("festival").addEventListener("change", (e) => load(e.target.value));
+$("festival").addEventListener("change", (e) => { load(e.target.value); proof(e.target.value); });
 
 (async () => {
   const list = await (await fetch("/api/clash/festivals")).json();
   list.forEach((f) => { const o = el("option", "", f.name); o.value = f.slug; $("festival").append(o); });
   await load(list[0].slug);
+  proof(list[0].slug);
   const cmd = new URLSearchParams(location.search).get("cmd"); // e.g. /clash?cmd=Run, for demo links
   if (cmd) send(cmd);
 })();

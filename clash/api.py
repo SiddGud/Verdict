@@ -9,6 +9,8 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
 from clash import agents as ag
+from clash import baseline as bl
+from clash import fanroute as fr
 from clash import overlap as ov
 from clash import schedule as sc
 
@@ -40,7 +42,18 @@ def _state(s, feed=None, rule=None):
             "worst": [{"weight": x, "acts": [a, b], "slot": fest["slots"][k]} for x, a, b, k in sc.worst(pos, w, 5)],
             "rules": [{**r, "reads_as": ag.describe(r, fest)} for r in s["rules"]],
             "unmatched": [a for a in fest["acts"] if a not in t["matched"]],
+            "fan_demand": _demand(s),
             "feed": feed or [], "rule": rule}
+
+
+def _demand(s):
+    """Pairs that fans' routes forced them to choose between on the current timetable, most fans first."""
+    count = {}
+    for picks in s.get("fans", []):
+        for k, (a, b) in picks.items():
+            if s["pos"].get(a, [0, -1])[1] == s["pos"].get(b, [0, -2])[1]:
+                count[(a, b)] = count.get((a, b), 0) + 1
+    return [{"acts": list(p), "fans": n} for p, n in sorted(count.items(), key=lambda x: -x[1])[:5]]
 
 
 def _session(sid):
@@ -72,7 +85,8 @@ def festivals():
 @router.post("/api/clash/load")
 def load(req: Load):
     fest, t, w = _festival(req.festival)
-    s = {"id": uuid.uuid4().hex[:16], "version": 0, "fest": fest, "table": t, "w": w, "pos": sc.published(fest), "rules": []}
+    s = {"id": uuid.uuid4().hex[:16], "version": 0, "fest": fest, "table": t, "w": w, "pos": sc.published(fest), "rules": [],
+         "fans": []}
     with LOCK:
         if len(SESSIONS) >= MAX_SESSIONS:
             SESSIONS.pop(next(iter(SESSIONS)))
@@ -83,7 +97,18 @@ def load(req: Load):
 def _apply(s):
     """Re-plan from the published timetable with every rule so far, as the war-room would."""
     base = sc.published(s["fest"])
-    new, feed = ag.run(base, s["fest"], s["w"], s["rules"])
+    w = {a: dict(row) for a, row in s["w"].items()}
+    reported = {}
+    for picks in s.get("fans", []):  # each fan who had to choose between two acts adds weight to that pair
+        for a, b in picks.values():
+            reported[(a, b)] = reported.get((a, b), 0) + 1
+    for (a, b), n in reported.items():
+        if a in w and b in w[a]:
+            w[a][b] = w[b][a] = min(1.0, w[a][b] + 0.1 * n)
+    new, feed = ag.run(base, s["fest"], w, s["rules"])
+    if reported:
+        feed.insert(0, {"who": "booker", "text": f"{sum(reported.values())} fan route clash reports are counted as "
+                        "extra weight on those pairs."})
     s["pos"], s["version"] = new, s["version"] + 1
     return feed
 
@@ -114,3 +139,32 @@ def reset(req: Session):
     with LOCK:
         s["pos"], s["rules"], s["version"] = sc.published(s["fest"]), [], s["version"] + 1
     return _state(s)
+
+
+class Route(BaseModel):
+    session: str = Field(max_length=40)
+    favourites: list[str] = Field(min_length=1, max_length=5)
+
+
+@router.post("/api/clash/route")
+def route(req: Route):
+    s = _session(req.session)
+    favs = [f.strip()[:60] for f in req.favourites if f.strip()]
+    r = fr.route(s["fest"], s["pos"], favs)
+    if "error" not in r:
+        with LOCK:
+            s["fans"].append({h["slot"]: (h["act"], h["clash_with"]["act"]) for h in r["hours"] if h["clash_with"]})
+            s["version"] += 1
+    return {**r, "state": _state(s)}
+
+
+BASELINE = {}
+
+
+@router.get("/api/clash/baseline")
+def baseline(festival: str = "testbill"):
+    if not festival.replace("-", "").replace("_", "").isalnum() or not os.path.exists(os.path.join(FESTIVALS, f"{festival}.json")):
+        raise HTTPException(404, "unknown festival")
+    if BASELINE.get(festival) is None:
+        BASELINE[festival] = bl.summary(ov.load(os.path.join(FESTIVALS, f"{festival}.json")))
+    return {"summary": BASELINE[festival]}
