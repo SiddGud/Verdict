@@ -1,0 +1,310 @@
+{
+ "name": "Lollapalooza Chicago, Thursday August 1, 2024 (published set times)",
+ "note": "Set times as published (Time Out Chicago, read Oct 29, 2026). Kidzapalooza, the children's stage, is left out. Megan Thee Stallion's end time was not listed; 10:00pm is assumed, when the other closing set ends. The source page spells Benson Boone as 'Bensen Boone' (corrected here) and lists Camden Cox twice (Perry's at noon and Tito's at 7:45pm); the second listing is kept under a label. Stage sizes are our own grouping (main: T-Mobile and Bud Light; mid: IHG, Tito's and Bacardi; small: BMI; Perry's keeps its dance acts): an act moves only between stages of its size.",
+ "source": "https://www.timeout.com/chicago/news/lollapalooza-2024-lineup-and-set-times-the-full-schedule-you-need-to-know-073124",
+ "stages": [
+  "T-Mobile",
+  "Bud Light",
+  "Perry's",
+  "IHG",
+  "Tito's",
+  "Bacardi",
+  "BMI"
+ ],
+ "sets": [
+  {
+   "stage": "T-Mobile",
+   "act": "Mette",
+   "start": "13:30",
+   "end": "14:15"
+  },
+  {
+   "stage": "T-Mobile",
+   "act": "Tyla",
+   "start": "15:15",
+   "end": "16:00"
+  },
+  {
+   "stage": "T-Mobile",
+   "act": "Chappell Roan",
+   "start": "17:00",
+   "end": "18:00"
+  },
+  {
+   "stage": "T-Mobile",
+   "act": "Labrinth",
+   "start": "19:00",
+   "end": "20:00"
+  },
+  {
+   "stage": "T-Mobile",
+   "act": "Megan Thee Stallion",
+   "start": "21:00",
+   "end": "22:00"
+  },
+  {
+   "stage": "Bud Light",
+   "act": "Matt Hansen",
+   "start": "13:00",
+   "end": "13:45"
+  },
+  {
+   "stage": "Bud Light",
+   "act": "Sam Barber",
+   "start": "14:45",
+   "end": "15:45"
+  },
+  {
+   "stage": "Bud Light",
+   "act": "Jungle",
+   "start": "16:45",
+   "end": "17:45"
+  },
+  {
+   "stage": "Bud Light",
+   "act": "Lizzy McAlpine",
+   "start": "18:45",
+   "end": "19:45"
+  },
+  {
+   "stage": "Bud Light",
+   "act": "Hozier",
+   "start": "20:30",
+   "end": "22:00"
+  },
+  {
+   "stage": "Perry's",
+   "act": "Camden Cox",
+   "start": "12:00",
+   "end": "12:45"
+  },
+  {
+   "stage": "Perry's",
+   "act": "Brandi Cyrus",
+   "start": "12:55",
+   "end": "13:40"
+  },
+  {
+   "stage": "Perry's",
+   "act": "Spinall",
+   "start": "13:50",
+   "end": "14:50"
+  },
+  {
+   "stage": "Perry's",
+   "act": "Kasbo",
+   "start": "15:00",
+   "end": "16:00"
+  },
+  {
+   "stage": "Perry's",
+   "act": "Walker & Royce",
+   "start": "16:10",
+   "end": "17:10"
+  },
+  {
+   "stage": "Perry's",
+   "act": "Farley \"Jackmaster\" Funk",
+   "start": "17:20",
+   "end": "17:50"
+  },
+  {
+   "stage": "Perry's",
+   "act": "Don Diablo",
+   "start": "18:00",
+   "end": "19:00"
+  },
+  {
+   "stage": "Perry's",
+   "act": "Mochakk",
+   "start": "19:15",
+   "end": "20:15"
+  },
+  {
+   "stage": "Perry's",
+   "act": "Fisher",
+   "start": "20:30",
+   "end": "21:45"
+  },
+  {
+   "stage": "IHG",
+   "act": "Been Stellar",
+   "start": "12:45",
+   "end": "13:30"
+  },
+  {
+   "stage": "IHG",
+   "act": "BigXthaPlug",
+   "start": "14:15",
+   "end": "15:15"
+  },
+  {
+   "stage": "IHG",
+   "act": "Olivia Dean",
+   "start": "16:00",
+   "end": "17:00"
+  },
+  {
+   "stage": "IHG",
+   "act": "Kesha",
+   "start": "18:00",
+   "end": "19:00"
+  },
+  {
+   "stage": "IHG",
+   "act": "Benson Boone",
+   "start": "20:00",
+   "end": "21:00"
+  },
+  {
+   "stage": "Tito's",
+   "act": "Abby Holliday",
+   "start": "12:15",
+   "end": "13:00"
+  },
+  {
+   "stage": "Tito's",
+   "act": "Fleshwater",
+   "start": "13:45",
+   "end": "14:45"
+  },
+  {
+   "stage": "Tito's",
+   "act": "D4vd",
+   "start": "15:45",
+   "end": "16:45"
+  },
+  {
+   "stage": "Tito's",
+   "act": "The Japanese House",
+   "start": "17:45",
+   "end": "18:45"
+  },
+  {
+   "stage": "Tito's",
+   "act": "Camden Cox (listed twice on the source page)",
+   "start": "19:45",
+   "end": "20:30"
+  },
+  {
+   "stage": "Bacardi",
+   "act": "Worry Club",
+   "start": "12:00",
+   "end": "12:30"
+  },
+  {
+   "stage": "Bacardi",
+   "act": "Quannnic",
+   "start": "12:50",
+   "end": "13:30"
+  },
+  {
+   "stage": "Bacardi",
+   "act": "Blondshell",
+   "start": "13:50",
+   "end": "14:30"
+  },
+  {
+   "stage": "Bacardi",
+   "act": "Riovaz",
+   "start": "14:50",
+   "end": "15:30"
+  },
+  {
+   "stage": "Bacardi",
+   "act": "Elyanna",
+   "start": "16:00",
+   "end": "16:45"
+  },
+  {
+   "stage": "Bacardi",
+   "act": "Giolì & Assia",
+   "start": "17:15",
+   "end": "18:00"
+  },
+  {
+   "stage": "Bacardi",
+   "act": "Saint Levant",
+   "start": "18:30",
+   "end": "19:15"
+  },
+  {
+   "stage": "Bacardi",
+   "act": "Flo",
+   "start": "19:45",
+   "end": "20:30"
+  },
+  {
+   "stage": "Bacardi",
+   "act": "Daði Freyr",
+   "start": "21:00",
+   "end": "22:00"
+  },
+  {
+   "stage": "BMI",
+   "act": "Chance Emerson",
+   "start": "13:00",
+   "end": "13:40"
+  },
+  {
+   "stage": "BMI",
+   "act": "Goldie Boutilier",
+   "start": "14:10",
+   "end": "14:50"
+  },
+  {
+   "stage": "BMI",
+   "act": "Brenn!",
+   "start": "15:20",
+   "end": "16:00"
+  },
+  {
+   "stage": "BMI",
+   "act": "Wolves of Glendale",
+   "start": "16:30",
+   "end": "17:10"
+  },
+  {
+   "stage": "BMI",
+   "act": "Walter the Producer",
+   "start": "17:40",
+   "end": "18:20"
+  },
+  {
+   "stage": "BMI",
+   "act": "Adan Diaz",
+   "start": "18:50",
+   "end": "19:30"
+  }
+ ],
+ "rules": {
+  "headliners_close": true,
+  "billing_window": 2,
+  "stage_locked": {
+   "Perry's": [
+    "Camden Cox",
+    "Brandi Cyrus",
+    "Spinall",
+    "Kasbo",
+    "Walker & Royce",
+    "Farley \"Jackmaster\" Funk",
+    "Don Diablo",
+    "Mochakk",
+    "Fisher"
+   ]
+  },
+  "stage_tiers": {
+   "T-Mobile": "main",
+   "Bud Light": "main",
+   "Perry's": "dance",
+   "IHG": "mid",
+   "Tito's": "mid",
+   "Bacardi": "mid",
+   "BMI": "small"
+  }
+ },
+ "qloo_names": {
+  "Spinall": "DJ Spinall",
+  "Camden Cox (listed twice on the source page)": "Camden Cox"
+ }
+}

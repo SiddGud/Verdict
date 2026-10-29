@@ -39,7 +39,8 @@ def _state(s, feed=None, rule=None):
         others = sorted(((w.get(a, {}).get(b, 0.0), b, round(h[i][j] * 60)) for b, j in pos.items() if a and b != a and h[i][j]),
                         reverse=True)
         sets.append({"cell": i, "stage": c["stage"], "start": c["start"], "end": c["end"], "act": a,
-                     "matched": bool(a) and a in t["matched"],
+                     "matched": bool(a) and (a in t["matched"] or a in t.get("lastfm", {})),
+                     "source": "qloo" if a in t["matched"] else "lastfm" if a in t.get("lastfm", {}) else None,
                      "clashes": [{"act": b, "weight": x, "minutes": m} for x, b, m in others if x >= 0.2]})
     pub = sc.published(fest)
     return {"session": s["id"], "version": s["version"], "festival": {"slug": fest["slug"], "name": fest["name"],
@@ -49,7 +50,8 @@ def _state(s, feed=None, rule=None):
                        "from": ov.clock(max(fest["cells"][pos[a]]["start"], fest["cells"][pos[b]]["start"]))}
                       for x, wt, a, b, m in sc.worst(pos, w, fest, 5)],
             "rules": [{**r, "reads_as": ag.describe(r, fest)} for r in s["rules"]],
-            "unmatched": [a for a in fest["acts"] if a not in t["matched"]],
+            "unmatched": [a for a in fest["acts"] if a not in t["matched"] and a not in t.get("lastfm", {})],
+            "from_lastfm": [a for a in fest["acts"] if a in t.get("lastfm", {})],
             "fan_demand": _demand(s),
             "feed": feed or [], "rule": rule}
 
@@ -84,7 +86,7 @@ class Session(BaseModel):
     session: str = Field(max_length=40)
 
 
-ORDER = ["lolla2026sun", "lolla2026thu", "lolla2026fri", "lolla2026sat"]  # the first one opens by default
+ORDER = ["lolla2024thu", "lolla2026sun", "lolla2026thu", "lolla2026fri", "lolla2026sat"]  # the first one opens by default
 
 
 @router.get("/api/clash/festivals")

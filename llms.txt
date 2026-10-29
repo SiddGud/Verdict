@@ -8,7 +8,8 @@
 ## What it does
 
 - Loads a festival day: stages, real set times and the published timetable.
-- Matches every act to a Qloo artist (exact names only; acts Qloo does not hold are shown as "no data", never guessed).
+- Matches every act to a Qloo artist (exact names only, never guessed); acts Qloo lacks fall back to Last.fm
+  listening data, labelled as such.
 - Asks Qloo how much each pair of acts shares fans, for the whole bill. Clash = shared fans times minutes of overlap.
 - Moves sets between existing slots to cut clashes, keeping the rules: headliners close, no act moves more than two
   hours from its billed time, set lengths stay the same, locked stages stay locked, plus any rule the booker adds.
@@ -33,9 +34,13 @@ acts Qloo lacks. Whether Qloo or the model matches real fans better is being tes
 
 ## Honest limits
 
-- Qloo does not hold every act. On the four real Lollapalooza 2026 days it matched 24 to 28 of 43 acts by exact
-  name; most missing acts are small early-afternoon sets, but some are new breakout acts. Missing acts are shown as
-  "no data" and count as no clash, so "fewer clashes" refers to the acts Qloo knows.
+- Qloo does not hold every act: on the four Lollapalooza 2026 days it matched 24 to 29 of 43 acts by exact name
+  (new breakout acts and small early sets lag its catalogue); on Thursday Aug 1, 2024 (the default day) 38 of 44.
+  For acts Qloo lacks, fan overlap comes from Last.fm's real listening data (artist.getsimilar match, used directly
+  as the weight), shown on the page as "Last.fm" with a dotted outline. With both, every act has data on every day
+  except one local showcase act (Chicago Made). Last.fm matches by name too, so a generic name can land on a
+  different artist (2026 Saturday's "Ink" returns drum and bass neighbours and may be the wrong act).
+  The fan route still scores only acts Qloo holds.
 - Qloo's raw affinity scores are bunched (unrelated acts and near-twins score close together), so each act's scores are
   ranked against the rest of the bill before use.
 - A real timetable has reasons a score cannot see (contracts, production, travel). The booker states them as rules;

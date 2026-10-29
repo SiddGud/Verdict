@@ -295,5 +295,8 @@
    "Airbnb": "mid",
    "BMI": "small"
   }
+ },
+ "qloo_names": {
+  "Devault (listed twice on the source page)": "Devault"
  }
 }

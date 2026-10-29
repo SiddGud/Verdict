@@ -49,7 +49,7 @@ function drawGrid(s, moved = new Set()) {
       col.append(line);
     }
     s.sets.filter((x) => x.stage === si).forEach((x) => {
-      const d = el("div", "cell " + (x.act ? heat(x) : "empty") + (x.act && !x.matched ? " nodata" : "") + (x.act && moved.has(x.act) ? " moved" : ""));
+      const d = el("div", "cell " + (x.act ? heat(x) : "empty") + (x.act && !x.matched ? " nodata" : "") + (x.source === "lastfm" ? " lastfm" : "") + (x.act && moved.has(x.act) ? " moved" : ""));
       d.style.top = (x.start - d0) * PX + 1 + "px";
       d.style.height = Math.max(18, (x.end - x.start) * PX - 3) + "px";
       if (x.act) {
@@ -82,7 +82,8 @@ function drawSide(s) {
   }
   $("rules").innerHTML = "";
   s.rules.forEach((r) => $("rules").append(el("span", "", r.reads_as)));
-  if (s.unmatched.length) $("rules").append(el("div", "", "No Qloo data (treated as no clash): " + s.unmatched.join(", ")));
+  if (s.from_lastfm && s.from_lastfm.length) $("rules").append(el("div", "", "Qloo has no data, so fan overlap comes from Last.fm listening data (dotted outline): " + s.from_lastfm.join(", ")));
+  if (s.unmatched.length) $("rules").append(el("div", "", "No data (treated as no clash): " + s.unmatched.join(", ")));
   $("festnote").textContent = s.festival.note;
   $("demand").innerHTML = "";
   if (s.fan_demand && s.fan_demand.length) {

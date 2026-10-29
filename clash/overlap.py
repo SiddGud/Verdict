@@ -7,6 +7,8 @@ import os
 import re
 import sys
 import time
+import urllib.parse
+import urllib.request
 
 import qloo
 
@@ -86,13 +88,65 @@ def _scores(signal, ids):
     return out
 
 
+def _lastfm_key():
+    for line in open(".env", encoding="utf-8") if os.path.exists(".env") else []:
+        if line.startswith("LASTFM_API_KEY="):
+            return line.split("=", 1)[1].strip()
+    return os.environ.get("LASTFM_API_KEY")
+
+
+def lastfm_similar(name):
+    """{normalised artist name: Last.fm match 0 to 1} for an artist's similar artists (real listening data), or None
+    if Last.fm does not know the artist. Cached privately like Qloo's replies."""
+    path = os.path.join(qloo.CACHE, f"lastfm_{_norm(name).replace(' ', '_')}.json")
+    if os.path.exists(path):
+        return json.load(open(path, encoding="utf-8"))
+    q = urllib.parse.urlencode({"method": "artist.getsimilar", "artist": name, "api_key": _lastfm_key(),
+                                "format": "json", "limit": 500})
+    for wait in (2, 5, 10, 0):
+        try:
+            d = json.load(urllib.request.urlopen("https://ws.audioscrobbler.com/2.0/?" + q, timeout=30))
+            break
+        except OSError:
+            if not wait:
+                raise
+            time.sleep(wait)
+    if d.get("error") == 6:  # artist not found
+        out = None
+    elif "error" in d:
+        raise RuntimeError(f"Last.fm failed on {name}: {d.get('message')}")
+    else:
+        out = {_norm(x["name"]): float(x["match"]) for x in d["similarartists"]["artist"]}
+    os.makedirs(qloo.CACHE, exist_ok=True)
+    json.dump(out, open(path, "w", encoding="utf-8"), ensure_ascii=False)
+    return out
+
+
+def _fill(fest, t):
+    """Rows for acts Qloo does not hold, from Last.fm's similar artists: {act: {other act: match}}, 0 where the
+    other act is not among its similar artists. Two filled acts get the mean of both directions."""
+    alias = fest.get("qloo_names", {})
+    sim = {a: lastfm_similar(alias.get(a, a)) for a in fest["acts"] if a not in t["matched"]}
+    sim = {a: v for a, v in sim.items() if v is not None}
+    rows = {a: {b: v.get(_norm(alias.get(b, b)), 0.0) for b in fest["acts"] if b != a} for a, v in sim.items()}
+    for a in rows:
+        for b in rows:
+            if a < b:
+                rows[a][b] = rows[b][a] = round((rows[a][b] + rows[b][a]) / 2, 4)
+    return rows
+
+
 def table(fest):
-    """{"acts": [...], "matched": {act: entity}, "overlap": {act: {act: score}}} for every pair of matched acts.
-    A pair's score is the mean of Qloo's two directions; acts Qloo does not hold have no row (shown as no data)."""
+    """{"acts": [...], "matched": {act: entity}, "overlap": {act: {act: score}}, "lastfm": {act: {act: match}}}.
+    "overlap" covers every pair of acts Qloo holds (the mean of Qloo's two directions). Acts Qloo does not hold get a
+    row in "lastfm" from Last.fm's real listening data, kept separate and labelled; acts neither holds are no data."""
     path = os.path.join(qloo.CACHE, f"clash_{fest['slug']}.json")
     if os.path.exists(path):
         t = json.load(open(path, encoding="utf-8"))
         if t["acts"] == fest["acts"] and t.get("alias", {}) == fest.get("qloo_names", {}):
+            if "lastfm" not in t:
+                t["lastfm"] = _fill(fest, t)
+                json.dump(t, open(path, "w", encoding="utf-8"), ensure_ascii=False)
             return t
     alias = fest.get("qloo_names", {})  # checked by hand: the act's name as Qloo writes it
     matched = {a: e for a in fest["acts"] if (e := resolve(alias.get(a, a)))}
@@ -107,6 +161,7 @@ def table(fest):
                 s = sum(two) / len(two) if two else 0.0
                 overlap[a][b] = overlap[b][a] = round(s, 4)
     t = {"acts": fest["acts"], "alias": alias, "matched": matched, "overlap": overlap}
+    t["lastfm"] = _fill(fest, t)
     os.makedirs(qloo.CACHE, exist_ok=True)
     json.dump(t, open(path, "w", encoding="utf-8"), ensure_ascii=False)
     return t
@@ -120,7 +175,13 @@ def weights(t):
     for a, row in t["overlap"].items():
         vals = sorted(row.values())
         rank[a] = {b: sum(v <= s for v in vals) / len(vals) for b, s in row.items()}
-    return {a: {b: round(((rank[a][b] + rank[b][a]) / 2) ** 3, 4) for b in row} for a, row in t["overlap"].items()}
+    w = {a: {b: round(((rank[a][b] + rank[b][a]) / 2) ** 3, 4) for b in row} for a, row in t["overlap"].items()}
+    # Last.fm's match is already spread from 0 (not among the 500 most similar) to 1 (near twin), so it is used as
+    # the weight directly; ranking would turn a match of 0.02 into a full clash on a bill with few neighbours.
+    for a, row in t.get("lastfm", {}).items():
+        for b, s in row.items():
+            w.setdefault(a, {})[b] = w.setdefault(b, {})[a] = s
+    return w
 
 
 def main(path):
@@ -135,6 +196,8 @@ def main(path):
     missing = [a for a in fest["acts"] if a not in t["matched"]]
     if missing:
         print("No Qloo data:", ", ".join(missing))
+        print(f"Filled from Last.fm: {len(t['lastfm'])} of {len(missing)}; no data at all:",
+              ", ".join(a for a in missing if a not in t["lastfm"]) or "none")
     pairs = sorted(((s, a, b) for a in t["overlap"] for b, s in t["overlap"][a].items() if a < b), reverse=True)
     print(f"{len(pairs)} pairs scored")
     print("Highest overlap:")
