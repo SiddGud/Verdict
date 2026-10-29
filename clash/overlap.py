@@ -6,6 +6,7 @@ import json
 import os
 import re
 import sys
+import time
 
 import qloo
 
@@ -56,9 +57,19 @@ def load(path):
     return f
 
 
+def _get(path, **params):
+    """qloo.get, but an error reply (rate limit, timeout) is retried and then raised, never read as "no data"."""
+    for wait in (2, 5, 10, 20):
+        d = qloo.get(path, **params)
+        if "error" not in d:
+            return d
+        time.sleep(wait)
+    raise RuntimeError(f"Qloo kept failing on {path}: {d.get('error')}")
+
+
 def resolve(name):
     """The Qloo artist with this exact name among the top search results, or None. Never a near miss."""
-    d = qloo.get("/search", query=name, types="urn:entity:artist", take=5)
+    d = _get("/search", query=name, types="urn:entity:artist", take=5)
     for h in d.get("results") or []:  # /search returns a plain list
         if isinstance(h, dict) and _norm(h.get("name", "")) == _norm(name):
             return {"name": h["name"], "id": h["entity_id"], "popularity": h.get("popularity") or 0.0}
@@ -68,7 +79,7 @@ def resolve(name):
 def _scores(signal, ids):
     out = {}
     for i in range(0, len(ids), 40):
-        d = qloo.get("/v2/insights", **{"filter.type": "urn:entity:artist", "signal.interests.entities": signal,
+        d = _get("/v2/insights", **{"filter.type": "urn:entity:artist", "signal.interests.entities": signal,
                                         "filter.results.entities": ",".join(ids[i:i + 40]), "take": 50})
         for x in qloo.results(d, "entities"):
             out[x["entity_id"]] = x.get("query", {}).get("affinity", 0.0)

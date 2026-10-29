@@ -25,7 +25,7 @@ def fit(fest, favourites):
     scores = {}
     keys = list(ids)
     for i in range(0, len(keys), 40):
-        d = qloo.get("/v2/insights", **{"filter.type": "urn:entity:artist",
+        d = ov._get("/v2/insights", **{"filter.type": "urn:entity:artist",
                                         "signal.interests.entities": ",".join(e["id"] for e in found),
                                         "filter.results.entities": ",".join(keys[i:i + 40]), "take": 50})
         for x in qloo.results(d, "entities"):
