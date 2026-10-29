@@ -1,0 +1,8 @@
+.env
+.venv/
+cache/
+__pycache__/
+*.log
+backtest28_results.json
+research_notes/
+reports/

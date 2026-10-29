@@ -1,0 +1,31 @@
+# Render blueprint. Secrets are set in the Render dashboard, never in this file.
+services:
+  - type: web
+    name: clash-court
+    runtime: python
+    plan: starter            # keeps the service awake through judging; free plans sleep when idle
+    buildCommand: pip install -r requirements.txt
+    startCommand: mkdir -p /var/data/cache && uvicorn app:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    # Private persistent disk for the Qloo, Ticketmaster and Last.fm reply cache (Qloo: private server-side caching
+    # is fine; Qloo data in a public repo is not). Upload the local cache/ folder to /var/data/cache once, so the
+    # festival tables and city months load with no API calls.
+    disk:
+      name: clash-court-data
+      mountPath: /var/data
+      sizeGB: 5
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.13.1
+      - key: QLOO_API_KEY
+        sync: false
+      - key: TICKETMASTER_API_KEY
+        sync: false
+      - key: LASTFM_API_KEY
+        sync: false
+      - key: LLM_PROVIDER
+        value: comet
+      - key: COMET_API_KEY
+        sync: false
+      - key: QLOO_CACHE_DIR
+        value: /var/data/cache
