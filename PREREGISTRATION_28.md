@@ -76,3 +76,11 @@ The listening data is from about 2011 and holds only each user's top 50 artists,
 Artists with 40 or more listeners in the data are well known, so the models have read about most of them; this test
 is not about small acts. Qloo may have been built partly from Last.fm data, which would favour Qloo. The bills are
 drawn by genre tags, not taken from real festivals. One model of each size. 10 bills is a small sample.
+
+## Amendment 1 (2026-10-29, before any outcome was computed)
+
+On the first bill, CometAPI refused the frontier model call with "your prompt was flagged as potentially violating our
+usage policy" (the prompt holds only artist names and the instructions above). No bill had finished and no score or
+outcome had been computed. Rule added: if any model call for a bill is refused by a provider's policy filter, that bill
+is set aside and reported, and bills keep being drawn in the same seeded sequence until 10 bills are complete, with at
+most 20 drawn. Fewer than 10 complete: the analysis runs on those complete, and says so.
