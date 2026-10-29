@@ -175,7 +175,7 @@ async function planDay(e) {
     r.sets.forEach((h) => {
       const row = el("div", "r" + (h.top ? " top" : ""));
       row.append(el("span", "t", h.start));
-      const txt = el("span", "", `${h.act} on ${h.stage} (fit ${h.fit.toFixed(2)})`);
+      const txt = el("span", "", `${h.act} on ${h.stage} (fit ${h.fit.toFixed(2)}${h.source === "lastfm" ? ", from Last.fm" : ""})`);
       if (h.clash_with) txt.append(el("span", "must", `  must choose: ${h.clash_with.act} (${h.clash_with.fit.toFixed(2)})`));
       row.append(txt);
       $("route").append(row);

@@ -13,18 +13,19 @@ WALK = 10  # minutes a fan may leave a set early to reach the next one
 
 
 def fit(fest, favourites):
-    """{act: Qloo affinity for someone who loves these artists}, plus the favourites Qloo matched and those it did not."""
+    """{act: fit for someone who loves these artists}, the favourites Qloo matched and those it did not, and the acts
+    scored from Last.fm. Qloo scores the acts it holds. An act Qloo lacks is scored when a favourite is among its
+    Last.fm similar artists (match m): it is placed at the m-th quantile of the fan's Qloo scores, so the two sources
+    share one scale. A favourite who plays the bill is a sure pick (1.0) either way."""
     found, missing = [], []
     for name in favourites[:5]:
         e = ov.resolve(name)
         (found if e else missing).append(e or name)
-    if not found:
-        return {}, found, missing
     t = ov.table(fest)
     ids = {e["id"]: a for a, e in t["matched"].items()}
     scores = {}
     keys = list(ids)
-    for i in range(0, len(keys), 40):
+    for i in range(0, len(keys) if found else 0, 40):
         d = ov._get("/v2/insights", **{"filter.type": "urn:entity:artist",
                                         "signal.interests.entities": ",".join(e["id"] for e in found),
                                         "filter.results.entities": ",".join(keys[i:i + 40]), "take": 50})
@@ -34,7 +35,22 @@ def fit(fest, favourites):
     for e in found:  # Qloo leaves the signal artists out of its results: an act the fan named is a sure pick
         if e["id"] in ids:
             scores[ids[e["id"]]] = 1.0
-    return scores, found, missing
+    alias = fest.get("qloo_names", {})
+    named = {ov._norm(x) for x in favourites[:5]}
+    ranked = sorted(v for v in scores.values() if v < 1.0)
+    from_lastfm = []
+    for a in t.get("lastfm", {}):
+        if ov._norm(alias.get(a, a)) in named or ov._norm(a) in named:
+            scores[a] = 1.0
+        else:
+            m = max((v for k, v in (ov.lastfm_similar(alias.get(a, a)) or {}).items() if k in named), default=0.0)
+            if not m or not ranked:
+                continue
+            scores[a] = ranked[min(len(ranked) - 1, int(m * len(ranked)))]
+        from_lastfm.append(a)
+    missing = [x for x in missing if not any(ov._norm(x) == ov._norm(alias.get(a, a)) or ov._norm(x) == ov._norm(a)
+                                             for a in from_lastfm)]
+    return scores, found, missing, from_lastfm
 
 
 def best_path(sets):
@@ -54,7 +70,7 @@ def route(fest, pos, favourites):
     """The fan's best path through the current timetable. A set's value is the fan's fit above their median for this
     bill, so only acts they like more than usual are worth a walk. A chosen set is flagged when an overlapping set is
     nearly as good (within 0.03) and in the fan's top quarter of the bill: a clash they cannot avoid."""
-    scores, found, missing = fit(fest, favourites)
+    scores, found, missing, from_lastfm = fit(fest, favourites)
     if not scores:
         return {"error": "None of those artists were found. Try exact names, for example 'Phoebe Bridgers'.",
                 "missing": missing}
@@ -70,9 +86,10 @@ def route(fest, pos, favourites):
         r = rivals[0] if rivals and rivals[0][0] >= top_q and scores[a] - rivals[0][0] <= 0.03 else None
         out.append({"start": ov.clock(st), "end": ov.clock(en), "act": a, "stage": fest["stages"][cells[pos[a]]["stage"]],
                     "fit": round(scores[a], 3), "top": scores[a] >= top_q,
+                    "source": "lastfm" if a in from_lastfm else "qloo",
                     "clash_with": {"act": r[1], "fit": round(r[0], 3)} if r else None})
     must = [h for h in out if h["top"]]
-    return {"favourites": [e["name"] for e in found], "not_found": missing, "sets": out,
+    return {"favourites": [e["name"] for e in found], "not_found": missing, "sets": out, "from_lastfm": from_lastfm,
             "summary": f"{len(out)} sets on your route, {len(must)} of them in your top quarter of the bill; "
                        f"{sum(1 for h in out if h['clash_with'])} where you must choose."}
 
@@ -86,7 +103,7 @@ def main(args):
         print(r["error"]); return
     print("Favourites found:", ", ".join(r["favourites"]), "| not found:", ", ".join(r["not_found"]) or "none")
     for h in r["sets"]:
-        mark = "*" if h["top"] else " "
+        mark = ("*" if h["top"] else " ") + ("L" if h["source"] == "lastfm" else " ")
         c = f"   MUST CHOOSE: {h['clash_with']['act']} ({h['clash_with']['fit']:.2f})" if h["clash_with"] else ""
         print(f"{mark} {h['start']}-{h['end']}  {h['act']} on {h['stage']} ({h['fit']:.2f}){c}")
     print(r["summary"])
