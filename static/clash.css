@@ -1,0 +1,56 @@
+:root {
+  --bg: #0e1116; --panel: #161b22; --line: #2a313c; --text: #e6edf3; --muted: #8b949e;
+  --hot: #e5484d; --warm: #f5a524; --cool: #2f3a47; --accent: #7c6cff; --good: #3fb950;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 14px/1.45 system-ui, -apple-system, Segoe UI, sans-serif; }
+header { display: flex; flex-wrap: wrap; gap: 16px; justify-content: space-between; align-items: center;
+  padding: 16px 20px; border-bottom: 1px solid var(--line); }
+h1 { margin: 0; font-size: 22px; letter-spacing: .3px; }
+.tag { margin: 2px 0 0; color: var(--muted); }
+.score { display: flex; align-items: center; gap: 14px; }
+.score .label { display: block; font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .6px; }
+.num { font-size: 26px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.arrow { color: var(--muted); }
+.cut { font-weight: 700; color: var(--good); min-width: 110px; }
+main { display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 16px; padding: 16px 20px; }
+@media (max-width: 1000px) { main { grid-template-columns: 1fr; } }
+.board, .room { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px; min-width: 0; }
+.bar { display: flex; gap: 10px; align-items: center; margin-bottom: 10px; flex-wrap: wrap; }
+select, input, button { font: inherit; color: var(--text); background: #0d1117; border: 1px solid var(--line); border-radius: 6px; padding: 6px 10px; }
+button { cursor: pointer; }
+button:hover { border-color: var(--accent); }
+.note { color: var(--muted); font-size: 12px; }
+.grid { display: grid; gap: 4px; overflow-x: auto; }
+.grid .h { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; padding: 4px; }
+.grid .t { font-size: 12px; color: var(--muted); padding: 8px 4px; font-variant-numeric: tabular-nums; }
+.cell { background: var(--cool); border-radius: 6px; padding: 6px 8px; min-height: 40px; transition: background .4s, transform .3s;
+  border: 1px solid transparent; }
+.cell .a { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cell .c { font-size: 11px; opacity: .85; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cell.warm { background: #5a4214; border-color: var(--warm); }
+.cell.hot { background: #5c1d22; border-color: var(--hot); }
+.cell.empty { background: transparent; border: 1px dashed var(--line); }
+.cell.moved { transform: scale(1.06); box-shadow: 0 0 0 2px var(--accent); }
+.cell.nodata .a::after { content: " (no data)"; font-weight: 400; color: var(--muted); }
+.legend { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 10px; color: var(--muted); font-size: 12px; }
+.sw { display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 6px; vertical-align: -2px; }
+.sw.hot { background: var(--hot); } .sw.warm { background: var(--warm); } .sw.cool { background: var(--cool); }
+.worst { margin-top: 12px; font-size: 13px; }
+.worst h3 { margin: 0 0 6px; font-size: 13px; color: var(--muted); font-weight: 600; }
+.room h2 { margin: 0 0 8px; font-size: 16px; }
+.feed { height: 420px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding-right: 4px; }
+.msg { border-left: 3px solid var(--line); padding: 4px 8px; background: #0d1117; border-radius: 0 6px 6px 0; animation: in .25s ease-out; }
+.msg .who { font-size: 11px; text-transform: uppercase; letter-spacing: .5px; color: var(--muted); }
+.msg.booker { border-color: var(--accent); }
+.msg.fan { border-color: var(--hot); }
+.msg.referee { border-color: var(--good); }
+.msg.error { border-color: var(--warm); }
+@keyframes in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+.rules { font-size: 12px; color: var(--muted); margin: 8px 0; }
+.rules span { display: inline-block; border: 1px solid var(--line); border-radius: 999px; padding: 2px 8px; margin: 2px; }
+.cmd { display: flex; gap: 6px; }
+.cmd input { flex: 1; min-width: 0; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.chips button { font-size: 12px; padding: 4px 8px; }
+footer { color: var(--muted); font-size: 12px; padding: 4px 20px 24px; max-width: 900px; }

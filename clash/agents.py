@@ -189,7 +189,7 @@ def run(pos, fest, w, rules=(), seconds=2.0):
         moved = ", ".join(f"{a} to {fest['stages'][new_cell[0]]} at {fest['slots'][new_cell[1]]}"
                           for a, new_cell in m["to"].items())
         feed.append({"who": "referee", "text": f"Moved {moved}: clash score {m['before']:.2f} to {m['after']:.2f}.",
-                     "acts": m["acts"]})
+                     "acts": m["acts"], "to": m["to"], "score": m["after"]})
     after = sc.clash_score(new, w)
     cut = 100 * (before - after) / before if before else 0
     feed.append({"who": "referee", "text": f"Done. Clash score {before:.2f} to {after:.2f} ({cut:.0f}% lower), "

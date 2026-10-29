@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Clash Court</title>
+<meta name="description" content="An AI war-room that builds a festival timetable so fans do not have to choose between two acts they love.">
+<link rel="stylesheet" href="/static/clash.css">
+</head>
+<body>
+<header>
+  <div class="brand">
+    <h1>Clash Court</h1>
+    <p class="tag">Fans should not have to choose between two acts they love.</p>
+  </div>
+  <div class="score">
+    <div><span class="label">Published timetable</span><span id="pub" class="num">-</span></div>
+    <div class="arrow">to</div>
+    <div><span class="label">Now</span><span id="now" class="num">-</span></div>
+    <div id="cut" class="cut"></div>
+  </div>
+</header>
+
+<main>
+  <section class="board">
+    <div class="bar">
+      <select id="festival" aria-label="Festival"></select>
+      <span id="festnote" class="note"></span>
+    </div>
+    <div id="grid" class="grid" aria-live="polite"></div>
+    <div class="legend">
+      <span><i class="sw hot"></i>shares many fans with an act on another stage at the same hour</span>
+      <span><i class="sw warm"></i>some shared fans</span>
+      <span><i class="sw cool"></i>no real clash</span>
+    </div>
+    <div id="worst" class="worst"></div>
+  </section>
+
+  <aside class="room">
+    <h2>The war-room</h2>
+    <div id="feed" class="feed"></div>
+    <div id="rules" class="rules"></div>
+    <form id="cmd" class="cmd" autocomplete="off">
+      <input id="text" placeholder="Tell the booker agent: 'Mitski just cancelled', 'Doechii arrives at 3pm'" maxlength="300">
+      <button type="submit">Send</button>
+    </form>
+    <div class="chips">
+      <button data-cmd="Run">Run the war-room</button>
+      <button data-cmd="Turnstile just cancelled">Turnstile just cancelled</button>
+      <button data-cmd="Doechii arrives at 3pm">Doechii arrives at 3pm</button>
+      <button data-cmd="keep Mitski and Clairo apart">keep Mitski and Clairo apart</button>
+      <button data-cmd="Reset">Reset</button>
+    </div>
+  </aside>
+</main>
+
+<footer>
+  Fan overlap for every pair of acts comes from Qloo's taste graph. Code builds the timetable; the agents only explain
+  it and read the booker's words. Acts Qloo does not hold are shown as "no data" and never guessed.
+</footer>
+<script src="/static/clash.js"></script>
+</body>
+</html>

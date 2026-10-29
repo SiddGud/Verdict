@@ -58,9 +58,23 @@ def violations(pos, fest, extra=()):
     return out
 
 
-def optimise(pos, fest, olap, extra=(), seconds=2.0, seed=0):
-    """Local search from `pos`: swap two cells when that lowers the clash score and breaks no rule.
-    Returns (new timetable, move log). Stops when no swap helps or after `seconds`."""
+def optimise(pos, fest, olap, extra=(), seconds=2.0, seed=0, tries=12):
+    """Several local searches from `pos`, each trying swaps in a different seeded order; keeps the one with the
+    lowest clash score (ties: fewer moves). Every move in the kept log lowers the score and breaks no rule."""
+    start, best = time.time(), None
+    for t in range(tries):
+        left = seconds - (time.time() - start)
+        if left <= 0 and best:
+            break
+        new, log = _search(pos, fest, olap, extra, max(left, 0.2), seed * 1000 + t)
+        key = (clash_score(new, olap), len(log))
+        if best is None or key < best[0]:
+            best = (key, new, log)
+    return best[1], best[2]
+
+
+def _search(pos, fest, olap, extra, seconds, seed):
+    """Local search from `pos`: swap two cells when that lowers the clash score and breaks no rule."""
     pos = {a: list(v) for a, v in pos.items()}
     cells = [(s, k) for s in range(len(fest["stages"])) for k in range(len(fest["slots"]))]
     rng = random.Random(seed)
