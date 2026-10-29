@@ -44,7 +44,8 @@ def _state(s, feed=None, rule=None):
                      "clashes": [{"act": b, "weight": x, "minutes": m} for x, b, m in others if x >= 0.2]})
     pub = sc.published(fest)
     return {"session": s["id"], "version": s["version"], "festival": {"slug": fest["slug"], "name": fest["name"],
-            "note": fest.get("note", ""), "stages": fest["stages"], "day": fest["day"]},
+            "note": fest.get("note", ""), "stages": fest["stages"], "day": fest["day"],
+            "examples": fest.get("examples", [])},
             "sets": sets, "score": sc.clash_score(pos, w, fest), "published_score": sc.clash_score(pub, w, fest),
             "worst": [{"weight": wt, "acts": [a, b], "minutes": m,
                        "from": ov.clock(max(fest["cells"][pos[a]]["start"], fest["cells"][pos[b]]["start"]))}

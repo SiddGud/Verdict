@@ -295,5 +295,10 @@
    "Airbnb": "mid",
    "BMI": "small"
   }
- }
+ },
+ "examples": [
+  "Turnstile just cancelled",
+  "beabadoobee arrives at 5pm",
+  "keep The xx and MUNA apart"
+ ]
 }

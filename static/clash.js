@@ -85,6 +85,13 @@ function drawSide(s) {
   if (s.from_lastfm && s.from_lastfm.length) $("rules").append(el("div", "", "Qloo has no data, so fan overlap comes from Last.fm listening data (dotted outline): " + s.from_lastfm.join(", ")));
   if (s.unmatched.length) $("rules").append(el("div", "", "No data (treated as no clash): " + s.unmatched.join(", ")));
   $("festnote").textContent = s.festival.note;
+  const ex = $("examples");
+  if (ex.dataset.slug !== s.festival.slug) { // example orders name acts on this day's bill
+    ex.dataset.slug = s.festival.slug;
+    ex.innerHTML = "";
+    s.festival.examples.forEach((t) => { const b = el("button", "", t); b.type = "button"; b.addEventListener("click", () => send(t)); ex.append(b); });
+    $("text").placeholder = "Tell the booker agent: " + (s.festival.examples.slice(0, 2).map((t) => `'${t}'`).join(", ") || "an act just cancelled");
+  }
   $("demand").innerHTML = "";
   if (s.fan_demand && s.fan_demand.length) {
     $("demand").append(el("div", "", "From fans' routes, still forced to choose:"));

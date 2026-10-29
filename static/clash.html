@@ -39,7 +39,7 @@
   <section class="board fan">
     <h2>Your day</h2>
     <p class="note">Name up to five artists you love (they need not play here). Qloo scores every act on this bill for you
-      and plans your route on the current timetable.</p>
+      (Last.fm listening data for the few acts Qloo does not hold) and plans your route on the current timetable.</p>
     <form id="routeform" class="cmd" autocomplete="off">
       <input id="favs" placeholder="Phoebe Bridgers, Clairo, Frank Ocean" maxlength="300">
       <button type="submit">Plan my day</button>
@@ -58,14 +58,12 @@
     <div id="rules" class="rules"></div>
     <div id="demand" class="rules"></div>
     <form id="cmd" class="cmd" autocomplete="off">
-      <input id="text" placeholder="Tell the booker agent: 'Mitski just cancelled', 'Doechii arrives at 3pm'" maxlength="300">
+      <input id="text" placeholder="Tell the booker agent, for example: an act just cancelled" maxlength="300">
       <button type="submit">Send</button>
     </form>
     <div class="chips">
       <button data-cmd="Run">Run the war-room</button>
-      <button data-cmd="Turnstile just cancelled">Turnstile just cancelled</button>
-      <button data-cmd="Doechii arrives at 3pm">Doechii arrives at 3pm</button>
-      <button data-cmd="keep Mitski and Clairo apart">keep Mitski and Clairo apart</button>
+      <span id="examples"></span>
       <button data-cmd="Reset">Reset</button>
     </div>
   </aside>
@@ -73,7 +71,8 @@
 
 <footer>
   Fan overlap for every pair of acts comes from Qloo's taste graph. Code builds the timetable; the agents only explain
-  it and read the booker's words. Acts Qloo does not hold are shown as "no data" and never guessed.
+  it and read the booker's words. For acts Qloo does not hold, fan overlap comes from Last.fm
+  listening data and is labelled "Last.fm"; an act neither source holds is shown as "no data" and never guessed.
 </footer>
 <script src="/static/clash.js"></script>
 </body>

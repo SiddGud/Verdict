@@ -123,7 +123,7 @@ def _search(pos, fest, w, extra, seconds, seed):
                 continue  # same times on two stages: the clashes would not change
             d = (_gain(a, c2, pos, w, h, b) + _gain(b, c1, pos, w, h, a)
                  - _gain(a, c1, pos, w, h, b) - _gain(b, c2, pos, w, h, a))  # only pairs with a or b change
-            if d > -0.005:  # skip churn a booker would not want
+            if d > -0.01:  # skip churn a booker would not want (and moves too small to show at two decimals)
                 continue
             trial = dict(pos)
             if a:

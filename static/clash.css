@@ -14,10 +14,11 @@ h1 { margin: 0; font-size: 22px; letter-spacing: .3px; }
 .arrow { color: var(--muted); }
 .cut { font-weight: 700; color: var(--good); min-width: 110px; }
 main { display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 16px; padding: 16px 20px; }
-@media (max-width: 1000px) { main { grid-template-columns: 1fr; } }
+@media (max-width: 1000px) { main { grid-template-columns: minmax(0, 1fr); } }
 .board, .room { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px; min-width: 0; }
 .bar { display: flex; gap: 10px; align-items: center; margin-bottom: 10px; flex-wrap: wrap; }
 select, input, button { font: inherit; color: var(--text); background: #0d1117; border: 1px solid var(--line); border-radius: 6px; padding: 6px 10px; }
+select { max-width: 100%; }
 button { cursor: pointer; }
 button:hover { border-color: var(--accent); }
 .note { color: var(--muted); font-size: 12px; }
@@ -55,6 +56,7 @@ button:hover { border-color: var(--accent); }
 .cmd input { flex: 1; min-width: 0; }
 .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
 .chips button { font-size: 12px; padding: 4px 8px; }
+#examples { display: contents; }
 footer { color: var(--muted); font-size: 12px; padding: 4px 20px 24px; max-width: 900px; }
 .fan h2, .proof h2 { margin: 0 0 6px; font-size: 16px; }
 .route { margin-top: 10px; display: grid; gap: 4px; }
