@@ -189,11 +189,13 @@ async function proof(slug) {
   const b = $("baseline"), s = r.summary;
   b.innerHTML = "";
   if (!s) { b.textContent = "The model-alone comparison has not been computed for this festival."; return; }
-  b.append(el("p", "", "We asked a frontier language model, with no Qloo, to score how much every pair of acts shares fans. Twice, the same question."));
-  b.append(el("div", "big", `${s.set_times_that_differ} of ${s.acts}`));
-  b.append(el("p", "", "set times differ between the timetables built from its two answers."));
-  b.append(el("p", "", `${s.pairs_changed_by_10_or_more} of ${s.pairs} pair scores moved by 10 points or more between the two runs. Qloo gives the same score every time.`));
-  b.append(el("p", "", s.unknown.length ? `Acts it said it does not know: ${s.unknown.join(", ")}.` : "It said it knew every act on this bill."));
+  b.append(el("p", "", "We asked a frontier language model, with no Qloo, to score how much every pair of acts on this bill shares fans. Twice, the same question."));
+  b.append(el("div", "big", `${s.pairs_changed_by_10_or_more} of ${s.pairs}`));
+  b.append(el("p", "", "pair scores moved by 10 points or more between its two answers. Qloo gives the same score every time."));
+  b.append(el("p", "", `It said it does not know ${s.model_unknown.length} of ${s.acts} acts; Qloo has no data for ${s.qloo_no_data.length}.` +
+    (s.model_knows_qloo_lacks.length ? ` The model claims to know ${s.model_knows_qloo_lacks.length} acts Qloo lacks` : "") +
+    (s.qloo_has_model_lacks.length ? `; Qloo holds ${s.qloo_has_model_lacks.length} the model does not know.` : ".")));
+  b.append(el("p", "", "Whether Qloo's or the model's scores match real fans better is being tested against real listening data (pre-registered Test 28)."));
 }
 
 $("routeform").addEventListener("submit", planDay);

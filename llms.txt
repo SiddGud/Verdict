@@ -26,9 +26,10 @@
 
 ## Where a model alone falls short (shown on the page)
 
-Asked the same question twice with no Qloo, a frontier model's pair scores changed enough that the timetables built
-from its two answers differ in about 24 of 40 set times (on a 40-act test bill). Qloo returns the same scores every
-time for every act it holds.
+Asked the same question twice with no Qloo, a frontier model's pair scores move between answers (on a 40-act test
+bill, 144 of 780 pairs moved by 10 points or more; on the real Lollapalooza Sunday, 13 of 903). Qloo returns the same
+scores every time for every act it holds. On coverage the model is not worse: on that Sunday it claimed to know 9
+acts Qloo lacks. Whether Qloo or the model matches real fans better is being tested (pre-registered Test 28).
 
 ## Honest limits
 

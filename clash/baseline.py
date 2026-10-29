@@ -52,21 +52,21 @@ def score(fest, run):
 
 
 def summary(fest):
-    """What the page shows, or None if the model runs were not computed for this festival."""
+    """What the page shows, or None if the model runs were not computed for this festival. Only facts that hold up:
+    how far the model's pair scores move between two identical asks, and which acts each side knows. (Timetables
+    built from two runs are not compared: the optimiser alone moves many set times between near-equal plans.)"""
     if not all(os.path.exists(_path(fest, r)) for r in (1, 2)):
         return None
     runs = [score(fest, r) for r in (1, 2)]
-    pub = sc.published(fest)
-    tables = []
-    for r in runs:
-        w = ov.weights({"overlap": r["overlap"]})
-        tables.append(sc.optimise(pub, fest, w)[0])
-    moved = sum(tables[0][a] != tables[1][a] for a in pub)
     a, b = runs[0]["overlap"], runs[1]["overlap"]
     diffs = [abs(a[x][y] - b[x][y]) for x in a for y in a[x] if x < y]
-    return {"set_times_that_differ": moved, "acts": len(pub), "mean_pair_change": round(sum(diffs) / len(diffs), 3),
-            "pairs_changed_by_10_or_more": sum(d >= 0.1 for d in diffs), "pairs": len(diffs),
-            "unknown": sorted(set(runs[0]["unknown"]) | set(runs[1]["unknown"]))}
+    held = set(ov.table(fest)["matched"])
+    unknown = set(runs[0]["unknown"]) | set(runs[1]["unknown"])
+    return {"acts": len(fest["acts"]), "pairs": len(diffs), "mean_pair_change": round(sum(diffs) / len(diffs), 3),
+            "pairs_changed_by_10_or_more": sum(d >= 0.1 for d in diffs),
+            "model_unknown": sorted(unknown), "qloo_no_data": sorted(set(fest["acts"]) - held),
+            "model_knows_qloo_lacks": sorted(set(fest["acts"]) - held - unknown),
+            "qloo_has_model_lacks": sorted(unknown & held)}
 
 
 def main(slug):
