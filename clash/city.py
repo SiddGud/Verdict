@@ -244,7 +244,48 @@ def friends(city, people, start, end):
             share = sum(1 for x, y in hi if min(x, y) >= 0.3) / len(hi) if hi else 0.0
             pairs.append({"people": [a, b], "shared": round(share, 3), "count": len(hi)})
     pairs.sort(key=lambda p: -p["shared"])
-    return {"people": names, "shows": len(rows), "picks": top[:8], "pairs": pairs}
+    return {"people": names, "shows": len(rows), "picks": top[:8], "pairs": pairs, "start": start, "end": end,
+            "plan": plan_month(rows, fits, names)}
+
+
+LOVES, NIGHTS, OWN = 0.7, 10, 2  # 0.7 is about a person's top tenth of the month's acts (0.89 ranked, cubed)
+
+
+def plan_month(rows, fits, names):
+    """The group's month as dated nights out: at most one show a night and each act once. A person goes to a show they
+    would love (fit 0.7 or more). Shows all of the group would love come first, then shows two or more would love; then
+    anyone with fewer than two nights gets their own best shows, so a taste nobody else shares still gets a night.
+    Each night names who goes, and the best other show that night, if any, as the alternative."""
+    options = []
+    for r in rows:
+        each = {n: round(fits[n].get(r["act"], 0.0), 3) for n in names}
+        going = [n for n in names if each[n] >= LOVES]
+        if not going:
+            continue
+        everyone = len(names) > 1 and len(going) == len(names)
+        score = sum(each[n] for n in going) + (0.5 if everyone else 0.0)
+        options.append({**r, "fits": each, "going": going, "everyone": everyone, "score": round(score, 3)})
+    options.sort(key=lambda x: -x["score"])
+    plan, dates, acts = [], set(), set()
+
+    def take(o):
+        dates.add(o["date"]); acts.add(o["act"])
+        alt = next((x for x in options if x["date"] == o["date"] and x["act"] not in acts), None)
+        plan.append({**o, "alt": {"act": alt["act"], "venue": alt["venue"], "going": alt["going"]} if alt else None})
+
+    for o in options:  # together: everyone, then two or more
+        if len(plan) >= NIGHTS:
+            break
+        if len(o["going"]) >= min(2, len(names)) and o["date"] not in dates and o["act"] not in acts:
+            take(o)
+    for n in names:  # nobody is left without a night
+        mine = [o for o in options if n in o["going"] and o["date"] not in dates and o["act"] not in acts]
+        mine.sort(key=lambda o: -o["fits"][n])
+        for o in mine[:max(0, OWN - sum(n in p["going"] for p in plan))]:
+            if o["date"] not in dates:
+                take(o)
+    plan.sort(key=lambda x: (x["date"], x.get("time") or ""))
+    return plan
 
 
 def month(city, favourites, start, end):

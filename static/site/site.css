@@ -92,3 +92,39 @@ form .s-try .s-try-k { margin: 0 .2rem 0 0; }
   .s-dayin select { max-width: 100%; flex: 1 1 100%; }
   .s-daybar { position: static; }
 }
+
+/* ---------- friends' month: the plan as a calendar and an agenda ---------- */
+.s-whoall { display: flex; flex-wrap: wrap; gap: .4rem; margin: .2rem 0 1rem; }
+.s-whoall span { font: 500 .72rem var(--mono); border: 1px solid var(--rule-2); border-radius: 999px; padding: .2rem .6rem; color: var(--ink-2); }
+.s-mcal { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; margin-bottom: 1.4rem; }
+.s-day { min-height: 76px; border: 1px solid var(--rule); border-radius: 8px; padding: 5px 6px; display: grid; align-content: start; gap: 3px;
+  text-align: left; background: none; color: var(--faint); font: inherit; min-width: 0; }
+.s-day.blank { border: 0; }
+.s-day .dn { font: 400 1.05rem/1 var(--display); }
+.s-day.on { color: var(--ink); border-color: var(--ink-2); background: var(--field); cursor: pointer; }
+.s-day.on.all { background: var(--qloo-tint); border-color: var(--qloo); }
+.s-day.on:hover { border-color: var(--ink); }
+.s-day .da { font-size: .72rem; font-weight: 600; line-height: 1.2; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.s-day .dw { display: flex; gap: 2px; flex-wrap: wrap; }
+.s-day .dw i { font: 600 .58rem/1 var(--mono); font-style: normal; width: 16px; height: 16px; border-radius: 50%; display: grid; place-items: center;
+  background: var(--ink); color: var(--bg); }
+.s-day.all .dw i { background: var(--qloo); color: #fff; }
+.s-agenda { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; }
+.s-agenda li { display: grid; grid-template-columns: 7.5rem minmax(0, 1fr) auto; gap: .4rem 1rem; align-items: start; padding: .85rem 0;
+  border-top: 1px solid var(--rule); scroll-margin-top: 140px; }
+.s-agenda li.all { box-shadow: inset 3px 0 0 var(--qloo); padding-left: .8rem; }
+.s-when { display: grid; font-size: .9rem; }
+.s-when span { font: 400 .74rem var(--mono); color: var(--muted); }
+.s-agw { display: grid; gap: .15rem; min-width: 0; }
+.s-agh { color: var(--muted); }
+.s-agh strong { font-size: 1rem; color: var(--ink); }
+.s-going b { color: var(--qloo); font-weight: 600; font-size: .88rem; }
+.s-going span { font-size: .88rem; color: var(--ink-2); }
+.s-alt { font-size: .8rem; color: var(--muted); }
+.s-act { display: flex; gap: .5rem; align-items: center; }
+.s-tix { font-size: .85rem; font-weight: 600; }
+@media (max-width: 700px) {
+  .s-day { min-height: 54px; padding: 3px; }
+  .s-day .da { display: none; }
+  .s-agenda li { grid-template-columns: minmax(0, 1fr); }
+}

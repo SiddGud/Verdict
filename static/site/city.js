@@ -278,7 +278,7 @@
         .bindTooltip(list.map(([n, p]) => esc(`${n}. ${p.act}, ${fmt(p.date)}`)).join("<br>") + `<br>at ${esc(first.venue)}`).addTo(layer);
       pts.push([first.lat, first.lon]);
     });
-    if (r.picks[0]) caption("For all of you", `${r.picks[0].act}, ${fmt(r.picks[0].date)}`, `at ${r.picks[0].venue}`);
+    if (r.picks[0]) caption("Your month", `${r.picks.length} nights out, numbered by date`, `first: ${r.picks[0].act}, ${fmt(r.picks[0].date)}`);
     fit(pts, 14);
   }
 
@@ -378,30 +378,85 @@
       const r = await post("/api/city/friends", { ...where(), people });
       if (r.error) return fail(out, r.error);
       out.innerHTML = "";
-      if (!r.picks.length) out.append(el("p", "", "No show this month suits everyone. Try fewer people or more artists."));
-      else out.append(el("p", "c-lead", `The shows that suit all of you, out of ${r.shows} on sale:`));
-      r.picks.forEach((p) => {
-        const row = el("div", "c-pick");
-        row.append(el("div", "c-pt", `${p.act}, ${fmt(p.date)} at ${p.venue}`));
-        const bars = el("div", "c-bars");
-        Object.entries(p.fits).forEach(([n, v]) => {
-          const b = el("div", "c-bar");
-          b.append(el("span", "", n));
-          const t = el("i", ""); t.style.width = Math.round(v * 100) + "%";
-          const track = el("span", "c-track"); track.append(t);
-          b.append(track);
-          bars.append(b);
-        });
-        row.append(bars);
-        out.append(row);
-      });
-      if (r.pairs.length) {
-        out.append(el("h4", "", "Who should go together"));
-        r.pairs.forEach((p) => out.append(el("p", "", `${p.people[0]} and ${p.people[1]}: ${Math.round(p.shared * 100)}% of the shows either would love, both would.`)));
-      }
-      friendsOnMap(r);
+      ourMonth(out, r);
     } catch (err) { fail(out, "Something went wrong: " + err.message); }
   });
+
+  // The group's month as a timetable: the calendar with each night out, then the nights in order with who goes.
+  const initial = (n) => n.trim().slice(0, 1).toUpperCase();
+  function ourMonth(out, r) {
+    const plan = r.plan || [];
+    if (!plan.length) { out.append(el("p", "", "No show this month suits any of you. Try more or different artists.")); return; }
+    const all = plan.filter((p) => p.everyone).length, many = r.people.length > 1;
+    out.append(el("p", "c-lead", `Your month: ${plan.length} nights out` + (many && all ? `, ${all} with all of you` : "") +
+      `, picked from ${r.shows} shows on sale. Each person goes to shows they would love (about their top tenth of the month).`));
+    if (many) {
+      const who = el("div", "s-whoall");
+      r.people.forEach((n) => who.append(el("span", "", `${n}: ${plan.filter((p) => p.going.includes(n)).length} nights`)));
+      out.append(who);
+    }
+    // the calendar
+    const cal = el("div", "s-mcal");
+    ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].forEach((d) => cal.append(el("div", "c-dow", d)));
+    const d0 = new Date(r.start + "T12:00:00"), d1 = new Date(r.end + "T12:00:00");
+    for (let i = 0; i < (d0.getDay() + 6) % 7; i++) cal.append(el("div", "s-day blank"));
+    const byDate = new Map(plan.map((p, i) => [p.date, [p, i]]));
+    for (let d = new Date(d0); d <= d1; d.setDate(d.getDate() + 1)) {
+      const iso = d.toISOString().slice(0, 10), hit = byDate.get(iso);
+      const c = el(hit ? "button" : "div", "s-day" + (hit ? " on" + (hit[0].everyone ? " all" : "") : ""));
+      c.append(el("span", "dn", String(d.getDate())));
+      if (hit) {
+        const [p, i] = hit;
+        c.type = "button";
+        c.append(el("span", "da", p.act));
+        const w = el("span", "dw");
+        p.going.forEach((n) => w.append(el("i", "", initial(n))));
+        c.append(w);
+        c.title = `${p.act} at ${p.venue}: ${p.going.join(", ")}`;
+        c.addEventListener("click", () => { document.getElementById("night-" + i).scrollIntoView({ behavior: "smooth", block: "center" }); nightOut(p); });
+      }
+      cal.append(c);
+    }
+    out.append(cal);
+    // the agenda
+    const list = el("ol", "s-agenda");
+    plan.forEach((p, i) => {
+      const li = el("li", p.everyone ? "all" : "");
+      li.id = "night-" + i;
+      const when = el("div", "s-when");
+      when.append(el("strong", "", fmt(p.date)), el("span", "", p.time ? p.time.slice(0, 5) : ""));
+      const what = el("div", "s-agw");
+      const head = el("div", "s-agh");
+      head.append(el("strong", "", p.act), el("span", "", ` at ${p.venue}`));
+      what.append(head);
+      const who = el("div", "s-going");
+      if (p.everyone) who.append(el("b", "", "All of you"));
+      else who.append(el("span", "", p.going.join(" and ") + (p.going.length === 1 && many ? " (just you)" : "")));
+      what.append(who);
+      if (p.alt) what.append(el("span", "s-alt", `Or that night: ${p.alt.act} at ${p.alt.venue} (${p.alt.going.join(", ")})`));
+      const go = el("div", "s-act");
+      const map = el("button", "quiet small", "On the map");
+      map.type = "button";
+      map.addEventListener("click", () => nightOut(p));
+      go.append(map);
+      if (p.url) { const t = el("a", "s-tix", "Tickets"); t.href = p.url; t.target = "_blank"; t.rel = "noopener"; go.append(t); }
+      li.append(when, what, go);
+      list.append(li);
+    });
+    out.append(list);
+    if (r.pairs.length) {
+      const top = r.pairs[0];
+      out.append(el("p", "hint", `Closest tastes: ${top.people[0]} and ${top.people[1]} (of the shows either would love, ` +
+        `${Math.round(top.shared * 100)}% suit both).`));
+    }
+    friendsOnMap({ picks: plan });
+  }
+  function nightOut(p) {
+    if (!ensureMap() || p.lat == null) return;
+    caption(fmt(p.date), p.act, `at ${p.venue}, ${p.everyone ? "all of you" : p.going.join(" and ")}`);
+    fly([p.lat, p.lon], 15, 1.2);
+    document.getElementById("d-map").scrollIntoView({ behavior: "smooth", block: "center" });
+  }
 
   // ---------- openers and tour ----------
   $("f-tour").addEventListener("submit", async (e) => {
