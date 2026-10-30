@@ -6,16 +6,42 @@ and tour tools, and the model-alone baseline.
 
 uvicorn app:app --port 8000
 """
+import io
 import os
+import tarfile
+import urllib.request
 
 from fastapi import FastAPI
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
+import qloo
 from clash.api import router as clash_router
 from clash.city_api import router as city_router
 
 ROOT = os.path.dirname(__file__)
+
+
+def fetch_cache():
+    """On a host, fill the cache once from a private Hugging Face dataset (CACHE_DATASET, read with HF_TOKEN), so the
+    recorded court sittings and Qloo replies never sit in the public repo. Locally, with no CACHE_DATASET, nothing
+    happens. If the download fails the site still starts and answers from the live APIs, only slower."""
+    dataset, token = os.environ.get("CACHE_DATASET"), os.environ.get("HF_TOKEN")
+    have = os.listdir(qloo.CACHE) if os.path.isdir(qloo.CACHE) else []
+    if not dataset or not token or any(n.startswith("council_") for n in have):
+        return
+    url = f"https://huggingface.co/datasets/{dataset}/resolve/main/cache.tar.gz"
+    try:
+        data = urllib.request.urlopen(urllib.request.Request(url, headers={"Authorization": f"Bearer {token}"}), timeout=300).read()
+        os.makedirs(qloo.CACHE, exist_ok=True)
+        with tarfile.open(fileobj=io.BytesIO(data), mode="r:gz") as t:
+            t.extractall(qloo.CACHE, filter="data")
+        print(f"cache ready: {len(os.listdir(qloo.CACHE))} entries from {dataset}", flush=True)
+    except Exception as e:
+        print(f"cache not fetched ({type(e).__name__}: {e}); answering from the live APIs", flush=True)
+
+
+fetch_cache()
 
 app = FastAPI(title="Clash Court")
 app.mount("/static", StaticFiles(directory=os.path.join(ROOT, "static")), name="static")

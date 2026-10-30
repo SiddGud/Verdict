@@ -1,35 +1,32 @@
-# Render blueprint. Secrets are set in the Render dashboard, never in this file.
+# Render blueprint. Secrets are set in the Render dashboard, never in this file. The private cache (Qloo,
+# Ticketmaster and Last.fm replies, the recorded court sittings) is not in this repo: at start-up app.py downloads it
+# from a private Hugging Face dataset (CACHE_DATASET) with HF_TOKEN. Qloo data stays out of the public repo.
 services:
   - type: web
     name: clash-court
     runtime: python
-    plan: starter            # keeps the service awake through judging; free plans sleep when idle
+    plan: free               # sleeps after 15 idle minutes; an uptime monitor every 5 minutes keeps it awake
     buildCommand: pip install -r requirements.txt
-    startCommand: mkdir -p /var/data/cache && uvicorn app:app --host 0.0.0.0 --port $PORT
+    startCommand: uvicorn app:app --host 0.0.0.0 --port $PORT --proxy-headers --forwarded-allow-ips=*
     healthCheckPath: /health
-    # Private persistent disk for the Qloo, Ticketmaster and Last.fm reply cache (Qloo: private server-side caching
-    # is fine; Qloo data in a public repo is not). Upload the local cache/ folder to /var/data/cache once, so the
-    # festival tables and city months load with no API calls.
-    disk:
-      name: clash-court-data
-      mountPath: /var/data
-      sizeGB: 5
     envVars:
       - key: PYTHON_VERSION
-        value: 3.13.1
+        value: 3.14.0
       - key: QLOO_API_KEY
         sync: false
       - key: TICKETMASTER_API_KEY
         sync: false
       - key: LASTFM_API_KEY
         sync: false
-      - key: LLM_PROVIDER
-        value: comet
       - key: COMET_API_KEY
         sync: false
-      - key: QLOO_CACHE_DIR
-        value: /var/data/cache
+      - key: HF_TOKEN
+        sync: false
+      - key: CACHE_DATASET
+        value: SiddGud/clash-court-cache
+      - key: LLM_PROVIDER
+        value: comet
       - key: DAILY_USD          # model spend cap per day for the public demo; tools without a model keep working
         value: "5"
-      - key: ASKS_PER_HOUR      # questions to the agent per visitor per hour
+      - key: ASKS_PER_HOUR
         value: "20"
