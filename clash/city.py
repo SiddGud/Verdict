@@ -21,6 +21,10 @@ CITIES = {"new-york": ("New York", "NY"), "chicago": ("Chicago", "IL"), "los-ang
           "boston": ("Boston", "MA"), "philadelphia": ("Philadelphia", "PA"), "washington": ("Washington", "DC"),
           "atlanta": ("Atlanta", "GA"), "nashville": ("Nashville", "TN"), "austin": ("Austin", "TX"),
           "denver": ("Denver", "CO"), "seattle": ("Seattle", "WA"), "san-francisco": ("San Francisco", "CA")}
+# The cities and months the public demo serves: their listings and Qloo matches are loaded ahead, so every answer is
+# quick. Another city works the same way but takes minutes the first time (hundreds of acts to match).
+READY = [c for c in (os.environ.get("CITIES_READY") or "new-york,chicago").split(",") if c in CITIES]
+READY_MONTHS = (os.environ.get("MONTHS_READY") or "2026-11").split(",")
 TM = "https://app.ticketmaster.com/discovery/v2/events.json"
 SKIP = ("tribute", "karaoke", "open mic", "brunch", "tour package", "parking", "vip", "upgrade")
 

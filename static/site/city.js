@@ -513,7 +513,7 @@
     o.months.forEach((m) => { const x = el("option", "", m.name); x.value = m.key; $("d-month").append(x); });
     o.cities.forEach((c, i) => {
       const b = el("button", "", c.name);
-      b.type = "button"; b.dataset.slug = c.slug; b.setAttribute("aria-pressed", String(["new-york", "boston", "philadelphia", "washington"].includes(c.slug)));
+      b.type = "button"; b.dataset.slug = c.slug; b.setAttribute("aria-pressed", "true");
       b.addEventListener("click", () => b.setAttribute("aria-pressed", String(b.getAttribute("aria-pressed") !== "true")));
       $("t-cities").append(b);
     });

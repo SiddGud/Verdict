@@ -37,17 +37,17 @@ def _memo(key, fn, request=None, kind="lookup"):
 
 
 def _window(city, month):
-    if city not in ct.CITIES:
-        raise HTTPException(404, "unknown city")
-    if month not in MONTHS:
-        raise HTTPException(404, "unknown month")
+    if city not in ct.READY:
+        raise HTTPException(404, "that city is not loaded on this demo; try " + " or ".join(ct.CITIES[c][0] for c in ct.READY))
+    if month not in MONTHS or month not in ct.READY_MONTHS:
+        raise HTTPException(404, "that month is not loaded on this demo")
     return MONTHS[month][:2]
 
 
 @router.get("/api/city/options")
 def options():
-    return {"cities": [{"slug": k, "name": v[0]} for k, v in ct.CITIES.items()],
-            "months": [{"key": k, "name": v[2]} for k, v in MONTHS.items()]}
+    return {"cities": [{"slug": k, "name": ct.CITIES[k][0]} for k in ct.READY],
+            "months": [{"key": k, "name": v[2]} for k, v in MONTHS.items() if k in ct.READY_MONTHS]}
 
 
 class Plan(BaseModel):
@@ -118,8 +118,10 @@ class Tour(BaseModel):
 
 @router.post("/api/city/tour")
 def tour(req: Tour, request: Request):
-    if req.month not in MONTHS:
-        raise HTTPException(404, "unknown month")
+    if req.month not in MONTHS or req.month not in ct.READY_MONTHS:
+        raise HTTPException(404, "that month is not loaded on this demo")
+    if any(c not in ct.READY for c in req.cities):
+        raise HTTPException(404, "the tour can visit only the cities loaded on this demo")
     a, b = MONTHS[req.month][:2]
     return _memo(("tour", req.artist.lower(), tuple(req.cities), req.month),
                  lambda: bk.tour(req.artist.strip(), req.cities, a, b), request, "model")

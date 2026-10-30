@@ -17,7 +17,8 @@ from clash import overlap as ov
 from clash import schedule as sc
 
 MAX_CALLS = 6
-MONTHS = {"2026-11": ("2026-11-01", "2026-11-30"), "2026-12": ("2026-12-01", "2026-12-31")}
+MONTHS = {k: v for k, v in {"2026-11": ("2026-11-01", "2026-11-30"), "2026-12": ("2026-12-01", "2026-12-31")}.items()
+          if k in ct.READY_MONTHS}
 
 INSTRUCTIONS = (
     "You are the clerk of Clash Court, an agent that keeps acts who share fans from playing at the same time, and "
@@ -25,7 +26,7 @@ INSTRUCTIONS = (
     "and date from tool results, never from memory; fan overlap comes from Qloo (or Last.fm where Qloo has no data, "
     "say so when it matters); say plainly when the tools cannot answer. If the user asks to change the timetable (a "
     "cancellation, an arrival time, keeping two acts apart), call booker_order with their words. Keep answers under "
-    "120 words, plain text, no markdown, no dashes used as punctuation. Cities: " + ", ".join(ct.CITIES) +
+    "120 words, plain text, no markdown, no dashes used as punctuation. Cities: " + ", ".join(ct.READY) +
     ". Months: " + ", ".join(MONTHS) + "."
 )
 
@@ -36,7 +37,7 @@ def _fn(name, desc, props, req):
 
 
 S, I = {"type": "string"}, {"type": "integer"}
-CITY = {"type": "string", "enum": list(ct.CITIES)}
+CITY = {"type": "string", "enum": list(ct.READY)}
 MONTH = {"type": "string", "enum": list(MONTHS)}
 TOOLS = [
     _fn("timetable", "The festival day now: clash score now and as published, the worst clashes left, the booker's "

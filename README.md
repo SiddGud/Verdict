@@ -4,6 +4,17 @@ Every show fights for the same fans. Clash Court maps who shares fans across liv
 and real listings, so shows stop fighting over the same people and start finding them. Entry for the Qloo Agentic
 Hackathon 2026 by Athmeeya M Kashyap and Siddhant Gudwani.
 
+## The site
+
+- **Festival court** (`/`, the front page): the court, the timetable you can drag, emergencies, your own lineup, and
+  the bill drawn as Qloo sees it.
+- **For fans** (`/#/fans`): plan your day at the festival, and a month of nights out with friends.
+- **For promoters** (`/#/promoters`): the city desk (book a date, promoter portfolio, openers and tour).
+- **Why Qloo** (`/#/why`): what Qloo adds on each festival day, and Test 28.
+
+Each page says what it is for, how to use it, and gives examples to try. "Ask the court" (the chat) is on every page.
+The earlier one-page version is kept at `/classic`.
+
 ## What it does
 
 - **The bill as Qloo sees it.** Every act on the day drawn as a photo, pulled toward the acts its fans share (a force
@@ -28,10 +39,13 @@ Hackathon 2026 by Athmeeya M Kashyap and Siddhant Gudwani.
 - **You decide.** Drag any set to another slot: before you drop, the slot shows in red or green whether that act's
   fans would clash there, and with whom. The move is re-scored, any house rule it breaks is listed, Undo puts it back,
   and the act stays pinned where you put it when the court plans the rest. Clashes show in red.
-- **City desk.** A city's month of music shows on sale (Ticketmaster, 12 US cities):
+- **City desk.** A city's month of music shows on sale (Ticketmaster; any US city, with New York and Chicago in
+  November 2026 loaded ahead on the demo so every answer is quick; `CITIES_READY` sets the list):
   - Book a date: the nights where an artist's fans are pulled least, rivals to avoid, partners to market alongside.
   - Promoter portfolio: which of one promoter's shows compete on the same night, which to sequence, which to co-promote.
-  - Friends' month: the shows that suit a whole group, and whose taste is closest.
+  - Friends' month: the group's month as a plan on a calendar: dated nights out, who goes to each (shows they would
+    love, about their top tenth of the month), nights for the whole group first, each person's own nights when nobody
+    shares their taste, the other show that night, and tickets.
   - Openers and tour: a language model suggests openers and orders tour cities; Qloo and Ticketmaster check them.
 - **Your day.** A fan names favourite artists and gets a route through the festival; clashes they cannot avoid are
   filed with the court.
