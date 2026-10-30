@@ -49,7 +49,7 @@ app.include_router(clash_router)
 app.include_router(city_router)
 
 
-@app.get("/")
+@app.api_route("/", methods=["GET", "HEAD"])  # HEAD: uptime monitors check with it
 @app.get("/v2")
 def index():
     """The site: the festival court first, then pages for fans, promoters and the evidence."""
@@ -68,6 +68,6 @@ def war_room():
     return FileResponse(os.path.join(ROOT, "static", "clash.html"))
 
 
-@app.get("/health")
+@app.api_route("/health", methods=["GET", "HEAD"])
 def health():
     return {"ok": True}
