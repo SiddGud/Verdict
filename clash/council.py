@@ -183,11 +183,11 @@ JUDGE = ("You are the judge of Clash Court. Choose the proposal that frees the m
          "{\"choice\": proposal number or null, \"ruling\": \"two short sentences: the decision and why, citing the numbers; name the act, stage and time of each proposal you mention, never its number\"}.")
 
 
-def run_cases(fest, w, base, extra, emit, n=CASES, stop=None, every=False):
+def run_cases(fest, w, base, extra, emit, n=CASES, stop=None, every=False, skip=(), offset=0):
     """Argue the n worst clashes of base with the agents, applying each decided move; with every=True, argue every red
     clash (weight at least RED) until none is left unargued. Returns (Day, decided moves, proposals refused)."""
     day = Day(fest, w, base, extra)
-    decided, argued, refused = [], [], 0
+    decided, argued, refused = [], [set(p) for p in skip], 0
     for i in range(EVERY if every else n):
         if stop and stop():
             break
@@ -199,7 +199,7 @@ def run_cases(fest, w, base, extra, emit, n=CASES, stop=None, every=False):
         x, wt, a, b, mins = worst[0]
         argued.append({a, b})
         when = ov.clock(max(fest["cells"][day.pos[a]]["start"], fest["cells"][day.pos[b]]["start"]))
-        emit({"type": "case", "n": i + 1, "of": None if every else n, "acts": [a, b], "when": when, "minutes": mins,
+        emit({"type": "case", "n": offset + i + 1, "of": None if every else offset + n, "acts": [a, b], "when": when, "minutes": mins,
               "weight": round(wt, 2)})
 
         def fan_tools(me, other):
@@ -228,8 +228,16 @@ def run_cases(fest, w, base, extra, emit, n=CASES, stop=None, every=False):
                     raise ValueError("propose moving one of the two acts, with a slot number from a tool")
                 o["proposal"]["act"] = act
             try:
+                facts = {"fans_of_" + me: day.fans_of(me)[:4],
+                         "moves_for_" + me: day.moves(me, other, legal_only=False, k=4),
+                         "moves_for_" + other: day.moves(other, me, legal_only=False, k=4)}
+                emit({"type": "tool", "agent": f"fan:{me}", "name": "fans_of", "args": {"act": me},
+                      "summary": _brief("fans_of", facts["fans_of_" + me])})
+                emit({"type": "tool", "agent": f"fan:{me}", "name": "moves_for", "args": {"act": me},
+                      "summary": _brief("moves_for", facts["moves_for_" + me])})
                 o = _agent(f"fan:{me}", FAN.format(me=me, other=other, mins=mins, when=when),
-                           f"The clash: {me} and {other}, {mins} minutes from {when}.", tools, run, emit, check)
+                           f"The clash: {me} and {other}, {mins} minutes from {when}. What your tools already returned: "
+                           f"{json.dumps(facts)}. Call a tool only if you need more.", tools, run, emit, check)
                 props[slot] = o
             except Exception as e:  # noqa: BLE001 - a silent fan agent still lets the case go on
                 props[slot] = {"statement": f"(The fan agent for {me} could not answer: {str(e)[:80]}.)", "proposal": None}
@@ -269,8 +277,18 @@ def run_cases(fest, w, base, extra, emit, n=CASES, stop=None, every=False):
                     raise ValueError("counter-propose moving one of the two acts, with a slot number from legal_moves")
                 c["act"] = act
         try:
-            bo = _agent("booker", BOOKER, f"The clash: {a} and {b}, {mins} minutes from {when}. Proposals: {listing}. "
-                        f"Booker's own rules: {[ag.describe(r, fest) for r in extra] or 'none'}.", btools, booker_run, emit, bcheck)
+            checked = [{"number": i + 1, "from": p["from"], "act": p["act"], "to": p["to"], "cell": p["cell"],
+                        "breaks": p["breaks"], "clash_score_after": p["clash_score_after"]} for i, p in enumerate(proposals)]
+            legal = {"legal_moves_" + a: day.moves(a, b, legal_only=True, k=4), "legal_moves_" + b: day.moves(b, a, legal_only=True, k=4)}
+            for p in checked:
+                emit({"type": "tool", "agent": "booker", "name": "check_move", "args": {"act": p["act"], "cell": p["cell"]},
+                      "summary": f"{p['act']} to {p['to']}: " + ("breaks " + p["breaks"][0] if p["breaks"] else "keeps every rule")})
+            emit({"type": "tool", "agent": "booker", "name": "legal_moves", "args": {"act": a},
+                  "summary": _brief("legal_moves", legal["legal_moves_" + a])})
+            bo = _agent("booker", BOOKER, f"The clash: {a} and {b}, {mins} minutes from {when}. Proposals, already checked "
+                        f"with check_move: {json.dumps(checked)}. legal_moves already returned: {json.dumps(legal)}. "
+                        f"Booker's own rules: {[ag.describe(r, fest) for r in extra] or 'none'}. Call a tool only if you need more.",
+                        btools, booker_run, emit, bcheck)
         except Exception as e:  # noqa: BLE001
             bo = {"statement": f"(The booker agent could not answer: {str(e)[:80]}.)", "objections": [], "counter": None}
         counter = day.check(bo["counter"]["act"], bo["counter"]["cell"]) if bo.get("counter") else None
@@ -323,12 +341,25 @@ def run_cases(fest, w, base, extra, emit, n=CASES, stop=None, every=False):
     return day, decided, refused
 
 
-def sit(fest, w, base, extra, emit, stop=None, every=False):
+def sit(fest, w, base, extra, emit, stop=None, every=False, ruled=None):
     """The whole sitting: the cases, then the optimiser tidies the rest with the agents' moves pinned. Returns the
-    final timetable and a summary with both scores."""
+    final timetable and a summary with both scores. ruled: the booker's own ruling on the first case, made before the
+    agents argue the rest ({"pair": [a, b], "move": {"act", "cell"} or None})."""
     t0, usd0 = time.time(), llm.SPEND["usd"]
     start = sc.clash_score(base, w, fest)
-    day, decided, refused = run_cases(fest, w, base, extra, emit, stop=stop, every=every)
+    pre = []
+    if ruled:
+        d0 = Day(fest, w, base, extra)
+        if ruled.get("move"):
+            m = ruled["move"]
+            swapped = d0.apply(m["act"], m["cell"])
+            pre.append({"pair": ruled["pair"], "act": m["act"], "cell": m["cell"], "to": sc.where(fest, m["cell"]),
+                        "swaps_with": swapped, "by": "you"})
+        base = d0.pos
+    day, decided, refused = run_cases(fest, w, base, extra, emit, stop=stop, every=every,
+                                      n=CASES - (1 if ruled else 0), skip=[ruled["pair"]] if ruled else (),
+                                      offset=1 if ruled else 0)
+    decided = pre + decided
     pins = []
     for d in decided:
         for act in (d["act"], d["swaps_with"]):
@@ -346,6 +377,7 @@ def sit(fest, w, base, extra, emit, stop=None, every=False):
                # and how many applied moves the optimiser on its own would not have made
                "by_fans": sum(1 for d in decided if d["by"].startswith("fans")),
                "by_booker": sum(1 for d in decided if d["by"] == "the booker"),
+               "by_you": sum(1 for d in decided if d["by"] == "you"),
                "refused": refused,
                "not_the_optimisers": sum(1 for d in decided if alone.get(d["act"]) != final.get(d["act"]))}
     emit({"type": "tidy", "summary": summary})

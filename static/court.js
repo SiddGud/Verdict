@@ -467,6 +467,36 @@ function proposalChip(p, label) {
   return d;
 }
 
+// The booker has the floor: approve a proposal that keeps every rule, let the clash stand, or let the judge decide.
+// After 30 seconds without a choice the judge decides, so a viewer who only watches is never stuck.
+function gate(table) {
+  return new Promise((done) => {
+    const box = el("div", "c-gate");
+    box.append(el("div", "who", "You have the floor, booker"));
+    box.append(el("p", "", "Approve a move, let the clash stand, or leave it to the judge."));
+    const row = el("div", "c-gatebtns");
+    let left = 30, finished = false;
+    const finish = (pick) => { if (finished) return; finished = true; clearInterval(tick); box.remove(); done(pick); };
+    table.forEach((p) => {
+      const b = el("button", "quiet small" + (p.breaks && p.breaks.length ? " off" : ""), `Approve: ${p.act} to ${p.to}`);
+      b.type = "button";
+      if (p.breaks && p.breaks.length) { b.disabled = true; b.title = `Breaks a rule: ${p.breaks[0]}`; }
+      else b.addEventListener("click", () => finish({ kind: "approve", p }));
+      row.append(b);
+    });
+    const st = el("button", "quiet small", "The clash stands"); st.type = "button";
+    st.addEventListener("click", () => finish({ kind: "stands" }));
+    const jd = el("button", "primary c-auto", "Let the judge decide"); jd.type = "button";
+    jd.addEventListener("click", () => finish({ kind: "judge" }));
+    row.append(st, jd);
+    const count = el("span", "c-gatecount", `The judge decides in ${left} s`);
+    box.append(row, count);
+    $("transcript").append(box);
+    $("transcript").scrollTop = $("transcript").scrollHeight;
+    const tick = setInterval(() => { left -= 1; count.textContent = `The judge decides in ${left} s`; if (left <= 0) finish({ kind: "judge" }); }, 1000);
+  });
+}
+
 async function council(live) {
   if (busy || !state) return;
   busy = true;
@@ -478,7 +508,7 @@ async function council(live) {
   published.sets.forEach((x) => { if (x.act) pos[x.act] = x.cell; });
   const gone = new Set((state.rules || []).filter((r) => r.type === "cancel").map((r) => r.act));
   gone.forEach((a) => delete pos[a]);
-  let cases = 0, finalState = null, handedOff = false, savedPace = null;
+  let cases = 0, finalState = null, handedOff = false, savedPace = null, gated = false;
   $("skip").hidden = false;
   $("transcript").innerHTML = "";
   $("docket").innerHTML = "";
@@ -486,8 +516,10 @@ async function council(live) {
   $("case-title").textContent = live ? "Live: the agents are reading the bill." : "Fan agents, the booker and the judge argue the worst clashes.";
   drawGrid(viewOf(pos), { flip: true });
 
+  let onTable = [];
   const play = async (e, replay) => {
     if (e.type === "case") {
+      onTable = [];
       cases = e.of;
       const li = el("li", "now");
       li.append(el("span", "n", String(e.n).padStart(2, "0")), el("span", "", `${e.acts[0]} v. ${e.acts[1]}`), el("span", "tag", ""));
@@ -504,9 +536,11 @@ async function council(live) {
       toolLine(e);
       if (replay) await wait(380);
     } else if (e.type === "say" && e.agent === "fan") {
+      if (e.proposal) onTable.push({ ...e.proposal, by: `${e.act}'s fan agent` });
       const m = await say("p", `Fan agent for ${e.act}`, e.text, e.proposal ? proposalChip(e.proposal, "Proposes") : null, e.act);
       if (replay) await wait(500);
     } else if (e.type === "say" && e.agent === "booker") {
+      if (e.counter) onTable.push({ ...e.counter, by: "the booker agent" });
       const extra = el("div", "");
       (e.objections || []).forEach((o) => extra.append(el("div", "c-obj", `Objects: ${o}`)));
       if (e.counter) extra.append(proposalChip(e.counter, "Counter-proposes"));
@@ -560,8 +594,47 @@ async function council(live) {
     if ((r.headers.get("content-type") || "").includes("application/json")) {
       const d = await r.json();
       $("case-no").textContent = `Recorded sitting of the agents, ${d.recorded}`;
-      for (const e of d.events) await play(e, true);
-      finalState = d.state;
+      const evs = d.events;
+      let diverged = null;
+      for (let i = 0; i < evs.length; i++) {
+        await play(evs[i], true);
+        const e = evs[i];
+        if (e.type === "say" && e.agent === "booker" && !window.__touring && !instant && !gated) {
+          gated = true;
+          const ruling = evs.slice(i + 1).find((x) => x.type === "ruling");
+          const caseEv = evs.slice(0, i).reverse().find((x) => x.type === "case");
+          const pick = await gate(onTable);
+          const same = pick.kind === "judge" || (pick.kind === "stands" && !ruling.move) ||
+            (pick.kind === "approve" && ruling.move && ruling.move.act === pick.p.act && ruling.move.to === pick.p.to);
+          if (pick.kind !== "judge") {
+            await say("e", "Booker (you)", pick.kind === "approve" ? `I approve ${pick.p.act} to ${pick.p.to}, proposed by ${pick.p.by}.`
+              : "The clash stands: I approve none of these moves.");
+          }
+          if (!same) { diverged = { pair: caseEv.acts, pick }; break; }
+        }
+      }
+      if (diverged) {
+        await say("e", "The court", "Your ruling differs from the judge's, so the rest of the day changes: the agents argue the remaining cases live, from your timetable.");
+        const r2 = await fetch("/api/clash/council/continue", { method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ session: state.session, pair: diverged.pair,
+            act: diverged.pick.kind === "approve" ? diverged.pick.p.act : null, to: diverged.pick.kind === "approve" ? diverged.pick.p.to : null }) });
+        if (!r2.ok) throw new Error((await r2.json().catch(() => ({}))).error || (await r2.text()) || r2.statusText);
+        const reader = r2.body.getReader(), dec = new TextDecoder();
+        let buf = "";
+        for (;;) {
+          const { value, done } = await reader.read();
+          if (done) break;
+          buf += dec.decode(value, { stream: true });
+          let k;
+          while ((k = buf.indexOf("\n\n")) >= 0) {
+            const line = buf.slice(0, k).trim();
+            buf = buf.slice(k + 2);
+            if (line.startsWith("data:")) await play(JSON.parse(line.slice(5)), false);
+          }
+        }
+      } else {
+        finalState = d.state;
+      }
     } else {
       const reader = r.body.getReader(), dec = new TextDecoder();
       let buf = "";

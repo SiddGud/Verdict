@@ -444,3 +444,70 @@ def lineup(req: Lineup, request: Request):
             yield "data: " + json.dumps(e) + "\n\n"
 
     return StreamingResponse(stream(), media_type="text/event-stream", headers={"Cache-Control": "no-cache"})
+
+
+class Ruling(BaseModel):
+    session: str = Field(max_length=40)
+    pair: list[str] = Field(min_length=2, max_length=2)
+    act: str | None = Field(None, max_length=120)
+    to: str | None = Field(None, max_length=80)
+
+
+@router.post("/api/clash/council/continue")
+def council_continue(req: Ruling, request: Request):
+    """The booker ruled differently from the recorded judge on the first case: apply that ruling (only if it keeps
+    every rule), then the agents argue the remaining cases live from the new timetable. Streams like a live sitting."""
+    from clash import council as cn
+    s = _session(req.session)
+    fest = s["fest"]
+    if any(p not in fest["home"] for p in req.pair):
+        raise HTTPException(422, "unknown acts")
+    why = guard.admit(guard.visitor(request), "model", model=True)
+    if why:
+        return JSONResponse({"error": why}, status_code=429)
+    gone = {r["act"] for r in s["rules"] if r["type"] == "cancel"}
+    base = {a: i for a, i in sc.published(fest).items() if a not in gone}
+    extra = [r for r in s["rules"] if r["type"] != "cancel"]
+    move = None
+    if req.act:
+        cell = next((i for i in range(len(fest["cells"])) if sc.where(fest, i) == req.to), None)
+        if req.act not in base or cell is None:
+            raise HTTPException(422, "unknown move")
+        checked = cn.Day(fest, s["w"], base, extra).check(req.act, cell)
+        if "error" in checked or checked["breaks"]:
+            raise HTTPException(422, "that move breaks a rule: " + "; ".join(checked.get("breaks", [])[:1]))
+        move = {"act": req.act, "cell": cell}
+    events = queue.Queue()
+
+    def work():
+        try:
+            d = cn.Day(fest, s["w"], base, extra)
+            a, b = req.pair
+            mins = d.minutes(a, b)
+            swapped = d.apply(move["act"], move["cell"]) if move else None
+            left = d.minutes(a, b)
+            events.put({"type": "ruling", "outcome": "resolved" if not left else "eased" if left < mins else "stands",
+                        "text": (f"The booker rules: {move['act']} to {sc.where(fest, move['cell'])}." if move else
+                                 "The booker rules that the clash stands."), "clerk": None,
+                        "move": {"act": move["act"], "cell": move["cell"], "to": sc.where(fest, move["cell"]),
+                                 "swaps_with": swapped, "by": "you"} if move else None,
+                        "minutes_after": left, "clash_score": round(d.score(), 3), "pos": d.pos})
+            final, summary = cn.sit(fest, s["w"], base, extra, events.put, ruled={"pair": [a, b], "move": move})
+            with LOCK:
+                s["pos"], s["cases"], s["version"] = final, [], s["version"] + 1
+            events.put({"type": "final", "summary": summary,
+                        "state": _state(s, [{"who": "referee", "text": _council_summary_text(summary)}])})
+        except Exception as e:  # noqa: BLE001 - the page shows the reason; the server keeps running
+            events.put({"type": "error", "message": f"The agents could not finish: {str(e)[:160]}"})
+        events.put(None)
+
+    threading.Thread(target=work, daemon=True).start()
+
+    def stream():
+        while True:
+            e = events.get()
+            if e is None:
+                break
+            yield "data: " + json.dumps(e) + "\n\n"
+
+    return StreamingResponse(stream(), media_type="text/event-stream", headers={"Cache-Control": "no-cache"})

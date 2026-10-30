@@ -427,3 +427,12 @@
 .c-rulingfoot { display: grid; gap: .4rem; justify-items: start; }
 .c-by { font: 500 .74rem var(--body); padding: .25rem .55rem; border-radius: 999px; background: color-mix(in srgb, var(--ok) 18%, transparent); color: inherit; }
 .c-docket { max-height: 260px; overflow-y: auto; }
+
+/* ---------- the booker's gate ---------- */
+.c-gate { border: 2px solid var(--ink); border-radius: 12px; padding: .75rem .85rem; display: grid; gap: .45rem; background: var(--surface);
+  animation: c-in .3s ease both; box-shadow: 0 10px 26px -14px rgba(0, 0, 0, .45); }
+.c-gate .who { font: 600 .66rem var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--qloo); }
+.c-gate p { font-size: .88rem; }
+.c-gatebtns { display: flex; flex-wrap: wrap; gap: .4rem; align-items: center; }
+.c-gatebtns .off { opacity: .45; text-decoration: line-through; cursor: not-allowed; }
+.c-gatecount { font: 400 .72rem var(--mono); color: var(--muted); }

@@ -23,6 +23,7 @@
   async function tour() {
     if (running || !window.court || !window.cityDesk) return;
     running = true; stopped = false;
+    window.__touring = true; // the court's booker gate is skipped during the tour
     try {
       window.scrollTo({ top: 0, behavior: "smooth" });
       bar(1, "The problem", "Two acts that share fans, on two stages, at the same time: someone misses one. Every festival has dozens.");
@@ -71,6 +72,7 @@
     } finally {
       window.court.pace(1);
       running = false;
+      window.__touring = false;
     }
   }
 

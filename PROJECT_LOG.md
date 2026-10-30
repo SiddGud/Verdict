@@ -206,3 +206,18 @@ code refused 6 rule-breaking proposals; 4 of the 5 moves are not ones the optimi
 Saturday: 2 fan, 3 booker, 3 of 5 not the optimiser's. Older recordings were backfilled from their saved events (each
 applied move matched exactly one proposal), with no model calls.
 
+## 59. The booker has the floor (Oct 30, 2026)
+
+DeepSeek's minimum version: one gate, three buttons, no free text. Latency was the real risk, so the gate sits in
+the recorded sitting: after the fan agents and the booker agent speak on the first case, the page pauses ("You have
+the floor, booker") with Approve (one button per proposal; rule-breaking ones shown crossed out and disabled), The
+clash stands, and Let the judge decide (automatic after 30 s; skipped during the tour). A choice that matches the
+recorded judge continues the replay instantly. A different choice is applied by code (only if it keeps every rule)
+and the agents argue the remaining cases live from that timetable (/api/clash/council/continue); the booker's move is
+tagged "by you" in the tally. Live cases were sped up by giving each agent, in its brief, what its first tool calls
+would return (who shares its fans, the best moves for both acts; for the booker, every proposal already checked and
+the best legal moves), so most agents answer in one round trip; tools stay available. Checked in a browser: the gate's
+buttons (one disabled with its rule), agreeing with the judge (replay continues to 5.67), and disagreeing with no
+model credit (the live continuation fails, the page says the agents are unavailable and runs the quick ruling). The
+live continuation and the new per-case speed still need credit to measure.
+
