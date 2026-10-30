@@ -22,8 +22,8 @@ Code: clash/ (overlap, schedule, agents, fanroute, baseline, api), static/clash.
 (8 tests). It is now the site's front page; the earlier project moved to /whitespace.
 
 **Findings while building (in the order they came up).**
-1. *Qloo's raw affinity is bunched.* On a 40-act test bill, 780 pairs: sat in a narrow high band
-   (raw values are Qloo data and are not published here). Summed raw, the optimiser could cut clashes by only 1% (46.9 to 46.5).
+1. *Qloo's raw affinity is bunched.* On a 40-act test bill, 780 pairs sat in a narrow high band, so unrelated acts
+   and near-twins scored close together (raw values are Qloo data and are not published here). Summed raw, the optimiser could cut clashes by only 1% (46.9 to 46.5).
    Fix: rank each act's scores within the bill, average both directions, cube (near-twins dominate). The optimiser
    then cut clashes by 34%. This rescaling is a product choice, not something a test chose; Test 28 scores Qloo's
    raw mean, as registered.
