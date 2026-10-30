@@ -140,3 +140,39 @@ form .s-try .s-try-k { margin: 0 .2rem 0 0; }
 .s-alsocard span:last-child::after { content: " \2192"; color: var(--ink); font-weight: 600; }
 .s-alsocard.q { border-left: 4px solid var(--qloo); background: var(--qloo-tint); }
 @media (max-width: 1080px) { .s-alsogrid { grid-template-columns: minmax(0, 1fr); } }
+
+/* ---------- why Qloo: headline metrics and test cards ---------- */
+.s-metrics { max-width: var(--max); margin: clamp(1.6rem, 3vw, 2.4rem) auto 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));
+  border-top: 1px solid var(--h-rule); }
+.s-metrics > div { padding: 1.1rem 1rem 0 0; display: grid; gap: .3rem; align-content: start; }
+.s-metrics > div + div { padding-left: 1.2rem; border-left: 1px solid var(--h-rule); }
+.s-metrics dt { font: 500 .66rem var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--h-muted); }
+.s-metrics dd { margin: 0; font: 400 clamp(2.2rem, 4vw, 3.4rem)/1 var(--display); color: #FF7FB0; font-variant-numeric: tabular-nums; }
+.s-metrics dd small { font-size: .45em; color: var(--h-muted); margin-left: .1em; }
+.s-metrics span { font-size: .84rem; color: var(--h-muted); }
+.c-vs.s-one.seen .c-bars2 .b i { width: calc(var(--v) * 100%); }
+.c-vs.s-one.seen .c-bars2.s-zoom .b i { width: calc((var(--v) - .6) / .15 * 100%); } /* axis 0.60 to 0.75, so the gains show */
+.s-note { margin-top: .8rem; }
+.s-tests { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.s-test { background: var(--surface); border: 1px solid var(--rule); border-top: 3px solid var(--qloo); border-radius: 14px; padding: 18px;
+  display: grid; gap: .55rem; align-content: start; }
+.s-test header { display: flex; justify-content: space-between; align-items: center; gap: .5rem; }
+.s-tn { font: 600 .7rem var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+.s-chip { font: 600 .66rem var(--mono); letter-spacing: .06em; text-transform: uppercase; padding: .2rem .55rem; border-radius: 999px;
+  border: 1px solid var(--rule-2); color: var(--ink-2); white-space: nowrap; }
+.s-chip.sig { background: var(--qloo); border-color: var(--qloo); color: #fff; }
+.s-test h3 { font: 400 1.45rem/1.12 var(--display); font-weight: 400; }
+.s-test p { font-size: .9rem; color: var(--ink-2); }
+.s-test p b { color: var(--ink); }
+.s-res { margin: .3rem 0 0; display: grid; gap: .35rem; border-top: 1px solid var(--rule); padding-top: .6rem; }
+.s-res div { display: grid; grid-template-columns: 9.5rem minmax(0, 1fr); gap: .6rem; font-size: .88rem; }
+.s-res dt { color: var(--muted); }
+.s-res dd { margin: 0; }
+.s-res dd b { color: var(--qloo); font-weight: 600; }
+@media (max-width: 1000px) {
+  .s-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .s-metrics > div:nth-child(3) { padding-left: 0; border-left: 0; }
+  .s-metrics > div:nth-child(n + 3) { border-top: 1px solid var(--h-rule); padding-top: 1rem; margin-top: 1rem; }
+  .s-tests { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 700px) { .s-res div { grid-template-columns: minmax(0, 1fr); gap: .1rem; } }

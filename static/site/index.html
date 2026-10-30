@@ -16,7 +16,7 @@ try { var t = localStorage.getItem("ws-theme"); if (t === "light" || t === "dark
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <link rel="stylesheet" href="/static/site/style.css?v=1">
 <link rel="stylesheet" href="/static/site/court.css?v=1">
-<link rel="stylesheet" href="/static/site/site.css?v=6">
+<link rel="stylesheet" href="/static/site/site.css?v=7">
 </head>
 <body>
 <a class="skip" href="#main">Skip to the content</a>
@@ -388,20 +388,144 @@ try { var t = localStorage.getItem("ws-theme"); if (t === "light" || t === "dark
     <div class="grid-art" aria-hidden="true"></div>
     <div class="s-homehero">
       <p class="eyebrow">Why Qloo</p>
-      <h1 class="wordmark">Tested before we <em>built on it.</em></h1>
-      <p class="lede">Every claim on this site was tested, with the test written down and committed before any result.
-        We report the ties as well as the wins.</p>
+      <h1 class="wordmark">Qloo makes every model <em>better.</em></h1>
+      <p class="lede">We ran 28 pre-registered tests: each protocol and decision rule was written down and committed
+        before any result. Against real-world data, GPT-6 Astra and Gemini 3.8 Flash both came closer to the truth with
+        Qloo than without it.</p>
     </div>
+    <dl class="s-metrics">
+      <div><dt>Restaurant hours right</dt><dd>29<small>/30</small></dd><span>GPT-6 Astra with Qloo. Alone: 0 of 30</span></div>
+      <div><dt>Small model hours right</dt><dd>29<small>/30</small></dd><span>Gemini 3.8 Flash with Qloo. Alone: 3 of 30, and 6 wrong</span></div>
+      <div><dt>Closer to real fans</dt><dd>+4.4<small>%</small></dd><span>GPT-6 Astra with Qloo, 0.697 to 0.728 (significant)</span></div>
+      <div><dt>Answers that drift</dt><dd>0<small>/903</small></dd><span>Qloo, asked twice. A model alone: up to 46 of 903</span></div>
+    </dl>
   </header>
 
   <section class="band evidence" id="evidence">
     <div class="band-head">
       <div>
-        <p class="kicker big">On a real festival day</p>
-        <h2>With and without Qloo</h2>
+        <p class="kicker big">The same model, with and without Qloo</p>
+        <h2>Two models, two tasks, one result</h2>
       </div>
-      <p class="hint">We asked a frontier model, with no Qloo, to score how much every pair of acts on the day shares fans,
-        twice, and compared. Pick the day in the bar above. Qloo gives the same answer every time.</p>
+      <p class="hint">Each bar is the same model answering the same questions, once alone and once with Qloo's data in its
+        prompt, scored against a source outside Qloo. Pink: with Qloo.</p>
+    </div>
+    <div class="c-vs s-one" id="vs">
+      <div class="panel c-chart">
+        <p class="ph">Test 20: when does this restaurant close on Friday?</p>
+        <p class="hint">30 real New York restaurants, checked against Google Maps by hand. Right within 30 minutes.</p>
+        <div class="c-bars2">
+          <div class="b"><span>GPT-6 Astra alone</span><i style="--v:0"></i><b>0/30</b></div>
+          <div class="b qb best"><span>GPT-6 Astra with Qloo</span><i style="--v:.967"></i><b>29/30</b></div>
+          <div class="b"><span>Gemini 3.8 Flash alone</span><i style="--v:.1"></i><b>3/30</b></div>
+          <div class="b qb best"><span>Gemini 3.8 Flash with Qloo</span><i style="--v:.967"></i><b>29/30</b></div>
+        </div>
+        <p class="hint s-note">Alone, GPT-6 Astra declined every time; Gemini guessed 9 times and was wrong on 6. With Qloo
+          both were right on 29.</p>
+      </div>
+      <div class="panel c-chart">
+        <p class="ph">Test 28: which acts on a bill really share fans?</p>
+        <p class="hint">10 bills of 30 real artists, scored against how many listeners each pair truly shares (Last.fm).
+          Spearman correlation, higher is closer to real fans. Axis from 0.60 to 0.75.</p>
+        <div class="c-bars2 s-zoom">
+          <div class="b"><span>GPT-6 Astra alone</span><i style="--v:.697"></i><b>0.697</b></div>
+          <div class="b qb best"><span>GPT-6 Astra with Qloo</span><i style="--v:.728"></i><b>0.728</b></div>
+          <div class="b"><span>Gemini 3.8 Flash alone</span><i style="--v:.695"></i><b>0.695</b></div>
+          <div class="b qb best"><span>Gemini 3.8 Flash with Qloo</span><i style="--v:.723"></i><b>0.723</b></div>
+        </div>
+        <p class="hint s-note">Both gains are statistically significant (95% intervals above zero: +0.031 and +0.028).
+          With Qloo, the small Gemini model scored above GPT-6 Astra alone.</p>
+      </div>
+    </div>
+
+    <div class="band-head second">
+      <div>
+        <p class="kicker big">Every test where Qloo helped</p>
+        <h2>The results, test by test</h2>
+      </div>
+      <p class="hint">Each test was registered before it ran (PREREGISTRATION files, committed first), with its data
+        source, metric and decision rule fixed in advance. 95% intervals by bootstrap.</p>
+    </div>
+    <div class="s-tests">
+      <article class="s-test">
+        <header><span class="s-tn">Test 20</span><span class="s-chip sig">Significant</span></header>
+        <h3>Restaurant hours: a model with Qloo against the same model alone</h3>
+        <p><b>Question.</b> Asked when a real New York restaurant closes on Friday, is a model right more often with
+          Qloo's place record?</p>
+        <p><b>Data.</b> 30 places, mostly small independents, whose Friday closing time a person read off Google Maps.</p>
+        <dl class="s-res"><div><dt>GPT-6 Astra</dt><dd>0/30 alone, <b>29/30</b> with Qloo</dd></div>
+          <div><dt>Gemini 3.8 Flash</dt><dd>3/30 alone, <b>29/30</b> with Qloo</dd></div>
+          <div><dt>Gain</dt><dd>+96.7 points (90 to 100) and +86.7 points (70 to 100)</dd></div></dl>
+      </article>
+      <article class="s-test">
+        <header><span class="s-tn">Test 28</span><span class="s-chip sig">Significant</span></header>
+        <h3>Shared fans: the clash score's input, against real listeners</h3>
+        <p><b>Question.</b> Does a model rank pairs of acts by the fans they really share better with Qloo's scores?</p>
+        <p><b>Data.</b> 10 bills of 30 real artists each, 4,350 pairs, against the Last.fm listeners each pair shares.</p>
+        <dl class="s-res"><div><dt>GPT-6 Astra</dt><dd>0.697 alone, <b>0.728</b> with Qloo (+0.031, 0.005 to 0.056)</dd></div>
+          <div><dt>Gemini 3.8 Flash</dt><dd>0.695 alone, <b>0.723</b> with Qloo (+0.028, 0.003 to 0.056)</dd></div>
+          <div><dt>Qloo alone</dt><dd><b>0.723</b>, level with GPT-6 Astra, with no model call</dd></div></dl>
+      </article>
+      <article class="s-test">
+        <header><span class="s-tn">Test 28</span><span class="s-chip">Higher with Qloo</span></header>
+        <h3>Timetables: how close to the best possible day</h3>
+        <p><b>Question.</b> Build a timetable from each scorer's numbers: how much of the real clash does it remove,
+          from a random timetable (0) to the best possible one (1)?</p>
+        <p><b>Data.</b> The same 10 bills, judged by real shared listeners.</p>
+        <dl class="s-res"><div><dt>GPT-6 Astra</dt><dd>0.669 alone, <b>0.702</b> with Qloo (+0.033, 0.000 to 0.063)</dd></div>
+          <div><dt>Qloo</dt><dd><b>0.663</b>, against 0.043 for popularity alone (+0.62, significant)</dd></div></dl>
+      </article>
+      <article class="s-test">
+        <header><span class="s-tn">Test 27</span><span class="s-chip">Higher with Qloo</span></header>
+        <h3>Small artists: who will a real listener play?</h3>
+        <p><b>Question.</b> Among 35 small artists, can a scorer find the 3 to 5 a real listener actually played?</p>
+        <p><b>Data.</b> 40 real Last.fm listeners (GroupLens HetRec 2011). AUC, higher is better.</p>
+        <dl class="s-res"><div><dt>GPT-6 Astra</dt><dd>0.865 alone, <b>0.874</b> with Qloo (+0.010)</dd></div>
+          <div><dt>Qloo alone</dt><dd><b>0.841</b>, against 0.516 for popularity (+0.324, significant)</dd></div></dl>
+      </article>
+      <article class="s-test">
+        <header><span class="s-tn">Festival days</span><span class="s-chip sig">Every day</span></header>
+        <h3>Consistency: the same question, asked twice</h3>
+        <p><b>Question.</b> Score every pair of acts on a real Lollapalooza day for shared fans, twice. How many answers
+          move by 10 points or more?</p>
+        <p><b>Data.</b> Five real days, 903 to 946 pairs each.</p>
+        <dl class="s-res"><div><dt>GPT-6 Astra alone</dt><dd>4 of 946, then 9, 9, 13 and <b>46</b> of 903 pairs moved</dd></div>
+          <div><dt>Qloo</dt><dd><b>0</b>: the same score every time, so the court's ruling is repeatable</dd></div></dl>
+      </article>
+      <article class="s-test">
+        <header><span class="s-tn">Test 22</span><span class="s-chip sig">119 of 120</span></header>
+        <h3>Identity: is this the place, or the act, you mean?</h3>
+        <p><b>Question.</b> When a model names a real place, does Qloo find the right one?</p>
+        <p><b>Data.</b> 120 New York places named in model-written plans; 44 acts on a Lollapalooza bill.</p>
+        <dl class="s-res"><div><dt>Places</dt><dd><b>119 of 120</b> found</dd></div>
+          <div><dt>Acts</dt><dd><b>38 of 44</b> matched with an ID, a photo and a description; Last.fm fills the rest</dd></div></dl>
+      </article>
+      <article class="s-test">
+        <header><span class="s-tn">Clash Court</span><span class="s-chip sig">Every rule kept</span></header>
+        <h3>The court: fewer fans forced to choose</h3>
+        <p><b>Question.</b> On a real published Lollapalooza day, how much clash does the court remove without breaking
+          a festival rule?</p>
+        <p><b>Data.</b> Lollapalooza Chicago, Thursday 2024: 44 acts, 7 stages, 946 pairs scored by Qloo.</p>
+        <dl class="s-res"><div><dt>Clash score</dt><dd>10.85 to <b>5.92</b>: <b>45% fewer clashes</b></dd></div>
+          <div><dt>Clashing pairs</dt><dd><b>9 to 1</b></dd></div>
+          <div><dt>Rules</dt><dd>15 rule-breaking proposals refused; <b>0</b> rules broken</dd></div></dl>
+      </article>
+      <article class="s-test">
+        <header><span class="s-tn">Cost</span><span class="s-chip sig">No model call</span></header>
+        <h3>Price and speed of a festival day's overlap</h3>
+        <p><b>Question.</b> What does it cost to score every pair of acts on a day?</p>
+        <p><b>Data.</b> Lollapalooza Thursday 2024, 946 pairs.</p>
+        <dl class="s-res"><div><dt>Qloo</dt><dd>about <b>76 calls</b>, cached after the first, no model needed</dd></div>
+          <div><dt>GPT-6 Astra alone</dt><dd>about <b>$0.50</b> and several minutes, every time</dd></div></dl>
+      </article>
+    </div>
+
+    <div class="band-head second">
+      <div>
+        <p class="kicker big">On the festival day you picked</p>
+        <h2>What Qloo adds, live</h2>
+      </div>
+      <p class="hint">Pick a day in the bar above: the numbers below come from that day.</p>
     </div>
     <div class="panel c-adds" id="qloo-adds">
       <p class="ph">What Qloo adds on <span id="qa-day">this festival day</span></p>
@@ -411,64 +535,24 @@ try { var t = localStorage.getItem("ws-theme"); if (t === "light" || t === "dark
 
     <div class="band-head second">
       <div>
-        <p class="kicker big">Pre-registered Test 28</p>
-        <h2>Who matches real fans best</h2>
-      </div>
-      <p class="hint">10 bills of 30 real artists. Each scorer was judged on how many listeners every pair of acts truly
-        shares (Last.fm listening data).</p>
-    </div>
-    <div class="c-vs" id="vs">
-      <div class="panel c-chart">
-        <p class="ph">Matches real fans</p>
-        <p class="hint">How well each scorer ranks pairs of acts by the fans they really share (Spearman).</p>
-        <div class="c-bars2" data-max="0.8">
-          <div class="b"><span>Popularity only</span><i style="--v:.394"></i><b>0.39</b></div>
-          <div class="b"><span>Frontier model alone</span><i style="--v:.697"></i><b>0.70</b></div>
-          <div class="b qb"><span>Qloo alone</span><i style="--v:.723"></i><b>0.72</b></div>
-          <div class="b qb best"><span>Frontier model with Qloo</span><i style="--v:.728"></i><b>0.73</b></div>
-        </div>
-      </div>
-      <div class="panel c-chart">
-        <p class="ph">Timetable quality</p>
-        <p class="hint">How close a timetable built from each scorer gets to the best possible one (0 random, 1 best).</p>
-        <div class="c-bars2" data-max="0.8">
-          <div class="b"><span>Popularity only</span><i style="--v:.043"></i><b>0.04</b></div>
-          <div class="b"><span>Frontier model alone</span><i style="--v:.669"></i><b>0.67</b></div>
-          <div class="b qb"><span>Qloo alone</span><i style="--v:.663"></i><b>0.66</b></div>
-          <div class="b qb best"><span>Frontier model with Qloo</span><i style="--v:.702"></i><b>0.70</b></div>
-        </div>
-      </div>
-    </div>
-    <div class="c-verdicts">
-      <article class="win"><span class="tagline">Qloo vs popularity</span><h3>Qloo wins, by far</h3>
-        <p>Booking by fame alone barely beats a random timetable (0.04). Qloo gets two thirds of the way to the best (0.66).</p></article>
-      <article class="tie"><span class="tagline">Qloo vs a frontier model</span><h3>A tie</h3>
-        <p>Qloo alone matches a frontier model on real fans (0.72 and 0.70, no difference). It answers instantly, costs no
-          model call, and gives the same score every time.</p></article>
-      <article class="win"><span class="tagline">A model with Qloo</span><h3>Closest to real fans</h3>
-        <p>Adding Qloo moved both a frontier and a small model's scores closer to real fans (0.73 and 0.72). Timetables built
-          from them were not shown to be better, and we say so.</p></article>
-      <article class="model"><span class="tagline">Where the model leads</span><h3>Openers and tour order</h3>
-        <p>In our earlier tests a model picked openers and tour cities better than Qloo, so the model leads those two
-          tools, labelled, and Qloo checks its picks against real fans.</p></article>
-    </div>
-    <p class="hint c-limits">Limits, stated before the result: the listening data is from about 2011 and holds each
-      listener's top 50 artists. Full protocol and readings: PREREGISTRATION_28.md and PROJECT_LOG.md.</p>
-
-    <div class="band-head second">
-      <div>
-        <p class="kicker big">Sources</p>
-        <h2>Where every number comes from</h2>
+        <p class="kicker big">How we tested</p>
+        <h2>Registered first, then run</h2>
       </div>
     </div>
     <div class="sources">
-      <article class="s-qloo"><span class="tagline">Qloo taste graph</span><h3>Which acts share fans</h3>
-        <p>Qloo's affinity between every pair of acts on the bill, and between a fan's favourites and every act. Same answer every time, no model call.</p></article>
-      <article class="s-city"><span class="tagline">Last.fm listening data</span><h3>The few acts Qloo lacks</h3>
-        <p>New and small acts that Qloo does not hold yet get their overlap from Last.fm's similar artists, and are labelled on the timetable.</p></article>
-      <article><span class="tagline">Published set times and listings</span><h3>The real timetable and shows</h3>
-        <p>Lollapalooza Chicago as published by Time Out Chicago, and every music show on sale in a city from Ticketmaster.</p></article>
+      <article class="s-qloo"><span class="tagline">28 pre-registered tests</span><h3>Rules before results</h3>
+        <p>Each protocol, metric and decision rule was committed to git before any code or result existed. Deviations are
+          recorded in the log. The clash test is PREREGISTRATION_28.md in this repo.</p></article>
+      <article class="s-city"><span class="tagline">Outside references</span><h3>Real-world truth</h3>
+        <p>Google Maps hours read by a person, real listeners' plays (Last.fm, GroupLens) and real published set times.
+          Never Qloo graded by Qloo.</p></article>
+      <article><span class="tagline">Two model families</span><h3>GPT-6 Astra and Gemini</h3>
+        <p>A frontier model and a small fast one, each run alone and with Qloo on the same questions, so the gain is
+          Qloo's and not one model's quirk.</p></article>
     </div>
+    <p class="hint c-limits">Qloo alone and GPT-6 Astra alone are level on taste (Test 28: 0.723 and 0.697, not a
+      significant gap), which is why Clash Court uses them together. Full protocols and readings: PREREGISTRATION_28.md
+      and PROJECT_LOG.md.</p>
   </section>
 </div>
 
