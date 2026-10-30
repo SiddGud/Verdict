@@ -10,12 +10,14 @@ Hackathon 2026 by Athmeeya M Kashyap and Siddhant Gudwani.
   layout over Qloo's pair overlap). Pink lines are pairs on at the same time; switch to "After the court" and watch
   them go (9 pairs to 1 on Lollapalooza Thursday 2024).
 - **Festival court, argued by working agents.** A real Lollapalooza day (published set times). Qloo scores how much
-  every pair of acts shares fans. For each of the worst clashes, two fan agents (one per act) call tools on Qloo's
+  every pair of acts shares fans. For every red clash, two fan agents (one per act) call tools on Qloo's
   overlap and the timetable and each propose a concrete move; the booker agent checks every proposal with a rules
   tool, objects to the ones that break a rule and may counter-propose a legal one; the judge agent compares them with
   a scoring tool and rules. Code verifies every move (a rule-breaking choice is never applied), the chosen move is
   made at once, and the optimiser then tidies the rest of the day with the agents' moves pinned. The page reports
-  both scores honestly (on Lollapalooza Thursday 2024: agents and tidying 5.67, optimiser alone 5.45). Recorded
+  both scores honestly (on Lollapalooza Thursday 2024 the agents argued all 10 red clashes and made 9 moves, 3 proposed by fan agents and
+  6 by the booker, 6 of them moves the optimiser alone would not have made: 10.85 to 5.92, against 5.45 for the
+  optimiser alone). Recorded
   sittings replay instantly; "Run the agents live" sits again (about 3 minutes), with clash arcs linking the sets that
   share fans until the court separates them (about half the clash on Lollapalooza
   Thursday 2024, every rule kept). The booker can type emergencies ("Tyla just cancelled").

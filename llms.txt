@@ -39,9 +39,9 @@ the bill, flagged where the pair overlaps in time as published and after the cou
 ## Where a model alone falls short (shown on the page)
 
 Asked the same question twice with no Qloo, a frontier model's pair scores move between answers (on a 40-act test
-bill, 144 of 780 pairs moved by 10 points or more; on the real Lollapalooza Sunday, 13 of 903). Qloo returns the same
+bill, 144 of 780 pairs moved by 10 points or more; on the real Lollapalooza 2026 Sunday, 13 of 903; on the Thursday, 9 of 903). Qloo returns the same
 scores every time for every act it holds. On coverage the model is not worse: on that Sunday it claimed to know 9
-acts Qloo lacks. Whether Qloo or the model matches real fans better is being tested (pre-registered Test 28).
+acts Qloo lacks; on the Thursday it said it did not know 6 acts, Qloo lacked 14, the model knew 9 of those, and Qloo held 1 the model did not know. Whether Qloo or the model matches real fans better is being tested (pre-registered Test 28).
 
 ## Honest limits
 

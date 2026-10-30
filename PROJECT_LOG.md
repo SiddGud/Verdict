@@ -230,3 +230,14 @@ booker approves a move the judge did not choose, that move is now placed (and so
 The every-red-clash recording reached case 10 of 17 and the model-alone runs for 2026 Thursday to Saturday did not
 start before the credit ran out again; neither was saved.
 
+
+## 61. Every red clash argued; one more model-alone day (Oct 31, 2026)
+
+With a new key the agents argued every red clash on Lollapalooza Thursday 2024 (`--every`): 10 cases (later clashes
+were cleared by earlier moves, so fewer than the 17 red pairs at the start), 9 moves decided (3 proposed by fan
+agents, 6 by the booker), 15 rule-breaking proposals refused, 6 moves the optimiser alone would not have made, no
+failed replies. Clash score 10.85 to 5.92; the optimiser alone reaches 5.45, so the agents still score worse than the
+optimiser, and the page says so. 352 s, $0.76. This recording replaces the top-five one (backup kept locally).
+The model-alone comparison for Lollapalooza 2026 Thursday ran: 9 of 903 pairs moved by 10 points or more between two
+asks; the model did not know 6 acts, Qloo lacked 14 (the model knew 9 of those), Qloo held 1 the model did not know.
+Friday and Saturday stopped on insufficient quota and were not saved; their "What Qloo adds" panels stay empty.
