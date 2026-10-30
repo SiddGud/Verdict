@@ -33,7 +33,11 @@ PROVIDER = ENV.get("LLM_PROVIDER", "kie")
 # Both serve GPT-6 Astra on an OpenAI Responses-compatible endpoint. CometAPI is pay-as-you-go ($8 / $40 per
 # million input / output tokens, Oct 2026); Kie bills prepaid credits.
 PROVIDERS = {"kie": ("https://api.kie.ai/codex/v1/responses", "KIE_API_KEY"),
-             "comet": ("https://api.cometapi.com/v1/responses", "COMET_API_KEY")}
+             "comet": ("https://api.cometapi.com/v1/responses", "COMET_API_KEY"),
+             # OpenRouter serves the same model as openai/gpt-6-astra ($10 / $50 per million tokens, Oct 2026)
+             "openrouter": ("https://openrouter.ai/api/v1/responses", "OPENROUTER_API_KEY"),
+             "openai": ("https://api.openai.com/v1/responses", "OPENAI_API_KEY")}
+PRICE = {"comet": (8e-6, 40e-6), "openrouter": (10e-6, 50e-6), "openai": (10e-6, 50e-6)}  # US dollars per input / output token
 RESPONSES_URL, KEY_NAME = PROVIDERS[PROVIDER]
 
 
@@ -41,13 +45,14 @@ SPEND = {"usd": 0.0}  # CometAPI spend this process, from token usage (Kie repor
 
 
 def _usd(usage):
-    if PROVIDER == "comet":
-        SPEND["usd"] += 8e-6 * (usage.get("input_tokens") or 0) + 40e-6 * (usage.get("output_tokens") or 0)
+    if PROVIDER in PRICE:
+        pin, pout = PRICE[PROVIDER]
+        SPEND["usd"] += pin * (usage.get("input_tokens") or 0) + pout * (usage.get("output_tokens") or 0)
 
 
 def _auth():
     return {"Authorization": "Bearer " + ENV[KEY_NAME]}
-MODEL = ENV.get("LLM_MODEL", "gpt-6-astra")
+MODEL = ENV.get("LLM_MODEL") or ("openai/gpt-6-astra" if PROVIDER == "openrouter" else "gpt-6-astra")
 # Optional outage fallback (Azure OpenAI, v1 Responses API). Used only when the primary call fails or
 # times out, and every fallback is labelled in the call's meta so the trace shows it.
 FALLBACK_URL = ENV.get("AZURE_OPENAI_ENDPOINT", "").rstrip("/")   # e.g. https://<name>.openai.azure.com/openai/v1

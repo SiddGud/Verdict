@@ -13,7 +13,8 @@ import llm
 
 DAILY_USD = float(os.environ.get("DAILY_USD") or llm.ENV.get("DAILY_USD") or 5)
 PER_HOUR = {"ask": int(os.environ.get("ASKS_PER_HOUR") or 20), "model": int(os.environ.get("MODEL_PER_HOUR") or 10),
-            "command": int(os.environ.get("COMMANDS_PER_HOUR") or 40), "lookup": int(os.environ.get("LOOKUPS_PER_HOUR") or 60)}
+            "command": int(os.environ.get("COMMANDS_PER_HOUR") or 40), "lookup": int(os.environ.get("LOOKUPS_PER_HOUR") or 60),
+            "lineup": int(os.environ.get("LINEUPS_PER_HOUR") or 3)}
 _lock = threading.Lock()
 _hits = {}
 _day = {"date": datetime.date.today(), "start": llm.SPEND["usd"]}

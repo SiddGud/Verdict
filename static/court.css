@@ -382,3 +382,45 @@
 .c-droptip.bad strong { color: #FF8078; } .c-droptip.good strong { color: #5FD08F; }
 .c-droptip .swap { opacity: .7; font-family: var(--mono); font-size: .68rem; }
 .c-manual { display: flex; gap: .5rem; flex-wrap: wrap; }
+
+/* ---------- the working agents ---------- */
+.c-live { margin-top: .5rem; width: 100%; }
+.c-toolline { display: grid; grid-template-columns: auto auto 1fr; gap: .45rem; align-items: baseline; font-size: .74rem;
+  padding: .3rem .55rem; border-radius: 8px; background: color-mix(in srgb, var(--qloo) 6%, var(--field)); animation: c-in .25s ease both; }
+.c-toolline .k { font: 600 .62rem var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
+.c-toolline .n { font-weight: 600; color: var(--qloo); white-space: nowrap; }
+.c-toolline .s { color: var(--ink-2); font-family: var(--mono); font-size: .68rem; overflow-wrap: anywhere; }
+.c-prop { margin-top: .4rem; padding: .45rem .6rem; border-radius: 8px; display: grid; gap: .1rem; font-size: .8rem; border: 1px solid; }
+.c-prop.ok { border-color: color-mix(in srgb, var(--ok) 45%, transparent); background: color-mix(in srgb, var(--ok) 7%, transparent); }
+.c-prop.bad { border-color: color-mix(in srgb, var(--err) 45%, transparent); background: color-mix(in srgb, var(--err) 7%, transparent); }
+.c-prop span { color: var(--muted); }
+.c-obj { margin-top: .35rem; font-weight: 600; color: var(--err); font-size: .82rem; }
+.c-say.j .c-prop span, .c-say.o .c-prop span { color: inherit; opacity: .8; }
+
+/* ---------- bring your own lineup ---------- */
+.c-linkbtn { background: none; border: 0; padding: .35rem 0 0; color: var(--muted); font-size: .8rem; text-decoration: underline;
+  text-underline-offset: 3px; cursor: pointer; }
+.c-linkbtn:hover { color: var(--ink); }
+.c-dlg { width: min(620px, calc(100% - 24px)); border: 1px solid var(--rule); border-radius: 16px; padding: 20px;
+  background: var(--surface); color: var(--ink); box-shadow: 0 30px 70px -20px rgba(0, 0, 0, .55); }
+.c-dlg::backdrop { background: rgba(10, 10, 11, .55); backdrop-filter: blur(3px); }
+.c-dlg textarea { font-family: var(--mono); font-size: .8rem; min-height: 12rem; }
+.c-dlg .c-row { margin-top: .8rem; justify-content: space-between; }
+
+/* ---------- what qloo adds on this day ---------- */
+.c-adds { margin-bottom: 16px; }
+.c-addgrid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-top: .8rem; }
+.c-add { border: 1px solid var(--rule); border-radius: 12px; padding: .8rem .9rem; display: grid; gap: .3rem; align-content: start; }
+.c-add .k { font: 500 .64rem var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+.c-add .big { font: 400 2rem/1 var(--display); }
+.c-add .big small { font: 400 .9rem var(--body); color: var(--muted); }
+.c-add p { font-size: .84rem; color: var(--ink-2); }
+.c-add.q { border-top: 3px solid var(--qloo); } .c-add.m { border-top: 3px solid var(--city); } .c-add.t { border-top: 3px solid var(--ink); }
+.c-add .faces { display: flex; }
+.c-add .faces img { width: 26px; height: 26px; border-radius: 50%; object-fit: cover; border: 2px solid var(--surface); margin-left: -7px; }
+.c-add .faces img:first-child { margin-left: 0; }
+@media (max-width: 1000px) { .c-addgrid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 600px) { .c-addgrid { grid-template-columns: minmax(0, 1fr); } }
+.c-toolline { grid-template-columns: auto 1fr; }
+.c-toolline .s { grid-column: 1 / -1; }
+.c-transcript { max-height: min(62vh, 620px); overflow-y: auto; padding-right: 4px; scroll-behavior: smooth; }

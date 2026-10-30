@@ -246,7 +246,7 @@ function manual(s) {
   const u = el("button", "quiet small", "Undo"); u.type = "button";
   u.addEventListener("click", async () => manual(await post("/api/clash/undo", { session: state.session })));
   const c = el("button", "quiet small", "Let the court plan around it"); c.type = "button";
-  c.addEventListener("click", () => convene());
+  c.addEventListener("click", () => quickRuling());
   row.append(u, c);
   $("transcript").append(row);
   error("");
@@ -311,6 +311,7 @@ function say(kind, who, text, extra, face) {
   head.append(document.createTextNode(who));
   m.append(head, body);
   $("transcript").append(m);
+  $("transcript").scrollTop = $("transcript").scrollHeight;
   const finish = () => { body.textContent = text; if (extra) m.append(extra); };
   if (fast || instant || matchMedia("(prefers-reduced-motion: reduce)").matches) { finish(); return Promise.resolve(m); }
   return new Promise((done) => {
@@ -363,7 +364,7 @@ async function sit(s, opening) {
     const c = cases[i], [a, b] = c.acts, src = lfm.has(a) || lfm.has(b) ? " lfm" : "";
     const items = $("docket").children;
     [...items].forEach((li, j) => li.classList.toggle("now", j === i));
-    $("case-no").textContent = `Case ${i + 1} of ${cases.length}, ${c.when}`;
+    $("case-no").textContent = `Quick ruling (optimiser, no agents): case ${i + 1} of ${cases.length}, ${c.when}`;
     const t = $("case-title");
     t.innerHTML = "";
     t.append(faceoff(a, b));
@@ -420,8 +421,176 @@ async function act(promise, opening) {
   }
 }
 
-function convene() {
+// "Convene the court": the working agents. A recorded sitting replays when the timetable is as published; otherwise,
+// or when asked, the agents sit live and every event streams in.
+function convene(live = false) {
+  if (state) return council(live);
+}
+
+// The quick ruling (optimiser, no agents): used after an emergency or a manual move.
+function quickRuling() {
   if (state) return act(post("/api/clash/run", { session: state.session }));
+}
+
+// A view of the timetable for any placement, with clashes worked out here from the weights sent at load.
+function viewOf(pos) {
+  const at = {};
+  Object.entries(pos).forEach(([a, i]) => { at[i] = a; });
+  const sets = published.sets.map((x) => ({ ...x, act: at[x.cell] || null, clashes: [] }));
+  sets.forEach((x) => {
+    if (!x.act) return;
+    sets.forEach((y) => {
+      if (!y.act || y === x || y.stage === x.stage) return;
+      const mins = Math.min(x.end, y.end) - Math.max(x.start, y.start), w = (weights[x.act] || {})[y.act] || 0;
+      if (mins > 0 && w >= 0.2) x.clashes.push({ act: y.act, weight: w, minutes: mins });
+    });
+    x.clashes.sort((a, b) => b.weight - a.weight);
+  });
+  return { ...published, from_lastfm: state.from_lastfm, sets };
+}
+
+const TOOLNAME = { fans_of: "Qloo: who shares fans", moves_for: "moves that free fans", check_move: "rules check",
+  legal_moves: "legal moves", score_move: "score check" };
+
+function toolLine(e) {
+  const who = e.agent.startsWith("fan:") ? e.agent.slice(4) + "'s fan agent" : e.agent === "booker" ? "Booker agent" : "Judge";
+  const d = el("div", "c-toolline");
+  d.append(el("span", "k", who), el("span", "n", TOOLNAME[e.name] || e.name), el("span", "s", e.summary || ""));
+  $("transcript").append(d);
+  $("transcript").scrollTop = $("transcript").scrollHeight;
+}
+
+function proposalChip(p, label) {
+  const d = el("div", "c-prop" + (p.breaks && p.breaks.length ? " bad" : " ok"));
+  d.append(el("strong", "", `${label}: ${p.act} to ${p.to}` + (p.swaps_with ? ` (swaps with ${p.swaps_with})` : "")));
+  d.append(el("span", "", p.breaks && p.breaks.length ? `Breaks a rule: ${p.breaks[0]}` : `Keeps every rule; day's clash score ${p.clash_score_after.toFixed(2)}`));
+  return d;
+}
+
+async function council(live) {
+  if (busy || !state) return;
+  busy = true;
+  document.body.style.cursor = "progress";
+  $("convene").disabled = true;
+  error("");
+  fast = false;
+  let pos = {};
+  published.sets.forEach((x) => { if (x.act) pos[x.act] = x.cell; });
+  const gone = new Set((state.rules || []).filter((r) => r.type === "cancel").map((r) => r.act));
+  gone.forEach((a) => delete pos[a]);
+  let cases = 0, finalState = null, handedOff = false;
+  $("skip").hidden = false;
+  $("transcript").innerHTML = "";
+  $("docket").innerHTML = "";
+  $("case-no").textContent = live ? "The agents sit now" : "The court sits";
+  $("case-title").textContent = live ? "Live: the agents are reading the bill." : "Fan agents, the booker and the judge argue the worst clashes.";
+  drawGrid(viewOf(pos), { flip: true });
+
+  const play = async (e, replay) => {
+    if (e.type === "case") {
+      cases = e.of;
+      const li = el("li", "now");
+      li.append(el("span", "n", String(e.n).padStart(2, "0")), el("span", "", `${e.acts[0]} v. ${e.acts[1]}`), el("span", "tag", ""));
+      [...$("docket").children].forEach((x) => x.classList.remove("now"));
+      $("docket").append(li);
+      $("case-no").textContent = `Case ${e.n} of ${e.of}, ${e.when}, ${e.minutes} min overlap`;
+      $("case-title").innerHTML = "";
+      $("case-title").append(faceoff(e.acts[0], e.acts[1]));
+      $("transcript").innerHTML = "";
+      drawGrid(viewOf(pos), { trial: e.acts });
+      if (replay) await wait(700);
+    } else if (e.type === "tool") {
+      toolLine(e);
+      if (replay) await wait(380);
+    } else if (e.type === "say" && e.agent === "fan") {
+      const m = await say("p", `Fan agent for ${e.act}`, e.text, e.proposal ? proposalChip(e.proposal, "Proposes") : null, e.act);
+      if (replay) await wait(500);
+    } else if (e.type === "say" && e.agent === "booker") {
+      const extra = el("div", "");
+      (e.objections || []).forEach((o) => extra.append(el("div", "c-obj", `Objects: ${o}`)));
+      if (e.counter) extra.append(proposalChip(e.counter, "Counter-proposes"));
+      await say("o", "Booker agent", e.text, extra.childNodes.length ? extra : null);
+      if (replay) await wait(500);
+    } else if (e.type === "ruling") {
+      const stamp = el("span", "c-stamp " + e.outcome, VERDICT[e.outcome]);
+      await say("j", "Judge agent", e.text, stamp);
+      if (e.clerk) await say("o", "Clerk (code check)", e.clerk);
+      const tag = $("docket").lastChild && $("docket").lastChild.querySelector(".tag");
+      if (tag) { tag.className = "tag " + e.outcome; tag.textContent = VERDICT[e.outcome]; }
+      if (e.move) {
+        pos = { ...e.pos };
+        drawGrid(viewOf(pos), { flip: true, landed: [e.move.act, e.move.swaps_with].filter(Boolean) });
+      }
+      $("now").textContent = e.clash_score.toFixed(2);
+      if (replay) await wait(1300);
+    } else if (e.type === "tidy") {
+      const m = e.summary;
+      [...$("docket").children].forEach((x) => x.classList.remove("now"));
+      $("case-no").textContent = "Judgment";
+      $("case-title").textContent = "The agents ruled; the optimiser tidies the rest.";
+      $("transcript").innerHTML = "";
+      await say("j", "The court", `The agents decided ${m.decided} moves: clash score ${m.start.toFixed(2)} to ${m.after_cases.toFixed(2)}. ` +
+        `The optimiser then tidied the rest of the day with those moves pinned: ${m.final.toFixed(2)}. ` +
+        `For comparison, the optimiser alone reaches ${m.optimiser_alone.toFixed(2)}.`);
+    } else if (e.type === "final") {
+      finalState = e.state;
+    } else if (e.type === "error") {
+      error(e.message);
+    }
+  };
+
+  try {
+    const r = await fetch("/api/clash/council", { method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ session: state.session, live }) });
+    if (!r.ok) throw new Error((await r.json().catch(() => ({}))).error || r.statusText);
+    if ((r.headers.get("content-type") || "").includes("application/json")) {
+      const d = await r.json();
+      $("case-no").textContent = `Recorded sitting of the agents, ${d.recorded}`;
+      for (const e of d.events) await play(e, true);
+      finalState = d.state;
+    } else {
+      const reader = r.body.getReader(), dec = new TextDecoder();
+      let buf = "";
+      for (;;) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        buf += dec.decode(value, { stream: true });
+        let i;
+        while ((i = buf.indexOf("\n\n")) >= 0) {
+          const line = buf.slice(0, i).trim();
+          buf = buf.slice(i + 2);
+          if (line.startsWith("data:")) await play(JSON.parse(line.slice(5)), false);
+        }
+      }
+    }
+    if (!finalState && live !== "fallback") {
+      // the agents could not sit (for example the model provider refused): say so, then give the quick ruling
+      $("transcript").innerHTML = "";
+      $("case-no").textContent = "The agents are unavailable";
+      $("case-title").textContent = "The quick ruling (optimiser, no agents) sits instead.";
+      busy = false;
+      handedOff = true; // the quick ruling now owns the busy flag and the buttons
+      await wait(1500);
+      return quickRuling();
+    }
+    if (finalState) {
+      state = finalState;
+      fast = false;
+      fadeArcs();
+      await wait(300);
+      drawGrid(state, { flip: true });
+      drawScore(state, true);
+    }
+  } catch (err) {
+    error("The court could not sit: " + err.message);
+  } finally {
+    if (!handedOff) {
+      $("skip").hidden = true;
+      busy = false;
+      document.body.style.cursor = "";
+      $("convene").disabled = false;
+    }
+  }
 }
 
 function emergency(text) {
@@ -457,6 +626,7 @@ async function load(slug) {
   $("docket").innerHTML = "";
   $("case-no").textContent = "Court is not yet in session";
   $("case-title").textContent = 'Press "Convene the court" to put the worst clashes on trial.';
+  document.dispatchEvent(new CustomEvent("court:loaded", { detail: slug })); // the graph and the Qloo panel redraw for the new day
 }
 
 // ---------- your day ----------
@@ -492,7 +662,8 @@ async function planDay(e) {
 
 // ---------- wiring ----------
 
-$("convene").addEventListener("click", convene);
+$("convene").addEventListener("click", () => convene(false));
+$("convene-live").addEventListener("click", () => convene(true));
 $("reset").addEventListener("click", reset);
 $("skip").addEventListener("click", () => { fast = true; });
 $("cmd").addEventListener("submit", (e) => { e.preventDefault(); const t = $("text").value; $("text").value = ""; emergency(t); });
@@ -518,6 +689,7 @@ $("theme-toggle").addEventListener("click", () => {
 // Hooks for the other scripts on the page (Ask the court, the guided tour).
 window.court = {
   session: () => state && state.session,
+  current: () => state,
   pace: (p) => { pace = p; },
   festival: () => state && state.festival,
   convene,

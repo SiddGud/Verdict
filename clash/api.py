@@ -14,6 +14,7 @@ from pydantic import BaseModel, Field
 from clash import agents as ag
 from clash import ask as ak
 from clash import guard
+from clash import lineup as lu
 from clash import baseline as bl
 from clash import fanroute as fr
 from clash import overlap as ov
@@ -28,7 +29,7 @@ MAX_SESSIONS = 500
 
 
 def _festival(slug):
-    path = os.path.join(FESTIVALS, f"{slug}.json")
+    path = lu.path(slug) if slug.startswith("custom-") else os.path.join(FESTIVALS, f"{slug}.json")
     if not os.path.exists(path):
         raise HTTPException(404, "unknown festival")
     fest = ov.load(path)
@@ -339,3 +340,106 @@ def undo(req: Session):
         s["version"] += 1
     extra = [r for r in s["rules"] if r["type"] != "cancel" and not r.get("placed")]
     return {**_state(s), "broken": sc.violations(s["pos"], s["fest"], extra), "undone": True}
+
+
+class Council(BaseModel):
+    session: str = Field(max_length=40)
+    live: bool = False
+
+
+def _council_summary_text(m):
+    return (f"The agents decided {m['decided']} moves: clash score {m['start']:.2f} to {m['after_cases']:.2f}. The optimiser "
+            f"then tidied the rest of the day with those moves pinned: {m['final']:.2f}. The optimiser alone reaches "
+            f"{m['optimiser_alone']:.2f}." + (" Every rule kept." if not m["broken"] else " Rules broken: " + "; ".join(m["broken"][:2])))
+
+
+@router.post("/api/clash/council")
+def council(req: Council, request: Request):
+    """The court as working agents (clash/council.py). On the timetable as published, a recorded sitting replays with
+    no model calls; otherwise, or when asked to run live, the agents sit now and every event streams to the page."""
+    from clash import council as cn
+    s = _session(req.session)
+    fest = s["fest"]
+    rec = cn.recorded(fest["slug"]) if not req.live and not s["rules"] else None
+    if rec:
+        with LOCK:
+            s["pos"], s["cases"], s["version"] = dict(rec["final"]), [], s["version"] + 1
+        st = _state(s, [{"who": "referee", "text": _council_summary_text(rec["summary"])}])
+        return {"recorded": rec["recorded"], "events": rec["events"], "summary": rec["summary"], "state": st}
+    why = guard.admit(guard.visitor(request), "model", model=True)
+    if why:
+        return JSONResponse({"error": why}, status_code=429)
+    gone = {r["act"] for r in s["rules"] if r["type"] == "cancel"}
+    base = {a: i for a, i in sc.published(fest).items() if a not in gone}
+    extra = [r for r in s["rules"] if r["type"] != "cancel"]
+    events = queue.Queue()
+
+    def work():
+        try:
+            final, summary = cn.sit(fest, s["w"], base, extra, events.put)
+            with LOCK:
+                s["pos"], s["cases"], s["version"] = final, [], s["version"] + 1
+            events.put({"type": "final", "summary": summary,
+                        "state": _state(s, [{"who": "referee", "text": _council_summary_text(summary)}])})
+        except Exception as e:  # noqa: BLE001 - the page shows the reason; the server keeps running
+            events.put({"type": "error", "message": f"The agents could not finish: {str(e)[:160]}"})
+        events.put(None)
+
+    threading.Thread(target=work, daemon=True).start()
+
+    def stream():
+        while True:
+            e = events.get()
+            if e is None:
+                break
+            yield "data: " + json.dumps(e) + "\n\n"
+
+    return StreamingResponse(stream(), media_type="text/event-stream", headers={"Cache-Control": "no-cache"})
+
+
+
+class Lineup(BaseModel):
+    name: str = Field("", max_length=80)
+    text: str = Field(min_length=10, max_length=20000)
+
+
+@router.post("/api/clash/lineup")
+def lineup(req: Lineup, request: Request):
+    """Bring your own lineup: checks the pasted sets, matches every act in Qloo (Last.fm where Qloo has none), scores
+    the fan overlap, and streams progress. Ends with the new festival's slug, which /api/clash/load then opens."""
+    try:
+        fest = lu.parse(req.name, req.text)
+    except ValueError as e:
+        return JSONResponse({"error": str(e)}, status_code=422)
+    why = guard.admit(guard.visitor(request), "lineup")
+    if why:
+        return JSONResponse({"error": why}, status_code=429)
+    slug = lu.save(fest)
+    events = queue.Queue()
+
+    def work():
+        try:
+            f = ov.load(lu.path(slug))
+            acts = f["acts"]
+            for i, a in enumerate(acts, 1):  # match first, one by one, so the page can show progress
+                ov.resolve(a)
+                if i % 3 == 0 or i == len(acts):
+                    events.put({"type": "progress", "step": "Matching acts in Qloo", "done": i, "of": len(acts)})
+            events.put({"type": "progress", "step": "Scoring how much every pair of acts shares fans", "done": 0, "of": 1})
+            t = ov.table(f)
+            events.put({"type": "done", "slug": slug, "name": f["name"], "acts": len(acts),
+                        "in_qloo": len(t["matched"]), "from_lastfm": len(t.get("lastfm", {}))})
+        except Exception as e:  # noqa: BLE001 - the page shows the reason
+            events.put({"type": "error", "message": f"Could not build that day: {str(e)[:160]}"})
+        events.put(None)
+
+    threading.Thread(target=work, daemon=True).start()
+
+    def stream():
+        while True:
+            e = events.get()
+            if e is None:
+                break
+            yield "data: " + json.dumps(e) + "\n\n"
+
+    return StreamingResponse(stream(), media_type="text/event-stream", headers={"Cache-Control": "no-cache"})

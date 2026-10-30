@@ -15,7 +15,7 @@ try { var t = localStorage.getItem("ws-theme"); if (t === "light" || t === "dark
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400..700&family=Geist+Mono:wght@400..600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <link rel="stylesheet" href="/static/style.css?v=6">
-<link rel="stylesheet" href="/static/court.css?v=12">
+<link rel="stylesheet" href="/static/court.css?v=16">
 </head>
 <body>
 <a class="skip" href="#court">Skip to the court</a>
@@ -57,6 +57,7 @@ try { var t = localStorage.getItem("ws-theme"); if (t === "light" || t === "dark
       <h2>Convene the court</h2>
       <label for="festival">Festival day</label>
       <select id="festival" aria-label="Festival day"></select>
+      <button type="button" class="c-linkbtn" id="lineup-open">Or bring your own lineup</button>
       <div class="c-score" aria-live="polite">
         <div><span class="c-k">Published timetable</span><span class="c-n" id="pub">0.00</span></div>
         <div class="c-arrow" aria-hidden="true">to</div>
@@ -65,6 +66,7 @@ try { var t = localStorage.getItem("ws-theme"); if (t === "light" || t === "dark
       </div>
       <p class="hint c-scorehint">Clash score: shared fans times hours of overlap, summed over every pair on the bill.</p>
       <button type="button" id="convene" class="primary">Convene the court</button>
+      <button type="button" id="convene-live" class="quiet small c-live">Run the agents live (about 3 minutes)</button>
       <button type="button" id="tour-start" class="c-tourbtn"><span class="c-play" aria-hidden="true"></span>Watch the 2-minute tour</button>
       <form id="cmd" class="c-cmd" autocomplete="off">
         <label for="text">Booker's emergency</label>
@@ -285,6 +287,11 @@ try { var t = localStorage.getItem("ws-theme"); if (t === "light" || t === "dark
     <p class="hint">Pre-registered Test 28, written down and committed before any result: 10 bills of 30 real artists,
       each scorer judged on how many listeners every pair truly shares (Last.fm). We report the ties as well as the wins.</p>
   </div>
+  <div class="panel c-adds" id="qloo-adds">
+    <p class="ph">What Qloo adds on <span id="qa-day">this festival day</span></p>
+    <div class="c-addgrid" id="qa-grid"></div>
+    <p class="hint" id="qa-note"></p>
+  </div>
   <div class="c-vs" id="vs">
     <div class="panel c-chart">
       <p class="ph">Matches real fans</p>
@@ -349,17 +356,39 @@ try { var t = localStorage.getItem("ws-theme"); if (t === "light" || t === "dark
     <button type="submit" class="primary c-auto" id="ask-send">Ask</button>
   </form>
 </aside>
+<dialog class="c-dlg" id="lineup-dlg" aria-labelledby="lu-title">
+  <form id="lu-form" autocomplete="off">
+    <div class="c-askhead">
+      <div><p class="kicker">Your festival day</p><h2 id="lu-title">Bring your own lineup</h2></div>
+      <button type="button" class="icon-btn" id="lu-close" aria-label="Close">&times;</button>
+    </div>
+    <p class="hint">One set per line: stage, act, start, end. Commas or tabs (a copy from a spreadsheet works). Times like
+      13:00 or 1pm. Every act is matched in Qloo, then the court, the graph and the agent work on your day.</p>
+    <label for="lu-name">Name</label>
+    <input id="lu-name" maxlength="80" placeholder="My festival, Saturday">
+    <label for="lu-text">Sets</label>
+    <textarea id="lu-text" rows="10" maxlength="20000" placeholder="Stage, Act, Start, End&#10;Main, Hozier, 20:30, 22:00&#10;Second, Lizzy McAlpine, 19:45, 20:45"></textarea>
+    <p class="form-error" id="lu-err" hidden></p>
+    <p class="hint" id="lu-prog" aria-live="polite"></p>
+    <div class="c-row">
+      <button type="button" class="quiet small" id="lu-sample">Use a sample</button>
+      <button type="submit" class="primary c-auto" id="lu-go">Build the day</button>
+    </div>
+  </form>
+</dialog>
 <div class="c-tourbar" id="tour-bar" hidden aria-live="polite">
   <span class="n" id="tour-n"></span>
   <div><strong id="tour-t"></strong><span id="tour-s"></span></div>
   <button type="button" class="quiet small" id="tour-stop">Stop the tour</button>
 </div>
-<script src="/static/court.js?v=6"></script>
+<script src="/static/court.js?v=11"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script src="/static/city.js?v=6"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
-<script src="/static/graph.js?v=3"></script>
+<script src="/static/graph.js?v=4"></script>
 <script src="/static/ask.js?v=1"></script>
 <script src="/static/tour.js?v=2"></script>
+<script src="/static/lineup.js?v=2"></script>
+<script src="/static/qloo_adds.js?v=3"></script>
 </body>
 </html>

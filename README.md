@@ -9,11 +9,20 @@ Hackathon 2026 by Athmeeya M Kashyap and Siddhant Gudwani.
 - **The bill as Qloo sees it.** Every act on the day drawn as a photo, pulled toward the acts its fans share (a force
   layout over Qloo's pair overlap). Pink lines are pairs on at the same time; switch to "After the court" and watch
   them go (9 pairs to 1 on Lollapalooza Thursday 2024).
-- **Festival court.** A real Lollapalooza day (published set times). Qloo scores how much every pair of acts shares
-  fans. The worst clashes go on trial: fan agents argue with their numbers, the booker agent objects when the
-  quickest fix breaks a rule, the court rules, and the whole timetable moves, with clash arcs linking the sets that
+- **Festival court, argued by working agents.** A real Lollapalooza day (published set times). Qloo scores how much
+  every pair of acts shares fans. For each of the worst clashes, two fan agents (one per act) call tools on Qloo's
+  overlap and the timetable and each propose a concrete move; the booker agent checks every proposal with a rules
+  tool, objects to the ones that break a rule and may counter-propose a legal one; the judge agent compares them with
+  a scoring tool and rules. Code verifies every move (a rule-breaking choice is never applied), the chosen move is
+  made at once, and the optimiser then tidies the rest of the day with the agents' moves pinned. The page reports
+  both scores honestly (on Lollapalooza Thursday 2024: agents and tidying 5.67, optimiser alone 5.45). Recorded
+  sittings replay instantly; "Run the agents live" sits again (about 3 minutes), with clash arcs linking the sets that
   share fans until the court separates them (about half the clash on Lollapalooza
   Thursday 2024, every rule kept). The booker can type emergencies ("Tyla just cancelled").
+- **Bring your own lineup.** Paste one set per line (stage, act, start, end); every act is matched in Qloo (Last.fm
+  where Qloo has none), the overlap is scored, and the day opens like a built-in one.
+- **What Qloo adds, on this day.** Coverage and identity (IDs, photos), how a model with no Qloo changes its scores
+  when asked twice, what each side does not know, and cost; accuracy stated as Test 28 found it (a tie).
 - **You decide.** Drag any set to another slot: before you drop, the slot shows in red or green whether that act's
   fans would clash there, and with whom. The move is re-scored, any house rule it breaks is listed, Undo puts it back,
   and the act stays pinned where you put it when the court plans the rest. Clashes show in red.

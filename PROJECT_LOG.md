@@ -176,3 +176,21 @@ cutting the rest from 10.85 to 5.90, reset clears) and in a real browser (previe
 now red on the timetable; one threshold (shared-fan weight 0.45) defines a clash for the cells, the arcs and the
 preview, after a check found the preview and the cell colour disagreeing.
 
+## 57. Working agents, your own lineup, what Qloo adds (Oct 30, 2026)
+
+From an independent critical review (DeepSeek): the courtroom agents were templates over the optimiser. Now
+(clash/council.py) each of the five worst clashes is argued by working agents: two fan agents call tools on Qloo's
+overlap and the timetable (fans_of, moves_for) and each proposes a move; the booker checks them (check_move) and may
+counter-propose a legal one (legal_moves); the judge compares them (score_move) and rules; code refuses any move that
+breaks a rule or does not lower the clash score, and the optimiser tidies the rest with the agents' moves pinned.
+Recorded on Lollapalooza Thursday 2024: agents 10.85 to 6.90, with tidying 5.67, optimiser alone 5.45 (the agents
+decide case by case, the optimiser plans the whole day; both numbers are shown). About 150 s and $0.35 a sitting.
+Bugs found while recording: a clash the court could not settle was argued again (each clash is now argued once), and
+two sittings were saved while the model provider refused every call (a sitting with any failed agent is now never
+saved; a live sitting where all four agents fail stops and the quick ruling runs instead). Bring your own lineup
+(clash/lineup.py): pasted sets are checked (four parts, times, no overlap on a stage, 4 to 80 sets, 2 to 12 stages),
+matched in Qloo with progress, stored privately. The "what Qloo adds" panel uses the model-alone runs; on Thursday
+2024 the model changed 4 of 946 pairs by 10 points or more and said it knew every act, so the panel's case rests on
+identity, the pair-level gain and cost, and says so. Model provider: CometAPI (OpenRouter and OpenAI wired as
+alternatives; four pasted keys were rejected as expired or invalid before a working one).
+

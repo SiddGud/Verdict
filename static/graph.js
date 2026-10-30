@@ -118,6 +118,6 @@
 
   // Draw once the court has its session; redraw when the festival day changes.
   const ready = setInterval(() => { if (window.court && window.court.session()) { clearInterval(ready); load(); } }, 300);
-  $("festival").addEventListener("change", () => setTimeout(load, 900));
+  document.addEventListener("court:loaded", load);
   window.billGraph = { load, setMode };
 })();
