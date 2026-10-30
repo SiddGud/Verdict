@@ -28,6 +28,12 @@ def index():
     return FileResponse(os.path.join(ROOT, "static", "court.html"), headers={"Cache-Control": "no-cache"})
 
 
+@app.get("/v2")
+def organised():
+    """The organised site: one page per audience (fans, festivals, promoters) and one for the evidence."""
+    return FileResponse(os.path.join(ROOT, "static", "site", "index.html"), headers={"Cache-Control": "no-cache"})
+
+
 @app.get("/clash")
 def war_room():
     """The first version of the page (a plain war-room), kept for reference."""

@@ -1,0 +1,575 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Clash Court</title>
+<meta name="description" content="Clash Court maps which acts share fans with Qloo's taste data, so festivals stop clashing them, promoters stop booking against their own audience, and fans miss nothing.">
+<meta name="theme-color" content="#0A0A0B">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230A0A0B'/%3E%3Crect x='7' y='9' width='8' height='14' fill='none' stroke='%23fff' stroke-width='2.5'/%3E%3Crect x='17' y='9' width='8' height='14' fill='%23FF7FB0'/%3E%3C/svg%3E">
+<script>
+try { var t = localStorage.getItem("ws-theme"); if (t === "light" || t === "dark") document.documentElement.dataset.theme = t; } catch (_) {}
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400..700&family=Geist+Mono:wght@400..600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<link rel="stylesheet" href="/static/site/style.css?v=1">
+<link rel="stylesheet" href="/static/site/court.css?v=1">
+<link rel="stylesheet" href="/static/site/site.css?v=3">
+</head>
+<body>
+<a class="skip" href="#main">Skip to the content</a>
+
+<nav class="nav" aria-label="Main">
+  <a class="logo" href="#/" aria-label="Clash Court, home"><span class="logo-mark c-mark" aria-hidden="true"></span>Clash Court</a>
+  <div class="nav-links s-links">
+    <a href="#/fans" data-view="fans"><span class="s-for">For </span>fans</a>
+    <a href="#/festivals" data-view="festivals"><span class="s-for">For </span>festivals</a>
+    <a href="#/promoters" data-view="promoters"><span class="s-for">For </span>promoters</a>
+    <a class="how" href="#/why" data-view="why">Why Qloo</a>
+  </div>
+  <div class="nav-tools">
+    <button type="button" id="theme-toggle" class="icon-btn" aria-label="Switch between light and dark" title="Switch between light and dark">
+      <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 3.5a8.5 8.5 0 0 1 0 17z" fill="currentColor"/></svg>
+    </button>
+  </div>
+</nav>
+
+<main id="main">
+
+<!-- ======================= HOME ======================= -->
+<div class="s-view" data-view="home" id="v-home">
+  <header class="top s-top" id="top">
+    <div class="grid-art" aria-hidden="true"></div>
+    <div class="s-homehero">
+      <p class="eyebrow">Live music, mapped by shared fans</p>
+      <h1 class="wordmark">Fans shouldn't have to <em>choose.</em></h1>
+      <p class="lede">Two acts that share fans, on two stages, at the same time: someone misses one. Clash Court uses
+        <span class="src qloo">Qloo's taste data</span> to see which acts share fans. Festivals use it to stop those
+        clashes, promoters to stop booking against their own audience, and fans to plan a day where they miss nothing.</p>
+      <div class="s-herobtns">
+        <button type="button" id="tour-start" class="c-tourbtn"><span class="c-play" aria-hidden="true"></span>Watch the 2-minute tour</button>
+        <a class="s-ghost" href="#/festivals">Try the festival court</a>
+      </div>
+    </div>
+    <div class="s-doors">
+      <a class="s-door" href="#/fans">
+        <span class="s-who">I'm a fan</span>
+        <strong>Plan a day where you miss nothing</strong>
+        <span class="s-what">Name the artists you love. Get every act on the bill scored for you and your best path through the
+          festival day. Plan a month of shows with friends.</span>
+        <span class="s-go">For fans</span>
+      </a>
+      <a class="s-door" href="#/festivals">
+        <span class="s-who">I run a festival</span>
+        <strong>Put the timetable's clashes on trial</strong>
+        <span class="s-what">AI agents argue every clash and the timetable is rebuilt without breaking your rules. You have the
+          final say. Type an emergency, drag sets, or bring your own lineup.</span>
+        <span class="s-go">For festivals</span>
+      </a>
+      <a class="s-door" href="#/promoters">
+        <span class="s-who">I book or promote shows</span>
+        <strong>Stop booking against your own audience</strong>
+        <span class="s-what">Every show on sale in a city this month, scored by how much it shares fans with yours. Find the
+          best night, see which of your shows compete, pick openers.</span>
+        <span class="s-go">For promoters</span>
+      </a>
+    </div>
+  </header>
+
+  <section class="band">
+    <div class="band-head">
+      <div>
+        <p class="kicker big">How it works</p>
+        <h2>Three steps, every time</h2>
+      </div>
+    </div>
+    <ol class="s-steps3">
+      <li><span class="s-n">1</span><h3>Qloo says who shares fans</h3><p>Every act is matched in Qloo's taste graph. Qloo
+        scores how much each pair of acts' fans are the same people, from real behaviour, and gives the same answer
+        every time. Last.fm fills in the few acts Qloo lacks.</p></li>
+      <li><span class="s-n">2</span><h3>Agents and code do the work</h3><p>AI agents argue for each act's fans, a booker agent
+        checks the rules, a judge rules. Code checks every move, so nothing breaks a rule, and an optimiser tidies the
+        rest.</p></li>
+      <li><span class="s-n">3</span><h3>You decide</h3><p>You can overrule the court, drag sets yourself, type emergencies in
+        plain words, or ask the clerk anything in the chat at the bottom right of every page.</p></li>
+    </ol>
+    <a class="s-why" href="#/why">
+      <span class="kicker">Why Qloo</span>
+      <strong>Tested before we built on it.</strong>
+      <span>Asked the same question twice, a frontier model alone changed its answer by 10 points or more on up to 46 of
+        903 pairs of acts. Qloo gives the same answer every time. See the tests</span>
+    </a>
+  </section>
+</div>
+
+<!-- ============ THE FESTIVAL DAY BAR (fans and festivals) ============ -->
+<div class="s-daybar" id="daybar" hidden>
+  <div class="s-dayin">
+    <label for="festival">Festival day</label>
+    <select id="festival" aria-label="Festival day"></select>
+    <button type="button" class="c-linkbtn" id="lineup-open">Or bring your own lineup</button>
+    <span class="s-dayname" aria-hidden="true"><span id="fest-short">Lollapalooza Chicago</span></span>
+  </div>
+</div>
+
+<!-- ======================= FANS ======================= -->
+<div class="s-view" data-view="fans" id="v-fans" hidden>
+  <header class="top s-top">
+    <div class="grid-art" aria-hidden="true"></div>
+    <div class="hero">
+      <div class="brand">
+        <p class="eyebrow">For fans</p>
+        <h1 class="wordmark">Plan a day where you <em>miss nothing.</em></h1>
+        <p class="lede">Tell us the artists you love, even ones not playing. Qloo scores every act on the bill for your
+          taste, and Clash Court plans your best path through the festival day.</p>
+        <ol class="s-how">
+          <li>Pick the festival day in the bar above.</li>
+          <li>Type up to five artists you love and press <b>Plan my day</b>.</li>
+          <li>You get every act scored for you and a route through the day. A clash you can't avoid is sent to the
+            court as your case, and counts the next time it sits.</li>
+          <li>Going with friends? Use <b>Friends' month</b> below to find the shows you'd all enjoy.</li>
+        </ol>
+      </div>
+      <div class="panel c-bench s-plan">
+        <h2>Your day</h2>
+        <form id="routeform" autocomplete="off">
+          <label for="favs">Artists you love (up to five)</label>
+          <input id="favs" maxlength="300" placeholder="Phoebe Bridgers, Clairo, Frank Ocean" aria-label="Your favourite artists">
+          <button type="submit" class="primary">Plan my day</button>
+        </form>
+        <p class="s-try-k">Try</p>
+        <div class="chips s-try">
+          <button type="button" data-fill="favs" data-submit="routeform" data-text="Hozier, Lizzy McAlpine, Jungle">Hozier, Lizzy McAlpine, Jungle</button>
+          <button type="button" data-fill="favs" data-submit="routeform" data-text="Phoebe Bridgers, Clairo, Mitski">Phoebe Bridgers, Clairo, Mitski</button>
+        </div>
+        <p class="hint s-whyq"><b>Why Qloo:</b> it links your favourite artists to every act on the bill, including acts
+          you have never heard of, so the plan finds you new acts, not only the names you typed.</p>
+      </div>
+    </div>
+  </header>
+
+  <section class="band" id="day">
+    <div class="band-head">
+      <div>
+        <p class="kicker big">Your route</p>
+        <h2>Your day, and your case</h2>
+      </div>
+      <p class="hint">Every act on the bill, scored for you. Where two acts you'd love play at the same time, the plan
+        picks the better one and files the clash with the court.</p>
+    </div>
+    <div class="panel c-day">
+      <div id="route" class="c-route"><p class="hint">Type your artists above and press Plan my day.</p></div>
+    </div>
+  </section>
+
+  <section class="band" id="fans-desk">
+    <div class="band-head">
+      <div>
+        <p class="kicker big">With friends</p>
+        <h2>Friends' month</h2>
+      </div>
+      <p class="hint">Add each friend and the artists they love, pick a city and month, and press Plan our month. You
+        get the shows on sale that the whole group would enjoy, on a map.</p>
+    </div>
+    <div class="s-deskslot" id="slot-fans"></div>
+  </section>
+</div>
+
+<!-- ======================= FESTIVALS ======================= -->
+<div class="s-view" data-view="festivals" id="v-festivals" hidden>
+  <header class="top s-top">
+    <div class="grid-art" aria-hidden="true"></div>
+    <div class="hero">
+      <div class="brand">
+        <p class="eyebrow">For festivals and bookers</p>
+        <h1 class="wordmark">Put the clashes <em>on trial.</em></h1>
+        <p class="lede">A clash is two acts that share many fans, playing at the same time on different stages. The court
+          finds every clash and fixes it without breaking the festival's rules.</p>
+        <ol class="s-how">
+          <li>Pick a festival day in the bar above, or bring your own lineup.</li>
+          <li>Press <b>Convene the court</b>. AI agents argue each clash: one speaks for each act's fans, a booker agent
+            checks the rules, a judge rules.</li>
+          <li>On the first case you are the booker: approve a move, let the clash stand, or let the judge decide. If you
+            overrule, the agents argue the rest of the day live.</li>
+          <li>Type an emergency like <b>Tyla just cancelled</b>, or drag any set on the timetable to move it yourself.</li>
+        </ol>
+      </div>
+
+      <div class="panel c-bench">
+        <h2>Convene the court</h2>
+        <div class="c-score" aria-live="polite">
+          <div><span class="c-k">Published timetable</span><span class="c-n" id="pub">0.00</span></div>
+          <div class="c-arrow" aria-hidden="true">to</div>
+          <div><span class="c-k">After the court</span><span class="c-n" id="now">0.00</span></div>
+          <div class="c-cut" id="cut"></div>
+        </div>
+        <p class="hint c-scorehint">Clash score: shared fans times hours of overlap, added up over every pair on the bill.
+          Lower is better.</p>
+        <button type="button" id="convene" class="primary">Convene the court</button>
+        <button type="button" id="convene-live" class="quiet small c-live">Run the agents live (about 3 minutes)</button>
+        <form id="cmd" class="c-cmd" autocomplete="off">
+          <label for="text">Booker's emergency</label>
+          <div class="c-row">
+            <input id="text" maxlength="300" placeholder="An act just cancelled">
+            <button type="submit" class="quiet">Send</button>
+          </div>
+          <div class="chips" id="examples" aria-label="Example emergencies"></div>
+        </form>
+        <p class="form-error" id="err" hidden></p>
+        <button type="button" id="reset" class="quiet small c-reset">Back to the published timetable</button>
+      </div>
+    </div>
+    <dl class="stats" aria-label="This festival day">
+      <div><dt>Acts on the bill</dt><dd id="st-acts">0</dd></div>
+      <div><dt>Stages</dt><dd id="st-stages">0</dd></div>
+      <div><dt>Pairs scored</dt><dd id="st-pairs">0</dd></div>
+      <div><dt>Clashes cut</dt><dd id="st-cut">0%</dd></div>
+    </dl>
+  </header>
+
+  <section class="band c-courtband" id="court">
+    <div class="band-head">
+      <div>
+        <p class="kicker big">In session</p>
+        <h2 id="court-title">The worst clashes, on trial</h2>
+      </div>
+      <p class="hint">Left, the timetable: red sets share many fans with a set at the same time. Right, the courtroom:
+        each case is one clash, argued and ruled, and the timetable moves as it is decided.</p>
+    </div>
+    <div class="c-layout">
+      <section class="panel c-table" aria-label="Timetable">
+        <div class="c-tablehead">
+          <p class="ph">Timetable <span class="c-draghint">Drag any set to move it. You decide; the court advises.</span></p>
+          <div class="c-legend">
+            <span><i class="sw hot"></i>Clash: shares many fans with a set at the same time</span>
+            <span><i class="sw warm"></i>Some shared fans</span>
+            <span><i class="sw lfm"></i>From Last.fm (Qloo has no data)</span>
+          </div>
+        </div>
+        <div class="c-scroll"><div class="c-grid" id="grid"></div></div>
+        <p class="hint c-festnote" id="festnote"></p>
+      </section>
+
+      <section class="panel c-room" aria-label="The courtroom" aria-live="polite">
+        <div class="c-roomhead">
+          <p class="ph" id="case-no">Court is not yet in session</p>
+          <button type="button" class="quiet small" id="skip" hidden>Skip to the verdict</button>
+        </div>
+        <h3 class="c-caption" id="case-title">Press "Convene the court" to put the worst clashes on trial.</h3>
+        <div class="c-transcript" id="transcript"></div>
+        <ol class="c-docket" id="docket" aria-label="Docket"></ol>
+      </section>
+    </div>
+  </section>
+
+  <section class="band c-graphband" id="graph">
+    <div class="band-head">
+      <div>
+        <p class="kicker big">The bill as Qloo sees it</p>
+        <h2>Every act, pulled toward the acts its fans share</h2>
+      </div>
+      <p class="hint">Acts that share fans sit close together. A pink line joins two acts on at the same time: their fans
+        must choose. Switch to "After the court" to see which clashes the court removed. Click an act for its details.</p>
+    </div>
+    <div class="panel c-graph">
+      <div class="c-graphbar">
+        <div class="toggle" role="radiogroup" aria-label="Timetable shown" id="g-mode">
+          <button type="button" role="radio" aria-checked="true" data-mode="published">As published</button>
+          <button type="button" role="radio" aria-checked="false" data-mode="now">After the court</button>
+        </div>
+        <p class="hint c-gcount" id="g-count"></p>
+      </div>
+      <div class="c-gwrap">
+        <svg id="g-svg" role="img" aria-label="Graph of acts linked by shared fans"></svg>
+        <div class="c-gcard" id="g-card" hidden></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="band how-it" id="how">
+    <div class="band-head">
+      <div>
+        <p class="kicker big">How the court works</p>
+        <h2>Who is in the room</h2>
+      </div>
+      <p class="hint">Code builds the timetable; the agents argue, object and explain. Nothing an agent says can move a set
+        in a way that breaks a rule.</p>
+    </div>
+    <ol class="flow">
+      <li><h3>The clerk reads the bill</h3><p>Every act is matched to Qloo by exact name. Qloo scores how much each pair's fans are the same people, for the whole bill.</p></li>
+      <li><h3>Fan agents file cases</h3><p>Every red clash becomes a case. Each act's agent looks up its fans and the moves that would help, and proposes one.</p></li>
+      <li><h3>The booker objects</h3><p>The booker agent checks each proposal against the rules and objects when it breaks one: headliners close, no act moves more than two hours, set lengths and stage sizes stay. It may offer a legal move instead.</p></li>
+      <li><h3>The judge rules</h3><p>The judge scores the proposals and rules. Code checks the move, makes it, and an optimiser tidies the rest of the day with the agents' moves kept.</p></li>
+      <li><h3>Emergencies</h3><p>Type "Tyla just cancelled" or "Kesha arrives at 4pm". The booker reads it into a checked rule and the timetable is rebuilt.</p></li>
+      <li><h3>Fans weigh in</h3><p>A fan's route flags the clashes they cannot avoid. Each report adds weight to that pair the next time the court sits.</p></li>
+    </ol>
+  </section>
+</div>
+
+<!-- ======================= PROMOTERS ======================= -->
+<div class="s-view" data-view="promoters" id="v-promoters" hidden>
+  <header class="top s-top">
+    <div class="grid-art" aria-hidden="true"></div>
+    <div class="hero">
+      <div class="brand">
+        <p class="eyebrow">For promoters and booking agents</p>
+        <h1 class="wordmark">Stop booking against your <em>own audience.</em></h1>
+        <p class="lede">Every music show on sale in a city this month (Ticketmaster), scored by how much each act shares
+          fans with yours (Qloo). The map shows where those fans are being pulled.</p>
+      </div>
+      <div class="panel s-tools">
+        <h2>Three tools</h2>
+        <dl class="s-toollist">
+          <div><dt>Book a date</dt><dd>Type an artist and press <b>Find the night</b>. Every night of the month is ranked
+            by how few nearby shows compete for the same fans.</dd></div>
+          <div><dt>Promoter portfolio</dt><dd>Pick a promoter, such as Live Nation. See which of its own shows fight for
+            the same fans on the same night or week, and which should market together.</dd></div>
+          <div><dt>Openers and tour</dt><dd>Type a headliner for suggested openers. Pick cities and press <b>Route the
+            tour</b> for an order and a night in each.</dd></div>
+        </dl>
+        <p class="hint s-whyq"><b>Start with New York or Chicago:</b> their months are ready and load at once.</p>
+      </div>
+    </div>
+  </header>
+  <section class="band c-desk" id="desk">
+    <div class="band-head">
+      <div>
+        <p class="kicker big">City desk</p>
+        <h2>A city's month, read for one audience</h2>
+      </div>
+      <p class="hint">Pick the city and month, then a tool. Where our tests found a language model better (openers and
+        tour order), the model leads, labelled, and Qloo checks its picks against real fans.</p>
+    </div>
+    <div class="s-deskslot" id="slot-promoters">
+      <div class="panel" id="desk-panel">
+        <div class="c-deskbar">
+          <div class="toggle" role="radiogroup" aria-label="Tool" id="tabs">
+            <button type="button" role="radio" aria-checked="true" data-tab="book">Book a date</button>
+            <button type="button" role="radio" aria-checked="false" data-tab="portfolio">Promoter portfolio</button>
+            <button type="button" role="radio" aria-checked="false" data-tab="friends">Friends' month</button>
+            <button type="button" role="radio" aria-checked="false" data-tab="tour">Openers and tour</button>
+          </div>
+          <div class="c-where">
+            <select id="d-city" aria-label="City"></select>
+            <select id="d-month" aria-label="Month"></select>
+          </div>
+        </div>
+
+        <div class="map-wrap c-mapwrap">
+          <div id="d-map" class="map c-map" aria-label="Map of the city's shows this month"></div>
+          <div class="c-capcard" id="d-cap" hidden aria-live="polite">
+            <span class="k" id="d-cap-k"></span>
+            <strong id="d-cap-t"></strong>
+            <span class="s" id="d-cap-s"></span>
+            <button type="button" class="c-capskip" id="d-skip">Skip</button>
+          </div>
+        </div>
+        <div class="map-key c-mapkey" id="d-key">
+          <span><i class="dot q"></i>Pulls on your fans (bigger, stronger)</span>
+          <span><i class="dot g"></i>Other shows this month</span>
+          <span><i class="dot l"></i>From Last.fm</span>
+        </div>
+
+        <form class="c-tab" data-tab="book" id="f-book" autocomplete="off">
+          <div class="c-row">
+            <input id="b-artist" maxlength="60" placeholder="Artist to book, for example Clairo" aria-label="Artist to book">
+            <label class="c-check"><input type="checkbox" id="b-weekends"> Fridays and Saturdays only</label>
+            <button type="submit" class="primary c-auto">Find the night</button>
+          </div>
+          <div class="chips s-try"><span class="s-try-k">Try</span>
+            <button type="button" data-fill="b-artist" data-submit="f-book" data-text="Clairo">Clairo</button>
+            <button type="button" data-fill="b-artist" data-submit="f-book" data-text="Hozier">Hozier</button>
+          </div>
+          <div id="o-book" class="c-out"></div>
+        </form>
+
+        <form class="c-tab" data-tab="portfolio" id="f-port" autocomplete="off" hidden>
+          <div class="c-row">
+            <select id="p-promoter" aria-label="Promoter"></select>
+            <button type="submit" class="primary c-auto">Read the portfolio</button>
+          </div>
+          <div id="o-port" class="c-out"></div>
+        </form>
+
+        <form class="c-tab" data-tab="friends" id="f-friends" autocomplete="off" hidden>
+          <div class="c-people" id="people"></div>
+          <div class="c-row">
+            <button type="button" class="quiet small" id="add-person">Add a friend</button>
+            <button type="submit" class="primary c-auto">Plan our month</button>
+          </div>
+          <div id="o-friends" class="c-out"></div>
+        </form>
+
+        <form class="c-tab" data-tab="tour" id="f-tour" autocomplete="off" hidden>
+          <div class="c-row">
+            <input id="t-artist" maxlength="60" placeholder="Headliner, for example Clairo" aria-label="Headliner">
+            <button type="submit" class="primary c-auto">Suggest openers</button>
+          </div>
+          <p class="hint">Tour dates: pick the cities, and the model orders them; each night is then chosen from real listings.</p>
+          <div class="chips c-cities" id="t-cities"></div>
+          <button type="button" class="quiet small" id="t-route">Route the tour</button>
+          <div id="o-tour" class="c-out"></div>
+        </form>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ======================= WHY QLOO ======================= -->
+<div class="s-view" data-view="why" id="v-why" hidden>
+  <header class="top s-top s-short">
+    <div class="grid-art" aria-hidden="true"></div>
+    <div class="s-homehero">
+      <p class="eyebrow">Why Qloo</p>
+      <h1 class="wordmark">Tested before we <em>built on it.</em></h1>
+      <p class="lede">Every claim on this site was tested, with the test written down and committed before any result.
+        We report the ties as well as the wins.</p>
+    </div>
+  </header>
+
+  <section class="band evidence" id="evidence">
+    <div class="band-head">
+      <div>
+        <p class="kicker big">On a real festival day</p>
+        <h2>With and without Qloo</h2>
+      </div>
+      <p class="hint">We asked a frontier model, with no Qloo, to score how much every pair of acts on the day shares fans,
+        twice, and compared. Pick the day in the bar above. Qloo gives the same answer every time.</p>
+    </div>
+    <div class="panel c-adds" id="qloo-adds">
+      <p class="ph">What Qloo adds on <span id="qa-day">this festival day</span></p>
+      <div class="c-addgrid" id="qa-grid"></div>
+      <p class="hint" id="qa-note"></p>
+    </div>
+
+    <div class="band-head second">
+      <div>
+        <p class="kicker big">Pre-registered Test 28</p>
+        <h2>Who matches real fans best</h2>
+      </div>
+      <p class="hint">10 bills of 30 real artists. Each scorer was judged on how many listeners every pair of acts truly
+        shares (Last.fm listening data).</p>
+    </div>
+    <div class="c-vs" id="vs">
+      <div class="panel c-chart">
+        <p class="ph">Matches real fans</p>
+        <p class="hint">How well each scorer ranks pairs of acts by the fans they really share (Spearman).</p>
+        <div class="c-bars2" data-max="0.8">
+          <div class="b"><span>Popularity only</span><i style="--v:.394"></i><b>0.39</b></div>
+          <div class="b"><span>Frontier model alone</span><i style="--v:.697"></i><b>0.70</b></div>
+          <div class="b qb"><span>Qloo alone</span><i style="--v:.723"></i><b>0.72</b></div>
+          <div class="b qb best"><span>Frontier model with Qloo</span><i style="--v:.728"></i><b>0.73</b></div>
+        </div>
+      </div>
+      <div class="panel c-chart">
+        <p class="ph">Timetable quality</p>
+        <p class="hint">How close a timetable built from each scorer gets to the best possible one (0 random, 1 best).</p>
+        <div class="c-bars2" data-max="0.8">
+          <div class="b"><span>Popularity only</span><i style="--v:.043"></i><b>0.04</b></div>
+          <div class="b"><span>Frontier model alone</span><i style="--v:.669"></i><b>0.67</b></div>
+          <div class="b qb"><span>Qloo alone</span><i style="--v:.663"></i><b>0.66</b></div>
+          <div class="b qb best"><span>Frontier model with Qloo</span><i style="--v:.702"></i><b>0.70</b></div>
+        </div>
+      </div>
+    </div>
+    <div class="c-verdicts">
+      <article class="win"><span class="tagline">Qloo vs popularity</span><h3>Qloo wins, by far</h3>
+        <p>Booking by fame alone barely beats a random timetable (0.04). Qloo gets two thirds of the way to the best (0.66).</p></article>
+      <article class="tie"><span class="tagline">Qloo vs a frontier model</span><h3>A tie</h3>
+        <p>Qloo alone matches a frontier model on real fans (0.72 and 0.70, no difference). It answers instantly, costs no
+          model call, and gives the same score every time.</p></article>
+      <article class="win"><span class="tagline">A model with Qloo</span><h3>Closest to real fans</h3>
+        <p>Adding Qloo moved both a frontier and a small model's scores closer to real fans (0.73 and 0.72). Timetables built
+          from them were not shown to be better, and we say so.</p></article>
+      <article class="model"><span class="tagline">Where the model leads</span><h3>Openers and tour order</h3>
+        <p>In our earlier tests a model picked openers and tour cities better than Qloo, so the model leads those two
+          tools, labelled, and Qloo checks its picks against real fans.</p></article>
+    </div>
+    <p class="hint c-limits">Limits, stated before the result: the listening data is from about 2011 and holds each
+      listener's top 50 artists. Full protocol and readings: PREREGISTRATION_28.md and PROJECT_LOG.md.</p>
+
+    <div class="band-head second">
+      <div>
+        <p class="kicker big">Sources</p>
+        <h2>Where every number comes from</h2>
+      </div>
+    </div>
+    <div class="sources">
+      <article class="s-qloo"><span class="tagline">Qloo taste graph</span><h3>Which acts share fans</h3>
+        <p>Qloo's affinity between every pair of acts on the bill, and between a fan's favourites and every act. Same answer every time, no model call.</p></article>
+      <article class="s-city"><span class="tagline">Last.fm listening data</span><h3>The few acts Qloo lacks</h3>
+        <p>New and small acts that Qloo does not hold yet get their overlap from Last.fm's similar artists, and are labelled on the timetable.</p></article>
+      <article><span class="tagline">Published set times and listings</span><h3>The real timetable and shows</h3>
+        <p>Lollapalooza Chicago as published by Time Out Chicago, and every music show on sale in a city from Ticketmaster.</p></article>
+    </div>
+  </section>
+</div>
+
+</main>
+
+<footer class="foot">
+  <a class="logo" href="#/"><span class="logo-mark c-mark" aria-hidden="true"></span>Clash Court</a>
+  <p>Qloo Agentic Hackathon 2026, by Athmeeya M Kashyap and Siddhant Gudwani. Fan overlap from Qloo's taste graph, and
+    from Last.fm for acts Qloo does not hold; an act neither holds is shown as no data and never guessed.</p>
+</footer>
+<button type="button" class="c-askbtn" id="ask-open" aria-controls="ask-panel" aria-expanded="false">
+  <span class="dot" aria-hidden="true"></span>Ask the court
+</button>
+<aside class="c-ask" id="ask-panel" aria-hidden="true" aria-label="Ask the court">
+  <div class="c-askhead">
+    <div>
+      <p class="kicker">The clerk</p>
+      <h2>Ask the court</h2>
+    </div>
+    <button type="button" class="icon-btn" id="ask-close" aria-label="Close">&times;</button>
+  </div>
+  <p class="hint">Ask in plain words. The clerk can plan your day, change the timetable, find a night in a city, read a
+    promoter's month or explain the evidence. You see each tool it calls.</p>
+  <div class="c-asklog" id="ask-log" aria-live="polite"></div>
+  <div class="chips c-asksuggest" id="ask-suggest"></div>
+  <form class="c-row c-askform" id="ask-form" autocomplete="off">
+    <input id="ask-text" maxlength="300" placeholder="Ask the court..." aria-label="Your question">
+    <button type="submit" class="primary c-auto" id="ask-send">Ask</button>
+  </form>
+</aside>
+<dialog class="c-dlg" id="lineup-dlg" aria-labelledby="lu-title">
+  <form id="lu-form" autocomplete="off">
+    <div class="c-askhead">
+      <div><p class="kicker">Your festival day</p><h2 id="lu-title">Bring your own lineup</h2></div>
+      <button type="button" class="icon-btn" id="lu-close" aria-label="Close">&times;</button>
+    </div>
+    <p class="hint">One set per line: stage, act, start, end. At least four sets. Commas or tabs (a copy from a
+      spreadsheet works). Times like 13:00 or 1pm. Every act is matched in Qloo, then the court, the graph and the
+      chat work on your day.</p>
+    <label for="lu-name">Name</label>
+    <input id="lu-name" maxlength="80" placeholder="My festival, Saturday">
+    <label for="lu-text">Sets</label>
+    <textarea id="lu-text" rows="10" maxlength="20000" placeholder="Stage, Act, Start, End&#10;Main, Hozier, 20:30, 22:00&#10;Second, Lizzy McAlpine, 19:45, 20:45&#10;Main, Noah Kahan, 18:30, 19:45&#10;Second, Clairo, 16:30, 17:30"></textarea>
+    <p class="form-error" id="lu-err" hidden></p>
+    <p class="hint" id="lu-prog" aria-live="polite"></p>
+    <div class="c-row">
+      <button type="button" class="quiet small" id="lu-sample">Use a sample</button>
+      <button type="submit" class="primary c-auto" id="lu-go">Build the day</button>
+    </div>
+  </form>
+</dialog>
+<div class="c-tourbar" id="tour-bar" hidden aria-live="polite">
+  <span class="n" id="tour-n"></span>
+  <div><strong id="tour-t"></strong><span id="tour-s"></span></div>
+  <button type="button" class="quiet small" id="tour-stop">Stop the tour</button>
+</div>
+<script src="/static/site/site.js?v=1"></script>
+<script src="/static/site/court.js?v=2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="/static/site/city.js?v=1"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script src="/static/site/graph.js?v=1"></script>
+<script src="/static/site/ask.js?v=1"></script>
+<script src="/static/site/tour.js?v=1"></script>
+<script src="/static/site/lineup.js?v=1"></script>
+<script src="/static/site/qloo_adds.js?v=1"></script>
+<script>window.site && window.site.start();</script>
+</body>
+</html>
