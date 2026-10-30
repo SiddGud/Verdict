@@ -5,7 +5,7 @@
   let running = false, stopped = false;
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   const go = (id) => document.getElementById(id).scrollIntoView({ behavior: "smooth", block: "start" });
-  const STEPS = 5;
+  const STEPS = 6;
 
   function bar(n, title, sub) {
     $("tour-bar").hidden = false;
@@ -28,24 +28,33 @@
       bar(1, "The problem", "Two acts that share fans, on two stages, at the same time: someone misses one. Every festival has dozens.");
       await sleep(4500); if (stopped) return;
 
+      go("graph");
+      window.billGraph.setMode("published");
+      bar(2, "The bill as Qloo sees it", "Every act pulled toward the acts its fans share. Pink lines: pairs on at the same time, whose fans must choose.");
+      await sleep(5500); if (stopped) return;
+
       go("court");
-      bar(2, "The court sits", "Qloo scores how much every pair of acts shares fans. Fan agents argue each clash, the booker objects, the court rules, and the timetable moves.");
+      bar(3, "The court sits", "Qloo scores how much every pair of acts shares fans. Fan agents argue each clash, the booker objects, the court rules, and the timetable moves.");
       window.court.pace(0.55);
       await window.court.convene();
       window.court.pace(1);
-      await sleep(2500); if (stopped) return;
+      await sleep(1500); if (stopped) return;
+      go("graph");
+      await window.billGraph.setMode("now");
+      bar(3, "The court sits", "After the ruling: the pink lines are gone. Fans of those pairs no longer have to choose.");
+      await sleep(4500); if (stopped) return;
 
       go("desk");
-      bar(3, "A city's month, for one audience", "Every show on sale in New York this November, scored for Clairo's fans. The agent visits the shows that pull hardest on them.");
+      bar(4, "A city's month, for one audience", "Every show on sale in New York this November, scored for Clairo's fans. The agent visits the shows that pull hardest on them.");
       await window.cityDesk.book("Clairo");
       await sleep(2500); if (stopped) return;
 
-      bar(4, "A promoter's shows", "Live Nation's New York month: which of its own shows compete for the same fans, and which should market each other.");
+      bar(5, "A promoter's shows", "Live Nation's New York month: which of its own shows compete for the same fans, and which should market each other.");
       go("desk");
       await window.cityDesk.portfolio();
       await sleep(3000); if (stopped) return;
 
-      bar(5, "Ask the court", "A conversational agent that picks its own tools: Qloo overlap, the timetable, Ticketmaster listings. Every number is checked.");
+      bar(6, "Ask the court", "A conversational agent that picks its own tools: Qloo overlap, the timetable, Ticketmaster listings. Every number is checked.");
       window.askCourt.open();
       const before = document.querySelectorAll("#ask-log .q-answer").length;
       window.askCourt.send("Who on this bill shares the most fans with Chappell Roan, and do they clash with her now?");

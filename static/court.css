@@ -283,3 +283,82 @@
   .c-askbtn { right: 12px; bottom: 12px; }
 }
 @media (prefers-reduced-motion: reduce) { .c-ask, .c-bars2 .b i { transition: none; } .q-trace li, .q-answer { animation: none; } }
+
+/* ---------- photos (Qloo) and monograms ---------- */
+.c-av { display: inline-grid; place-items: center; flex: none; width: 28px; height: 28px; border-radius: 50%; overflow: hidden;
+  background: var(--qloo-tint); color: var(--qloo); font: 600 .62rem var(--body); letter-spacing: .02em; vertical-align: middle; }
+.c-av img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.c-av.xs { width: 15px; height: 15px; font-size: .45rem; margin-right: 4px; }
+.c-av.sm { width: 22px; height: 22px; font-size: .55rem; margin-right: 6px; }
+.c-av.lg { width: 74px; height: 74px; font-size: 1.3rem; box-shadow: 0 0 0 3px var(--surface), 0 8px 22px -10px rgba(0, 0, 0, .5); }
+.c-cell .a { display: flex; align-items: center; }
+.c-cell.hot .c-av { box-shadow: 0 0 0 1.5px rgba(255, 255, 255, .7); }
+.c-say .who { display: flex; align-items: center; }
+
+/* ---------- the face-off ---------- */
+.c-faceoff { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: .6rem; text-align: center; }
+.c-faceoff .side { display: grid; justify-items: center; gap: .3rem; animation: c-in .4s ease both; }
+.c-faceoff .side:last-child { animation-delay: .12s; }
+.c-faceoff .nm { font: 400 1.25rem/1.1 var(--display); }
+.c-faceoff .fans { font: 500 .6rem var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+.c-faceoff .v { font: italic 400 1.6rem var(--display); color: var(--qloo); }
+
+/* ---------- objection and the gavel ---------- */
+.c-say.o { animation: c-in .35s ease both, c-jolt .45s ease .1s; }
+@keyframes c-jolt { 20% { transform: translateX(-6px); } 40% { transform: translateX(5px); } 60% { transform: translateX(-3px); } 80% { transform: translateX(2px); } }
+.c-say.j .who::before { content: ""; width: 14px; height: 14px; margin-right: 6px; flex: none;
+  background: currentColor; -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M3 21h12v-2H3zM14.6 3.4l6 6-2.1 2.1-6-6zM7.5 10.5l6 6-2.1 2.1-6-6zM9.6 8.4l4-4 6 6-4 4z' fill='black'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M3 21h12v-2H3zM14.6 3.4l6 6-2.1 2.1-6-6zM7.5 10.5l6 6-2.1 2.1-6-6zM9.6 8.4l4-4 6 6-4 4z' fill='black'/%3E%3C/svg%3E") center / contain no-repeat; }
+
+/* ---------- clash arcs ---------- */
+.c-grid { position: relative; }
+.c-arcs { position: absolute; left: 0; top: 0; pointer-events: none; overflow: visible; z-index: 4; }
+.c-arcs .arc { fill: none; stroke: var(--qloo); stroke-linecap: round; stroke-width: calc(1px + var(--w) * 4px);
+  opacity: calc(.2 + var(--w) * .55); stroke-dasharray: 1; stroke-dashoffset: 1; animation: c-draw .9s cubic-bezier(.2, .8, .2, 1) forwards;
+  transition: opacity .45s ease; filter: drop-shadow(0 0 3px color-mix(in srgb, var(--qloo) 50%, transparent)); }
+.c-arcs .arc.dim { opacity: .07; }
+.c-arcs .arc.trial { opacity: 1; stroke-width: 4.5px; animation: c-draw .6s ease forwards, c-glow 1.2s ease-in-out .6s infinite; }
+.c-arcs.gone .arc { opacity: 0 !important; }
+@keyframes c-draw { to { stroke-dashoffset: 0; } }
+@keyframes c-glow { 50% { filter: drop-shadow(0 0 8px var(--qloo)); } }
+@media (prefers-reduced-motion: reduce) { .c-arcs .arc { animation: none; stroke-dashoffset: 0; } .c-say.o { animation: none; } }
+
+/* ---------- the bill as qloo sees it ---------- */
+.c-graphbar { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: .6rem 1rem; margin-bottom: .6rem; }
+.c-gcount { margin: 0; }
+.c-gwrap { position: relative; }
+#g-svg { width: 100%; height: clamp(440px, 62vh, 620px); display: block; border-radius: 12px;
+  background: radial-gradient(circle at 50% 45%, color-mix(in srgb, var(--qloo) 6%, var(--field)), var(--field) 70%); }
+.g-link { stroke: var(--rule-2); stroke-opacity: .75; transition: stroke .5s ease, stroke-opacity .3s ease; }
+.g-link.clash { stroke: var(--qloo); stroke-opacity: .95; animation: g-pulse 1.6s ease-in-out infinite; }
+@keyframes g-pulse { 50% { stroke-opacity: .45; } }
+.g-node { cursor: grab; outline: none; }
+.g-node .ring { fill: var(--surface); stroke: var(--rule-2); stroke-width: 1; }
+.g-node .ring.lfm { stroke: var(--lfm); stroke-dasharray: 3 2; stroke-width: 1.5; }
+.g-node .face { stroke: none; }
+.g-node .mono { text-anchor: middle; font: 600 9px var(--body); fill: var(--qloo); pointer-events: none; }
+.g-node .lbl { text-anchor: middle; font: 500 9.5px var(--body); fill: var(--ink-2); pointer-events: none;
+  paint-order: stroke; stroke: var(--field); stroke-width: 3px; }
+.g-node.gone { opacity: .25; }
+#g-svg.focus .g-node:not(.on) { opacity: .18; }
+#g-svg.focus .g-link:not(.on) { stroke-opacity: .06; }
+#g-svg.focus .g-link.on { stroke-opacity: 1; }
+.g-node.on .ring { stroke: var(--ink); stroke-width: 2; }
+.c-gcard { position: absolute; top: 12px; right: 12px; width: min(300px, calc(100% - 24px)); background: var(--surface);
+  border: 1px solid var(--rule); border-radius: 14px; padding: .8rem .9rem; box-shadow: var(--shadow); font-size: .84rem;
+  display: grid; gap: .4rem; animation: c-in .25s ease both; pointer-events: none; }
+.c-gcard .hd { display: flex; gap: .6rem; align-items: center; }
+.c-gcard img, .c-gcard .mono { width: 46px; height: 46px; border-radius: 50%; object-fit: cover; flex: none; }
+.c-gcard .mono { display: grid; place-items: center; background: var(--qloo-tint); color: var(--qloo); font-weight: 600; }
+.c-gcard strong { display: block; font: 400 1.2rem/1.1 var(--display); }
+.c-gcard .hd span { font-size: .74rem; color: var(--muted); }
+.c-gcard .ab { color: var(--muted); }
+.c-gcard .cl { color: var(--qloo); }
+.c-gcard .ok { color: var(--ok); }
+@media (prefers-reduced-motion: reduce) { .g-link.clash { animation: none; } }
+
+/* ---------- phone fixes: nothing may push the page wider than the screen ---------- */
+.c-ask:not(.open) { visibility: hidden; transition: transform .35s cubic-bezier(.2, .8, .2, 1), visibility 0s linear .35s; }
+.c-deskbar .toggle { max-width: 100%; overflow-x: auto; scrollbar-width: none; }
+.c-deskbar .toggle::-webkit-scrollbar { display: none; }
+@media (max-width: 900px) { .nav-links { display: none; } }

@@ -15,7 +15,7 @@ try { var t = localStorage.getItem("ws-theme"); if (t === "light" || t === "dark
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400..700&family=Geist+Mono:wght@400..600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <link rel="stylesheet" href="/static/style.css?v=6">
-<link rel="stylesheet" href="/static/court.css?v=7">
+<link rel="stylesheet" href="/static/court.css?v=10">
 </head>
 <body>
 <a class="skip" href="#court">Skip to the court</a>
@@ -23,6 +23,7 @@ try { var t = localStorage.getItem("ws-theme"); if (t === "light" || t === "dark
 <nav class="nav" aria-label="Main">
   <a class="logo" href="#top" aria-label="Clash Court, back to top"><span class="logo-mark c-mark" aria-hidden="true"></span>Clash Court</a>
   <div class="nav-links">
+    <a href="#graph">The bill</a>
     <a href="#court">Festival court</a>
     <a href="#desk">City desk</a>
     <a href="#day">Your day</a>
@@ -64,7 +65,7 @@ try { var t = localStorage.getItem("ws-theme"); if (t === "light" || t === "dark
       </div>
       <p class="hint c-scorehint">Clash score: shared fans times hours of overlap, summed over every pair on the bill.</p>
       <button type="button" id="convene" class="primary">Convene the court</button>
-      <button type="button" id="tour-start" class="c-tourbtn"><span class="c-play" aria-hidden="true"></span>Watch the 90-second tour</button>
+      <button type="button" id="tour-start" class="c-tourbtn"><span class="c-play" aria-hidden="true"></span>Watch the 2-minute tour</button>
       <form id="cmd" class="c-cmd" autocomplete="off">
         <label for="text">Booker's emergency</label>
         <div class="c-row">
@@ -84,6 +85,31 @@ try { var t = localStorage.getItem("ws-theme"); if (t === "light" || t === "dark
     <div><dt>Clashes cut</dt><dd id="st-cut">0%</dd></div>
   </dl>
 </header>
+
+<section class="band c-graphband" id="graph">
+  <div class="band-head">
+    <div>
+      <p class="kicker big">The bill as Qloo sees it</p>
+      <h2>Every act, pulled toward the acts its fans share</h2>
+    </div>
+    <p class="hint">Each act sits near the acts whose fans overlap most with its own (Qloo; Last.fm where Qloo has no
+      data). A pink line is a pair that plays at the same time on different stages: fans who must choose. Switch to
+      "After the court" to see which of them the court separated. Hover an act for its details.</p>
+  </div>
+  <div class="panel c-graph">
+    <div class="c-graphbar">
+      <div class="toggle" role="radiogroup" aria-label="Timetable shown" id="g-mode">
+        <button type="button" role="radio" aria-checked="true" data-mode="published">As published</button>
+        <button type="button" role="radio" aria-checked="false" data-mode="now">After the court</button>
+      </div>
+      <p class="hint c-gcount" id="g-count"></p>
+    </div>
+    <div class="c-gwrap">
+      <svg id="g-svg" role="img" aria-label="Graph of acts linked by shared fans"></svg>
+      <div class="c-gcard" id="g-card" hidden></div>
+    </div>
+  </div>
+</section>
 
 <section class="band c-courtband" id="court">
   <div class="band-head">
@@ -328,10 +354,12 @@ try { var t = localStorage.getItem("ws-theme"); if (t === "light" || t === "dark
   <div><strong id="tour-t"></strong><span id="tour-s"></span></div>
   <button type="button" class="quiet small" id="tour-stop">Stop the tour</button>
 </div>
-<script src="/static/court.js?v=2"></script>
+<script src="/static/court.js?v=3"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script src="/static/city.js?v=6"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script src="/static/graph.js?v=3"></script>
 <script src="/static/ask.js?v=1"></script>
-<script src="/static/tour.js?v=1"></script>
+<script src="/static/tour.js?v=2"></script>
 </body>
 </html>

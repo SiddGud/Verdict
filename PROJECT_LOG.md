@@ -154,3 +154,14 @@ the tie with a frontier model, where the model leads). Found and fixed while che
 names as HTML (now escaped), a race that could submit the portfolio before its promoter list loaded, picks at the
 same venue hiding each other, and a narration bar knocked off centre by its entrance animation.
 
+## 55. Making it look like the product it is (Oct 30, 2026)
+
+Qloo's /search replies already carried each artist's photo and a short description (cached, no new calls; Qloo
+Support allows the images in hackathon demos). Photos now appear on the timetable, in each case's face-off, in the
+agent panel and in a new section, "The bill as Qloo sees it": a force layout of the day's acts pulled toward the acts
+their fans share, with pink lines for pairs on at the same time (Lollapalooza Thursday 2024: 9 such pairs as
+published, 1 after the court). Clash arcs link clashing sets on the timetable and are gone once the court moves them.
+Court speech types out; the booker's objection jolts. The guided tour now opens on the graph and returns to it after
+the ruling (checked end to end in a real browser). Checked in dark mode and at phone width; fixed a page wider than a
+phone screen (nav links, the city desk's tabs, the closed agent panel).
+

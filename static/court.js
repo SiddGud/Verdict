@@ -23,6 +23,22 @@ const clock = (m) => `${String(Math.floor(m / 60) % 24).padStart(2, "0")}:${Stri
 const wait = (ms) => (fast || instant ? Promise.resolve() : new Promise((r) => setTimeout(r, ms * pace)));
 const heat = (x) => { const w = x.clashes.length ? x.clashes[0].weight : 0; return w >= 0.6 ? "hot" : w >= 0.35 ? "warm" : ""; };
 
+// ---------- photos ----------
+
+// Qloo's photo for an act (allowed in hackathon demos, credited on the page), or a monogram for acts Qloo lacks.
+function avatar(name, size) {
+  const f = (state || published || {}).festival || {}, url = (f.photos || {})[name];
+  const w = el("span", "c-av" + (size ? " " + size : ""));
+  if (url) {
+    const img = new Image();
+    img.src = url; img.alt = ""; img.loading = "lazy"; img.decoding = "async"; img.referrerPolicy = "no-referrer";
+    img.onerror = () => { img.remove(); w.textContent = initials(name); };
+    w.append(img);
+  } else w.textContent = initials(name);
+  return w;
+}
+const initials = (n) => n.replace(/\(.*\)/, "").split(/\s+/).filter(Boolean).map((x) => x[0]).join("").slice(0, 2).toUpperCase();
+
 // ---------- timetable ----------
 
 function drawGrid(view, { trial = [], landed = [], flip = false } = {}) {
@@ -66,7 +82,9 @@ function drawGrid(view, { trial = [], landed = [], flip = false } = {}) {
       d.style.height = Math.max(16, (x.end - x.start) * PX - 3) + "px";
       if (x.act) {
         d.dataset.act = x.act;
-        d.append(el("div", "a", x.act));
+        const name = el("div", "a");
+        name.append(avatar(x.act, "xs"), document.createTextNode(x.act));
+        d.append(name);
         d.append(el("div", "t", `${clock(x.start)} to ${clock(x.end)}`));
         d.title = x.clashes.length
           ? `${x.act} shares fans with ${x.clashes.map((c) => `${c.act} (${c.minutes} min overlap)`).join(", ")}`
@@ -76,7 +94,9 @@ function drawGrid(view, { trial = [], landed = [], flip = false } = {}) {
     });
     g.append(col);
   });
-  if (flip && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
+  const moving = flip && !matchMedia("(prefers-reduced-motion: reduce)").matches;
+  setTimeout(() => drawArcs(view, trial), moving ? (fast ? 380 : 1150) : 30);
+  if (moving) {
     g.querySelectorAll(".c-cell[data-act]").forEach((c) => {
       const a = before[c.dataset.act];
       if (!a) return;
@@ -88,6 +108,38 @@ function drawGrid(view, { trial = [], landed = [], flip = false } = {}) {
     });
   }
 }
+
+// Clash arcs: a curve between every two sets that overlap in time and share many fans, thicker for more shared fans.
+// They are drawn from where the sets sit, so when the court moves sets, the arcs it resolved are simply gone.
+let arcToken = 0;
+function drawArcs(view, trial = []) {
+  const g = $("grid"), token = ++arcToken;
+  g.querySelectorAll(".c-arcs").forEach((x) => x.remove());
+  const box = g.getBoundingClientRect(), at = {};
+  g.querySelectorAll(".c-cell[data-act]").forEach((c) => { at[c.dataset.act] = c.getBoundingClientRect(); });
+  const NS = "http://www.w3.org/2000/svg", svg = document.createElementNS(NS, "svg");
+  svg.setAttribute("class", "c-arcs");
+  svg.setAttribute("width", g.scrollWidth); svg.setAttribute("height", g.scrollHeight);
+  const seen = new Set();
+  view.sets.forEach((x) => x.act && x.clashes.forEach((c) => {
+    const key = [x.act, c.act].sort().join("|");
+    if (c.weight < 0.45 || seen.has(key) || !at[x.act] || !at[c.act]) return;
+    seen.add(key);
+    const a = at[x.act], b = at[c.act];
+    const [l, r] = a.left < b.left ? [a, b] : [b, a];
+    const x1 = l.right - box.left - 6, y1 = l.top - box.top + l.height / 2;
+    const x2 = r.left - box.left + 6, y2 = r.top - box.top + r.height / 2;
+    const lift = 26 + Math.abs(x2 - x1) * 0.18;
+    const path = document.createElementNS(NS, "path");
+    path.setAttribute("d", `M${x1},${y1} C${x1 + 18},${y1 - lift} ${x2 - 18},${y2 - lift} ${x2},${y2}`);
+    path.setAttribute("pathLength", "1");
+    path.setAttribute("class", "arc" + (trial.length && trial.includes(x.act) && trial.includes(c.act) ? " trial" : trial.length ? " dim" : ""));
+    path.style.setProperty("--w", c.weight);
+    svg.append(path);
+  }));
+  if (token === arcToken) g.append(svg);
+}
+const fadeArcs = () => $("grid").querySelectorAll(".c-arcs").forEach((x) => x.classList.add("gone"));
 
 // The timetable the court argues over: as published, without any act the booker cancelled.
 function baseView(s) {
@@ -141,13 +193,32 @@ function error(msg) {
 
 // ---------- the court ----------
 
-function say(kind, who, text, extra) {
-  const m = el("div", "c-say " + kind);
-  m.append(el("div", "who", who));
-  m.append(el("div", "", text));
-  if (extra) m.append(extra);
+// One line in the court. The text types out (instantly when skipping); resolves when it has finished.
+function say(kind, who, text, extra, face) {
+  const m = el("div", "c-say " + kind), head = el("div", "who"), body = el("div", "txt");
+  if (face) head.append(avatar(face, "sm"));
+  head.append(document.createTextNode(who));
+  m.append(head, body);
   $("transcript").append(m);
-  return m;
+  const finish = () => { body.textContent = text; if (extra) m.append(extra); };
+  if (fast || instant || matchMedia("(prefers-reduced-motion: reduce)").matches) { finish(); return Promise.resolve(m); }
+  return new Promise((done) => {
+    let i = 0;
+    const step = () => {
+      if (fast) { finish(); return done(m); }
+      i = Math.min(text.length, i + 3);
+      body.textContent = text.slice(0, i);
+      if (i < text.length) setTimeout(step, 22 * pace); else { finish(); done(m); }
+    };
+    step();
+  });
+}
+
+function faceoff(a, b) {
+  const side = (n) => { const d = el("div", "side"); d.append(avatar(n, "lg"), el("span", "nm", n), el("span", "fans", "fans")); return d; };
+  const f = el("div", "c-faceoff");
+  f.append(side(a), el("span", "v", "v."), side(b));
+  return f;
 }
 
 function docket(cases) {
@@ -174,8 +245,8 @@ async function sit(s, opening) {
   if (opening) {
     $("case-no").textContent = "Emergency";
     $("case-title").textContent = "The booker has news.";
-    say("e", "Booker agent", opening);
-    await wait(1400);
+    await say("e", "Booker agent", opening);
+    await wait(900);
   }
   for (let i = 0; i < cases.length; i++) {
     const c = cases[i], [a, b] = c.acts, src = lfm.has(a) || lfm.has(b) ? " lfm" : "";
@@ -184,19 +255,19 @@ async function sit(s, opening) {
     $("case-no").textContent = `Case ${i + 1} of ${cases.length}, ${c.when}`;
     const t = $("case-title");
     t.innerHTML = "";
-    t.append(`${a}'s fans `, el("span", "v", "v."), ` ${b}'s fans`);
+    t.append(faceoff(a, b));
     $("transcript").innerHTML = "";
     drawGrid(baseView(s), { trial: [a, b] });
     await wait(500);
-    say("p" + src, `Fan agent for ${a}`, c.plaintiff);
-    await wait(1500);
-    say("d" + src, `Fan agent for ${b}`, c.defendant);
-    await wait(1500);
+    await say("p" + src, `Fan agent for ${a}`, c.plaintiff, null, a);
+    await wait(500);
+    await say("d" + src, `Fan agent for ${b}`, c.defendant, null, b);
+    await wait(500);
     if (c.objection) {
-      say("o", "Booker agent", c.objection);
-      await wait(1700);
+      await say("o", "Booker agent: objection", c.objection);
+      await wait(600);
     }
-    say("j", "The court", c.ruling, el("span", "c-stamp " + c.outcome, VERDICT[c.outcome]));
+    await say("j", "The court", c.ruling, el("span", "c-stamp " + c.outcome, VERDICT[c.outcome]));
     const tag = items[i].querySelector(".tag");
     tag.className = "tag " + c.outcome;
     tag.textContent = VERDICT[c.outcome];
@@ -208,6 +279,8 @@ async function sit(s, opening) {
   $("transcript").innerHTML = "";
   const done = (s.feed || []).filter((f) => f.who === "referee").pop();
   say("j", "The court", done ? done.text : "No move would lower the clash score without breaking a rule.");
+  fadeArcs();
+  await wait(450);
   (s.feed || []).filter((f) => f.who === "referee" && /^(The current|I cannot)/.test(f.text)).forEach((f) => say("o", "Booker agent", f.text));
   fast = false;
   drawGrid(s, { flip: true, landed: cases.flatMap((c) => (c.outcome !== "stands" ? c.acts : [])) });

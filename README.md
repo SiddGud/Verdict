@@ -6,9 +6,13 @@ Hackathon 2026 by Athmeeya M Kashyap and Siddhant Gudwani.
 
 ## What it does
 
+- **The bill as Qloo sees it.** Every act on the day drawn as a photo, pulled toward the acts its fans share (a force
+  layout over Qloo's pair overlap). Pink lines are pairs on at the same time; switch to "After the court" and watch
+  them go (9 pairs to 1 on Lollapalooza Thursday 2024).
 - **Festival court.** A real Lollapalooza day (published set times). Qloo scores how much every pair of acts shares
   fans. The worst clashes go on trial: fan agents argue with their numbers, the booker agent objects when the
-  quickest fix breaks a rule, the court rules, and the whole timetable moves (about half the clash on Lollapalooza
+  quickest fix breaks a rule, the court rules, and the whole timetable moves, with clash arcs linking the sets that
+  share fans until the court separates them (about half the clash on Lollapalooza
   Thursday 2024, every rule kept). The booker can type emergencies ("Tyla just cancelled").
 - **City desk.** A city's month of music shows on sale (Ticketmaster, 12 US cities):
   - Book a date: the nights where an artist's fans are pulled least, rivals to avoid, partners to market alongside.
@@ -25,9 +29,9 @@ Hackathon 2026 by Athmeeya M Kashyap and Siddhant Gudwani.
 - **With and without Qloo.** Test 28 shown both ways: Qloo far beyond popularity, level with a frontier model, best
   when the two work together; and where the model leads instead.
 
-## Try it in 90 seconds
+## Try it in 2 minutes
 
-Press "Watch the 90-second tour" on the page (or open `/?watch=1`): the court sits, the city desk reads New York for
+Press "Watch the 2-minute tour" on the page (or open `/?watch=1`): the court sits, the city desk reads New York for
 Clairo, a promoter's portfolio is drawn, and the agent answers a question. Other demo links: `/?convene=1`,
 `/?book=Clairo`, `/?portfolio=1`, `/?friends=1`, `/?ask=Who shares the most fans with Hozier?`.
 

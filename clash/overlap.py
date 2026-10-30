@@ -74,8 +74,22 @@ def resolve(name):
     d = _get("/search", query=name, types="urn:entity:artist", take=5)
     for h in d.get("results") or []:  # /search returns a plain list
         if isinstance(h, dict) and _norm(h.get("name", "")) == _norm(name):
-            return {"name": h["name"], "id": h["entity_id"], "popularity": h.get("popularity") or 0.0}
+            props = h.get("properties") or {}
+            return {"name": h["name"], "id": h["entity_id"], "popularity": h.get("popularity") or 0.0,
+                    "image": (props.get("image") or {}).get("url"), "about": props.get("short_description")}
     return None
+
+
+def photos(fest):
+    """{act: Qloo image URL} for the acts Qloo holds. Reuses the cached /search replies that matched each act, so it
+    makes no new calls once the bill is matched. Qloo allows its images in hackathon demos with credit."""
+    alias = fest.get("qloo_names", {})
+    out = {}
+    for a in fest["acts"]:
+        e = resolve(alias.get(a, a))
+        if e and e.get("image"):
+            out[a] = e["image"]
+    return out
 
 
 def _scores(signal, ids):

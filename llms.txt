@@ -24,9 +24,14 @@ A tool-using loop: the model chooses among timetable, where_is, shares_fans_with
 fan_route, city_plan, promoter_portfolio, promoters and evidence; code runs them; every number in the answer is
 checked against the tool results and unmatched numbers are flagged. Endpoint: POST /api/clash/ask (server-sent events).
 
+## The bill as a graph
+
+GET /api/clash/graph?session=... returns each act (with Qloo's photo and short description) and its closest acts on
+the bill, flagged where the pair overlaps in time as published and after the court.
+
 ## How Qloo is used
 
-- `/search` (artist) to resolve each act by exact name.
+- `/search` (artist) to resolve each act by exact name; its photo and short description are shown (allowed for hackathon demos).
 - `/v2/insights` with `filter.type=urn:entity:artist`, one act as `signal.interests.entities` and the rest of the bill
   in `filter.results.entities`: the pair overlap table (about one call per act, cached).
 - The same endpoint with a fan's favourites as the signal: the fan's fit for every act on the bill (one call).

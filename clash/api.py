@@ -7,7 +7,7 @@ import queue
 import threading
 import uuid
 
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, HTTPException, Query, Request
 from fastapi.responses import JSONResponse, StreamingResponse
 from pydantic import BaseModel, Field
 
@@ -23,6 +23,7 @@ router = APIRouter()
 ag.MODEL_OK = lambda: not guard.over_budget()  # the booker's model fallback stops at the daily cap
 FESTIVALS = os.path.join(os.path.dirname(__file__), "festivals")
 SESSIONS, LOCK = {}, threading.Lock()
+PHOTOS = {}  # festival -> {act: Qloo image URL}
 MAX_SESSIONS = 500
 
 
@@ -32,6 +33,9 @@ def _festival(slug):
         raise HTTPException(404, "unknown festival")
     fest = ov.load(path)
     t = ov.table(fest)
+    if slug not in PHOTOS:
+        PHOTOS[slug] = ov.photos(fest)
+    fest["photos"] = PHOTOS[slug]
     return fest, t, ov.weights(t)
 
 
@@ -51,7 +55,7 @@ def _state(s, feed=None, rule=None):
     pub = sc.published(fest)
     return {"session": s["id"], "version": s["version"], "festival": {"slug": fest["slug"], "name": fest["name"],
             "note": fest.get("note", ""), "stages": fest["stages"], "day": fest["day"],
-            "examples": fest.get("examples", [])},
+            "examples": fest.get("examples", []), "photos": fest.get("photos", {})},
             "sets": sets, "score": sc.clash_score(pos, w, fest), "published_score": sc.clash_score(pub, w, fest),
             "worst": [{"weight": wt, "acts": [a, b], "minutes": m,
                        "from": ov.clock(max(fest["cells"][pos[a]]["start"], fest["cells"][pos[b]]["start"]))}
@@ -244,3 +248,34 @@ def ask(req: Ask, request: Request):
             yield "data: " + json.dumps(e) + "\n\n"
 
     return StreamingResponse(stream(), media_type="text/event-stream", headers={"Cache-Control": "no-cache"})
+
+
+ABOUT = {}  # festival -> {act: Qloo's short description}
+
+
+@router.get("/api/clash/graph")
+def graph(session: str = Query(max_length=40), top: int = 3):
+    """The bill as a fan-overlap graph: each act linked to its closest acts on the bill (Qloo, or Last.fm where Qloo
+    has no data), and whether each linked pair overlaps in time as published and on the session's timetable now."""
+    s = _session(session)
+    fest, w, pos, t = s["fest"], s["w"], s["pos"], s["table"]
+    slug, h, pub = fest["slug"], sc._hours(fest), sc.published(fest)
+    if slug not in ABOUT:
+        alias = fest.get("qloo_names", {})
+        ABOUT[slug] = {a: (ov.resolve(alias.get(a, a)) or {}).get("about") for a in t["matched"]}
+    top = max(1, min(top, 5))
+    links, seen = [], set()
+    for a in fest["acts"]:
+        for x, b in sorted(((x, b) for b, x in w.get(a, {}).items()), reverse=True)[:top]:
+            key = tuple(sorted((a, b)))
+            if x < 0.3 or key in seen:
+                continue
+            seen.add(key)
+            links.append({"source": a, "target": b, "weight": round(x, 3),
+                          "clash_published": round(h[pub[a]][pub[b]] * 60),
+                          "clash_now": round(h[pos[a]][pos[b]] * 60) if a in pos and b in pos else 0})
+    src = lambda a: "qloo" if a in t["matched"] else "lastfm" if a in t.get("lastfm", {}) else None  # noqa: E731
+    nodes = [{"id": a, "stage": fest["cells"][pub[a]]["stage"], "photo": fest.get("photos", {}).get(a),
+              "source": src(a), "about": ABOUT[slug].get(a), "cancelled": a not in pos} for a in fest["acts"]]
+    return {"stages": fest["stages"], "nodes": nodes, "links": links,
+            "court_has_sat": s["version"] > 0 and pos != pub}
