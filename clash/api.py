@@ -116,7 +116,7 @@ def load(req: Load):
         if len(SESSIONS) >= MAX_SESSIONS:
             SESSIONS.pop(next(iter(SESSIONS)))
         SESSIONS[s["id"]] = s
-    return _state(s)
+    return {**_state(s), "weights": {a: {b: round(x, 3) for b, x in row.items() if x >= 0.2} for a, row in w.items()}}
 
 
 def _apply(s):
@@ -169,6 +169,7 @@ def reset(req: Session):
     s = _session(req.session)
     with LOCK:
         s["pos"], s["rules"], s["version"] = sc.published(s["fest"]), [], s["version"] + 1
+        s["undo"] = []
     return _state(s)
 
 
@@ -279,3 +280,62 @@ def graph(session: str = Query(max_length=40), top: int = 3):
               "source": src(a), "about": ABOUT[slug].get(a), "cancelled": a not in pos} for a in fest["acts"]]
     return {"stages": fest["stages"], "nodes": nodes, "links": links,
             "court_has_sat": s["version"] > 0 and pos != pub}
+
+
+
+class Move(BaseModel):
+    session: str = Field(max_length=40)
+    act: str = Field(min_length=1, max_length=120)
+    cell: int = Field(ge=0, le=500)
+
+
+def _placed(fest, act, cell):
+    """The rules that keep an act where the booker put it: its stage and its start time."""
+    c = fest["cells"][cell]
+    return [{"type": "on_stage", "act": act, "stage": c["stage"], "placed": True},
+            {"type": "at_time", "act": act, "time": c["start"], "placed": True}]
+
+
+@router.post("/api/clash/move")
+def move(req: Move, request: Request):
+    """The booker drags a set to another slot: the two sets swap, the day is re-scored, and the act is pinned there so
+    the court plans around it. A move that breaks a house rule is kept (the booker decides) and the reasons are listed."""
+    s = _session(req.session)
+    why = guard.admit(guard.visitor(request), "command")
+    if why:
+        return {**_state(s), "error": why}
+    fest = s["fest"]
+    if req.act not in s["pos"] or req.cell >= len(fest["cells"]):
+        raise HTTPException(422, "unknown act or slot")
+    with LOCK:
+        pos = dict(s["pos"])
+        at = {i: a for a, i in pos.items()}
+        old, other = pos[req.act], at.get(req.cell)
+        if old == req.cell:
+            return {**_state(s), "moved": None}
+        s.setdefault("undo", []).append((dict(s["pos"]), list(s["rules"])))
+        s["undo"] = s["undo"][-30:]
+        pos[req.act] = req.cell
+        if other:
+            pos[other] = old
+        rules = [r for r in s["rules"] if not (r.get("placed") and r.get("act") in (req.act, other))]
+        rules += _placed(fest, req.act, req.cell)
+        if other:  # the act it swapped with is placed too: the booker moved it as much as the first
+            rules += _placed(fest, other, old)
+        s["pos"], s["rules"], s["version"] = pos, rules, s["version"] + 1
+    extra = [r for r in s["rules"] if r["type"] != "cancel" and not r.get("placed")]
+    broken = sc.violations(s["pos"], fest, extra)
+    return {**_state(s), "moved": {"act": req.act, "to": sc.where(fest, req.cell), "swapped": other,
+                                   "swapped_to": sc.where(fest, old) if other else None}, "broken": broken}
+
+
+@router.post("/api/clash/undo")
+def undo(req: Session):
+    s = _session(req.session)
+    with LOCK:
+        if not s.get("undo"):
+            return {**_state(s), "error": "Nothing to undo."}
+        s["pos"], s["rules"] = s["undo"].pop()
+        s["version"] += 1
+    extra = [r for r in s["rules"] if r["type"] != "cancel" and not r.get("placed")]
+    return {**_state(s), "broken": sc.violations(s["pos"], s["fest"], extra), "undone": True}

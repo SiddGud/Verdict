@@ -15,7 +15,7 @@ try { var t = localStorage.getItem("ws-theme"); if (t === "light" || t === "dark
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400..700&family=Geist+Mono:wght@400..600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <link rel="stylesheet" href="/static/style.css?v=6">
-<link rel="stylesheet" href="/static/court.css?v=10">
+<link rel="stylesheet" href="/static/court.css?v=12">
 </head>
 <body>
 <a class="skip" href="#court">Skip to the court</a>
@@ -123,9 +123,9 @@ try { var t = localStorage.getItem("ws-theme"); if (t === "light" || t === "dark
   <div class="c-layout">
     <section class="panel c-table" aria-label="Timetable">
       <div class="c-tablehead">
-        <p class="ph">Timetable</p>
+        <p class="ph">Timetable <span class="c-draghint">Drag any set to move it. You decide; the court advises.</span></p>
         <div class="c-legend">
-          <span><i class="sw hot"></i>Shares many fans with a set it overlaps</span>
+          <span><i class="sw hot"></i>Clash: shares many fans with a set at the same time</span>
           <span><i class="sw warm"></i>Some shared fans</span>
           <span><i class="sw lfm"></i>From Last.fm (Qloo has no data)</span>
         </div>
@@ -354,7 +354,7 @@ try { var t = localStorage.getItem("ws-theme"); if (t === "light" || t === "dark
   <div><strong id="tour-t"></strong><span id="tour-s"></span></div>
   <button type="button" class="quiet small" id="tour-stop">Stop the tour</button>
 </div>
-<script src="/static/court.js?v=3"></script>
+<script src="/static/court.js?v=6"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script src="/static/city.js?v=6"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>

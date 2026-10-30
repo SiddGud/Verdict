@@ -165,3 +165,14 @@ Court speech types out; the booker's objection jolts. The guided tour now opens 
 the ruling (checked end to end in a real browser). Checked in dark mode and at phone width; fixed a page wider than a
 phone screen (nav links, the city desk's tabs, the closed agent panel).
 
+## 56. The booker moves sets by hand (Oct 30, 2026)
+
+The team asked for manual control: the booker decides, the court advises. Any set can be dragged to another slot
+(the two swap); before the drop the slot previews the clash for that act's fans from the pair weights sent once on
+load. The server re-scores the day, lists any house rule the move breaks (the move is kept), keeps an undo history,
+and pins both moved acts (stage and start time), so a later court plans around them. Checked through the endpoints
+(swap and pin, a headliner moved early is flagged, undo restores the step, the court keeps both placements while
+cutting the rest from 10.85 to 5.90, reset clears) and in a real browser (preview, drop, report, Undo). Clashes are
+now red on the timetable; one threshold (shared-fan weight 0.45) defines a clash for the cells, the arcs and the
+preview, after a check found the preview and the cell colour disagreeing.
+

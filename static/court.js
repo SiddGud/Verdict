@@ -4,6 +4,7 @@
 const $ = (id) => document.getElementById(id);
 const PX = 1.05; // pixels per minute
 let state = null, published = null, busy = false, fast = false, pace = 1; // pace < 1 speeds the court up (the tour)
+let weights = {}; // act -> act -> shared-fan weight, sent once on load, so a drop can be previewed before it happens
 const instant = new URLSearchParams(location.search).has("fast"); // for screenshots and demo links
 
 async function post(path, body) {
@@ -21,7 +22,7 @@ function el(tag, cls, text) {
 
 const clock = (m) => `${String(Math.floor(m / 60) % 24).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}`;
 const wait = (ms) => (fast || instant ? Promise.resolve() : new Promise((r) => setTimeout(r, ms * pace)));
-const heat = (x) => { const w = x.clashes.length ? x.clashes[0].weight : 0; return w >= 0.6 ? "hot" : w >= 0.35 ? "warm" : ""; };
+const heat = (x) => { const w = x.clashes.length ? x.clashes[0].weight : 0; return w >= 0.45 ? "hot" : w >= 0.3 ? "warm" : ""; }; // 0.45: the same clash line as the arcs and the drop preview
 
 // ---------- photos ----------
 
@@ -78,10 +79,12 @@ function drawGrid(view, { trial = [], landed = [], flip = false } = {}) {
         if (landed.includes(x.act)) cls.push("landed");
       }
       const d = el("div", cls.join(" "));
+      d.dataset.cell = x.cell;
       d.style.top = (x.start - d0) * PX + 1 + "px";
       d.style.height = Math.max(16, (x.end - x.start) * PX - 3) + "px";
       if (x.act) {
         d.dataset.act = x.act;
+        d.draggable = !trial.length;
         const name = el("div", "a");
         name.append(avatar(x.act, "xs"), document.createTextNode(x.act));
         d.append(name);
@@ -140,6 +143,114 @@ function drawArcs(view, trial = []) {
   if (token === arcToken) g.append(svg);
 }
 const fadeArcs = () => $("grid").querySelectorAll(".c-arcs").forEach((x) => x.classList.add("gone"));
+
+// ---------- the booker moves sets by hand ----------
+
+let dragAct = null;
+const CLASH = 0.45; // shared-fan weight at which an overlap counts as a clash (as the arcs draw them)
+
+// What happens to the dragged act's fans if it plays in this slot: which sets on other stages overlap it, and how many
+// fans they share (the set already in the slot swaps into the dragged act's old slot, so it is left out).
+function preview(cell) {
+  const target = state.sets[cell], from = state.sets.find((x) => x.act === dragAct);
+  if (!target || !from) return null;
+  const hits = [];
+  state.sets.forEach((x) => {
+    if (!x.act || x.act === dragAct || x.cell === cell || x.stage === target.stage) return;
+    const mins = Math.min(target.end, x.end) - Math.max(target.start, x.start);
+    const w = (weights[dragAct] || {})[x.act] || 0;
+    if (mins > 0 && w >= 0.35) hits.push({ act: x.act, w, mins });
+  });
+  hits.sort((a, b) => b.w - a.w);
+  return { hits, clash: hits.some((h) => h.w >= CLASH), swap: target.act };
+}
+
+function showPreview(node, p) {
+  let tip = $("drop-tip");
+  if (!tip) { tip = el("div", "c-droptip"); tip.id = "drop-tip"; $("grid").append(tip); }
+  const g = $("grid").getBoundingClientRect(), r = node.getBoundingClientRect();
+  tip.style.left = Math.min(r.left - g.left, $("grid").scrollWidth - 230) + "px";
+  tip.style.top = r.bottom - g.top + 6 + "px";
+  tip.className = "c-droptip " + (p.clash ? "bad" : "good");
+  tip.innerHTML = "";
+  tip.append(el("strong", "", p.clash ? `Clash for ${dragAct}'s fans` : `Clear for ${dragAct}'s fans`));
+  if (p.hits.length) p.hits.slice(0, 3).forEach((h) => tip.append(el("span", "", `${h.act}: ${h.mins} min, ${h.w >= CLASH ? "many" : "some"} shared fans`)));
+  else tip.append(el("span", "", "No set on another stage shares many of its fans at that time."));
+  if (p.swap) tip.append(el("span", "swap", `Swaps with ${p.swap}`));
+}
+const hidePreview = () => { const t = $("drop-tip"); if (t) t.remove(); };
+
+function wireDrag() {
+  const g = $("grid");
+  g.addEventListener("dragstart", (e) => {
+    const c = e.target.closest(".c-cell[data-act]");
+    if (!c || busy) { e.preventDefault(); return; }
+    dragAct = c.dataset.act;
+    e.dataTransfer.effectAllowed = "move";
+    e.dataTransfer.setData("text/plain", dragAct);
+    c.classList.add("dragging");
+    g.classList.add("dragmode");
+  });
+  g.addEventListener("dragend", () => {
+    dragAct = null;
+    g.classList.remove("dragmode");
+    g.querySelectorAll(".dragging, .drop-good, .drop-bad").forEach((x) => x.classList.remove("dragging", "drop-good", "drop-bad"));
+    hidePreview();
+  });
+  g.addEventListener("dragover", (e) => {
+    const c = e.target.closest(".c-cell[data-cell]");
+    if (!dragAct || !c || c.dataset.act === dragAct) return;
+    e.preventDefault();
+    if (c.classList.contains("drop-good") || c.classList.contains("drop-bad")) return;
+    g.querySelectorAll(".drop-good, .drop-bad").forEach((x) => x.classList.remove("drop-good", "drop-bad"));
+    const p = preview(+c.dataset.cell);
+    if (!p) return;
+    c.classList.add(p.clash ? "drop-bad" : "drop-good");
+    showPreview(c, p);
+  });
+  g.addEventListener("drop", async (e) => {
+    const c = e.target.closest(".c-cell[data-cell]");
+    if (!dragAct || !c) return;
+    e.preventDefault();
+    const act = dragAct, cell = +c.dataset.cell;
+    hidePreview();
+    try {
+      const s = await post("/api/clash/move", { session: state.session, act, cell });
+      manual(s);
+    } catch (err) { error("Could not move that set: " + err.message); }
+  });
+}
+
+// After a move or an undo: redraw, re-score, and tell the booker what changed and what (if anything) it breaks.
+function manual(s) {
+  if (s.error) { error(s.error); return; }
+  const before = state.score;
+  state = s;
+  drawGrid(s, { flip: true, landed: s.moved ? [s.moved.act, s.moved.swapped].filter(Boolean) : [] });
+  drawScore(s, true);
+  $("docket").innerHTML = "";
+  $("transcript").innerHTML = "";
+  $("case-no").textContent = s.undone ? "Undone" : "Your move";
+  $("case-title").textContent = s.undone ? "Back one step." : `${s.moved.act} to ${s.moved.to}`;
+  const diff = s.score - before;
+  const lines = [];
+  if (s.moved) lines.push(`${s.moved.act} now plays ${s.moved.to}` + (s.moved.swapped ? `; ${s.moved.swapped} moves to ${s.moved.swapped_to}.` : "."));
+  lines.push(`Clash score ${before.toFixed(2)} to ${s.score.toFixed(2)}: ${Math.abs(diff) < 0.005 ? "no change" : diff < 0 ? "fewer fans must choose" : "more fans must choose"}.`);
+  say("e", "Booker (you)", lines.join(" "));
+  if (s.broken && s.broken.length) {
+    say("o", "House rules: this breaks", s.broken.slice(0, 4).join("; ") + ". It is your call; Undo puts it back.");
+  } else if (s.moved) {
+    say("j", "The court", `Every house rule still holds. Your placement is pinned: when the court sits, it plans around it.`);
+  }
+  const row = el("div", "c-manual");
+  const u = el("button", "quiet small", "Undo"); u.type = "button";
+  u.addEventListener("click", async () => manual(await post("/api/clash/undo", { session: state.session })));
+  const c = el("button", "quiet small", "Let the court plan around it"); c.type = "button";
+  c.addEventListener("click", () => convene());
+  row.append(u, c);
+  $("transcript").append(row);
+  error("");
+}
 
 // The timetable the court argues over: as published, without any act the booker cancelled.
 function baseView(s) {
@@ -338,6 +449,7 @@ async function load(slug) {
   const s = await post("/api/clash/load", { festival: slug });
   state = s;
   published = s;
+  weights = s.weights || {};
   drawMeta(s);
   drawGrid(s);
   drawScore(s);
@@ -423,3 +535,5 @@ window.court = {
     }
   },
 };
+
+wireDrag();

@@ -14,6 +14,9 @@ Hackathon 2026 by Athmeeya M Kashyap and Siddhant Gudwani.
   quickest fix breaks a rule, the court rules, and the whole timetable moves, with clash arcs linking the sets that
   share fans until the court separates them (about half the clash on Lollapalooza
   Thursday 2024, every rule kept). The booker can type emergencies ("Tyla just cancelled").
+- **You decide.** Drag any set to another slot: before you drop, the slot shows in red or green whether that act's
+  fans would clash there, and with whom. The move is re-scored, any house rule it breaks is listed, Undo puts it back,
+  and the act stays pinned where you put it when the court plans the rest. Clashes show in red.
 - **City desk.** A city's month of music shows on sale (Ticketmaster, 12 US cities):
   - Book a date: the nights where an artist's fans are pulled least, rivals to avoid, partners to market alongside.
   - Promoter portfolio: which of one promoter's shows compete on the same night, which to sequence, which to co-promote.

@@ -362,3 +362,23 @@
 .c-deskbar .toggle { max-width: 100%; overflow-x: auto; scrollbar-width: none; }
 .c-deskbar .toggle::-webkit-scrollbar { display: none; }
 @media (max-width: 900px) { .nav-links { display: none; } }
+
+/* ---------- clashes in red; moving sets by hand ---------- */
+.c-cell.hot { background: var(--err); border-color: var(--err); color: #fff; box-shadow: 0 0 0 2px color-mix(in srgb, var(--err) 35%, transparent); }
+.sw.hot { background: var(--err); }
+.c-arcs .arc { stroke: var(--err); filter: drop-shadow(0 0 3px color-mix(in srgb, var(--err) 45%, transparent)); }
+.c-arcs .arc.trial { animation: c-draw .6s ease forwards, c-glowr 1.2s ease-in-out .6s infinite; }
+@keyframes c-glowr { 50% { filter: drop-shadow(0 0 8px var(--err)); } }
+.c-draghint { font: 400 .74rem var(--body); color: var(--muted); margin-left: .5rem; }
+.c-cell[draggable="true"] { cursor: grab; }
+.c-cell.dragging { opacity: .35; }
+.c-grid.dragmode .c-cell:not(.dragging) { transition: none; }
+.c-grid.dragmode .c-cell.empty { border-color: var(--rule-2); background: color-mix(in srgb, var(--ink) 4%, transparent); }
+.c-cell.drop-good { box-shadow: 0 0 0 3px var(--ok) !important; z-index: 5; }
+.c-cell.drop-bad { box-shadow: 0 0 0 3px var(--err) !important; z-index: 5; }
+.c-droptip { position: absolute; z-index: 20; width: 220px; padding: .55rem .7rem; border-radius: 10px; font-size: .76rem; display: grid; gap: .15rem;
+  background: var(--ink); color: var(--bg); box-shadow: 0 12px 28px -10px rgba(0, 0, 0, .5); pointer-events: none; animation: c-in .2s ease both; }
+.c-droptip strong { font-size: .82rem; }
+.c-droptip.bad strong { color: #FF8078; } .c-droptip.good strong { color: #5FD08F; }
+.c-droptip .swap { opacity: .7; font-family: var(--mono); font-size: .68rem; }
+.c-manual { display: flex; gap: .5rem; flex-wrap: wrap; }
