@@ -29,3 +29,7 @@ services:
         sync: false
       - key: QLOO_CACHE_DIR
         value: /var/data/cache
+      - key: DAILY_USD          # model spend cap per day for the public demo; tools without a model keep working
+        value: "5"
+      - key: ASKS_PER_HOUR      # questions to the agent per visitor per hour
+        value: "20"

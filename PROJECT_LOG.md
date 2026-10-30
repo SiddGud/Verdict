@@ -138,3 +138,19 @@ makes its pair scores slightly closer to real fans (both models), but the timeta
 to be better. The pattern of Tests 22 to 27 holds: no taste win over a top model, a small consistent nudge with Qloo.
 Consequence for the page: the "Without Qloo" panel leans on run-to-run instability, but on these bills the frontier
 model's two runs agree at 0.991. The instability claim should not be the headline.
+
+## 54. The city desk, the map, Ask the court, the tour (Oct 30, 2026)
+
+Scope widened after the team found a timetable fixer alone too narrow: one fan-overlap map answers three questions
+(avoid a clash, find a partner, book a night nobody serves). City desk on Ticketmaster listings for 12 US cities:
+book a date, a promoter's portfolio (Live Nation, New York, November: 1 same-night pair, 52 within a week, 34 to
+co-promote), friends' month; openers and tour order led by the model (it beat Qloo in Tests 15 to 17), labelled.
+Map on the earlier project's design: the agent flies venue to venue, the calendar fills in after. Ask the court: the earlier project's
+follow-up pattern (model picks tools, numbers checked); three test questions answered with no unchecked numbers.
+Limits for a public page: per-visitor hourly counts and a daily model spend cap (guard.py); the booker's model
+fallback stops at the cap, pattern orders keep working. Guided tour (/?watch=1) checked end to end in a real browser
+session: court, map sweep, portfolio, agent answer, comparison. The comparison section shows Test 28 both ways (wins,
+the tie with a frontier model, where the model leads). Found and fixed while checking: tooltips rendered listing
+names as HTML (now escaped), a race that could submit the portfolio before its promoter list loaded, picks at the
+same venue hiding each other, and a narration bar knocked off centre by its entrance animation.
+

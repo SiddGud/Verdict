@@ -18,6 +18,12 @@
 - A fan names up to five artists they love; Qloo scores every act on the bill for them and the page plans their best
   path through the day, flagging the clashes they cannot avoid. Those reports weigh the next re-plan.
 
+## Ask the court (conversational agent)
+
+A tool-using loop: the model chooses among timetable, where_is, shares_fans_with, clash_between, booker_order,
+fan_route, city_plan, promoter_portfolio, promoters and evidence; code runs them; every number in the answer is
+checked against the tool results and unmatched numbers are flagged. Endpoint: POST /api/clash/ask (server-sent events).
+
 ## How Qloo is used
 
 - `/search` (artist) to resolve each act by exact name.

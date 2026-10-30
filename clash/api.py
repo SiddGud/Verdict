@@ -1,20 +1,26 @@
 """HTTP routes for the Clash Court page. The server holds each visitor's timetable and is the only source of truth:
 every reply carries the full state and a version number, and the page redraws from it."""
 import glob
+import json
 import os
+import queue
 import threading
 import uuid
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
+from fastapi.responses import JSONResponse, StreamingResponse
 from pydantic import BaseModel, Field
 
 from clash import agents as ag
+from clash import ask as ak
+from clash import guard
 from clash import baseline as bl
 from clash import fanroute as fr
 from clash import overlap as ov
 from clash import schedule as sc
 
 router = APIRouter()
+ag.MODEL_OK = lambda: not guard.over_budget()  # the booker's model fallback stops at the daily cap
 FESTIVALS = os.path.join(os.path.dirname(__file__), "festivals")
 SESSIONS, LOCK = {}, threading.Lock()
 MAX_SESSIONS = 500
@@ -140,8 +146,11 @@ def run(req: Session):
 
 
 @router.post("/api/clash/command")
-def command(req: Command):
+def command(req: Command, request: Request):
     s = _session(req.session)
+    why = guard.admit(guard.visitor(request), "command")
+    if why:
+        return {**_state(s), "error": why}
     rule = ag.parse(req.text, s["fest"])
     if "error" in rule:
         return {**_state(s), "error": rule["error"]}
@@ -186,3 +195,52 @@ def baseline(festival: str = "testbill"):
     if BASELINE.get(festival) is None:
         BASELINE[festival] = bl.summary(ov.load(os.path.join(FESTIVALS, f"{festival}.json")))
     return {"summary": BASELINE[festival]}
+
+
+class Ask(BaseModel):
+    session: str = Field(max_length=40)
+    question: str = Field(min_length=2, max_length=300)
+    history: list[dict] = Field(default_factory=list, max_length=8)
+
+
+@router.post("/api/clash/ask")
+def ask(req: Ask, request: Request):
+    """Ask the court: streams the agent's tool calls and answer as server-sent events. A booker order the agent
+    issues changes this session's timetable, and the new state is streamed so the page can replay the court."""
+    s = _session(req.session)
+    why = guard.admit(guard.visitor(request), "ask", model=True)
+    if why:
+        return JSONResponse({"error": why}, status_code=429)
+    events = queue.Queue()
+    history = [{"q": str(h.get("q", ""))[:300], "a": str(h.get("a", ""))[:800]} for h in req.history if isinstance(h, dict)]
+
+    def apply_order(text):
+        rule = ag.parse(str(text)[:300], s["fest"])
+        if "error" in rule:
+            return {"error": rule["error"]}
+        with LOCK:
+            s["rules"].append(rule)
+            feed = _apply(s)
+        st = _state(s, feed, {**rule, "reads_as": ag.describe(rule, s["fest"])})
+        events.put({"type": "state", "state": st})
+        return {"reads_as": st["rule"]["reads_as"], "clash_score_published": round(st["published_score"], 2),
+                "clash_score_now": round(st["score"], 2),
+                "court_cases": [{"acts": c["acts"], "ruling": c["ruling"]} for c in st["cases"]]}
+
+    def work():
+        try:
+            ak.ask(req.question, history, s, apply_order, events.put)
+        except Exception as e:  # noqa: BLE001 - the page shows the reason; the server keeps running
+            events.put({"type": "error", "message": f"The agent could not answer: {str(e)[:160]}"})
+        events.put(None)
+
+    threading.Thread(target=work, daemon=True).start()
+
+    def stream():
+        while True:
+            e = events.get()
+            if e is None:
+                break
+            yield "data: " + json.dumps(e) + "\n\n"
+
+    return StreamingResponse(stream(), media_type="text/event-stream", headers={"Cache-Control": "no-cache"})

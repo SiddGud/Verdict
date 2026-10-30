@@ -473,4 +473,24 @@
     if (q.get("friends")) { tab("friends"); $("f-friends").requestSubmit(); }
     if (q.get("tour")) { tab("tour"); $("t-artist").value = q.get("tour"); $("t-route").click(); }
   })();
+
+  // Hooks for the guided tour: each resolves when the map has finished its sweep.
+  const whenDone = (test, ms) => new Promise((done) => {
+    const t0 = Date.now(), id = setInterval(() => { if (test() || Date.now() - t0 > ms) { clearInterval(id); done(); } }, 250);
+  });
+  const pick = (name) => document.querySelector(`#tabs button[data-tab="${name}"]`).click();
+  window.cityDesk = {
+    async book(artist) {
+      pick("book");
+      $("b-artist").value = artist;
+      $("f-book").requestSubmit();
+      await whenDone(() => document.querySelector("#o-book .c-cal.shown"), 60000);
+    },
+    async portfolio() {
+      pick("portfolio");
+      await loadPromoters();
+      $("f-port").requestSubmit();
+      await whenDone(() => $("d-cap-k").textContent === "Done" && document.querySelector("#o-port .c-cols"), 60000);
+    },
+  };
 })();

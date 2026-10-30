@@ -98,7 +98,13 @@ def parse(text, fest):
         if kind == "not_after_strict":  # "must finish by 5pm"
             return {"type": "end_by", "act": a, "time": k}
         return {"type": kind, "act": a, "time": k}
+    if not MODEL_OK():
+        return {"error": "I could not read that with the patterns, and the model is paused for today. Try: "
+                         "'Tyla just cancelled', 'Kesha arrives at 4pm' or 'keep Hozier and Lizzy McAlpine apart'."}
     return _parse_with_model(t, fest)
+
+
+MODEL_OK = lambda: True  # the web app swaps in its daily spend check  # noqa: E731
 
 
 def _parse_with_model(text, fest):

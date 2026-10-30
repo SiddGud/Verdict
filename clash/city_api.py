@@ -2,11 +2,12 @@
 Answers are kept in memory by their inputs, so a repeated question costs no Qloo, Ticketmaster or model call."""
 import threading
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel, Field
 
 from clash import booking as bk
 from clash import city as ct
+from clash import guard
 
 router = APIRouter()
 MONTHS = {"2026-11": ("2026-11-01", "2026-11-30", "November 2026"), "2026-12": ("2026-12-01", "2026-12-31", "December 2026")}
@@ -14,10 +15,16 @@ MEMO, LOCK = {}, threading.Lock()
 NAME = Field(min_length=1, max_length=60)
 
 
-def _memo(key, fn):
+def _memo(key, fn, request=None, kind="lookup"):
+    """A stored answer if this question was asked before; otherwise the visitor's hourly limit (and, for model
+    tools, the daily spend cap) is checked before the work runs."""
     with LOCK:
         if key in MEMO:
             return MEMO[key]
+    if request is not None:
+        why = guard.admit(guard.visitor(request), kind, model=kind == "model")
+        if why:
+            return {"error": why}
     try:
         out = fn()
     except Exception as e:  # a provider failing should read as a message, not a crash
@@ -51,10 +58,10 @@ class Plan(BaseModel):
 
 
 @router.post("/api/city/plan")
-def plan(req: Plan):
+def plan(req: Plan, request: Request):
     a, b = _window(req.city, req.month)
     return _memo(("plan", req.city, req.month, req.artist.lower(), req.weekends),
-                 lambda: ct.plan(req.city, req.artist.strip(), a, b, req.weekends))
+                 lambda: ct.plan(req.city, req.artist.strip(), a, b, req.weekends), request, "lookup")
 
 
 @router.get("/api/city/promoters")
@@ -71,10 +78,10 @@ class Portfolio(BaseModel):
 
 
 @router.post("/api/city/portfolio")
-def portfolio(req: Portfolio):
+def portfolio(req: Portfolio, request: Request):
     a, b = _window(req.city, req.month)
     return _memo(("portfolio", req.city, req.month, req.promoter.lower()),
-                 lambda: ct.portfolio(req.city, req.promoter, a, b))
+                 lambda: ct.portfolio(req.city, req.promoter, a, b), request, "lookup")
 
 
 class Friends(BaseModel):
@@ -84,14 +91,14 @@ class Friends(BaseModel):
 
 
 @router.post("/api/city/friends")
-def friends(req: Friends):
+def friends(req: Friends, request: Request):
     a, b = _window(req.city, req.month)
     people = {k.strip()[:30]: [x.strip()[:60] for x in v if x.strip()][:5] for k, v in req.people.items() if k.strip()}
     people = {k: v for k, v in people.items() if v}
     if not people:
         raise HTTPException(422, "name at least one person and one artist")
     key = ("friends", req.city, req.month, tuple(sorted((k, tuple(v)) for k, v in people.items())))
-    return _memo(key, lambda: ct.friends(req.city, people, a, b))
+    return _memo(key, lambda: ct.friends(req.city, people, a, b), request, "lookup")
 
 
 class Support(BaseModel):
@@ -99,8 +106,8 @@ class Support(BaseModel):
 
 
 @router.post("/api/city/support")
-def support(req: Support):
-    return _memo(("support", req.headliner.lower()), lambda: bk.support(req.headliner.strip()))
+def support(req: Support, request: Request):
+    return _memo(("support", req.headliner.lower()), lambda: bk.support(req.headliner.strip()), request, "model")
 
 
 class Tour(BaseModel):
@@ -110,9 +117,9 @@ class Tour(BaseModel):
 
 
 @router.post("/api/city/tour")
-def tour(req: Tour):
+def tour(req: Tour, request: Request):
     if req.month not in MONTHS:
         raise HTTPException(404, "unknown month")
     a, b = MONTHS[req.month][:2]
     return _memo(("tour", req.artist.lower(), tuple(req.cities), req.month),
-                 lambda: bk.tour(req.artist.strip(), req.cities, a, b))
+                 lambda: bk.tour(req.artist.strip(), req.cities, a, b), request, "model")

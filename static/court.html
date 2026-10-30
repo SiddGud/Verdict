@@ -15,7 +15,7 @@ try { var t = localStorage.getItem("ws-theme"); if (t === "light" || t === "dark
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400..700&family=Geist+Mono:wght@400..600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <link rel="stylesheet" href="/static/style.css?v=6">
-<link rel="stylesheet" href="/static/court.css?v=4">
+<link rel="stylesheet" href="/static/court.css?v=7">
 </head>
 <body>
 <a class="skip" href="#court">Skip to the court</a>
@@ -27,7 +27,7 @@ try { var t = localStorage.getItem("ws-theme"); if (t === "light" || t === "dark
     <a href="#desk">City desk</a>
     <a href="#day">Your day</a>
     <a href="#how">How it works</a>
-    <a class="how" href="#evidence">How we know</a>
+    <a class="how" href="#evidence">With and without Qloo</a>
   </div>
   <div class="nav-tools">
     <button type="button" id="theme-toggle" class="icon-btn" aria-label="Switch between light and dark" title="Switch between light and dark">
@@ -64,6 +64,7 @@ try { var t = localStorage.getItem("ws-theme"); if (t === "light" || t === "dark
       </div>
       <p class="hint c-scorehint">Clash score: shared fans times hours of overlap, summed over every pair on the bill.</p>
       <button type="button" id="convene" class="primary">Convene the court</button>
+      <button type="button" id="tour-start" class="c-tourbtn"><span class="c-play" aria-hidden="true"></span>Watch the 90-second tour</button>
       <form id="cmd" class="c-cmd" autocomplete="off">
         <label for="text">Booker's emergency</label>
         <div class="c-row">
@@ -253,32 +254,48 @@ try { var t = localStorage.getItem("ws-theme"); if (t === "light" || t === "dark
   <div class="band-head">
     <div>
       <p class="kicker big">How we know</p>
-      <h2>Tested before we built on it</h2>
+      <h2>With and without Qloo</h2>
     </div>
-    <p class="hint">Test 28 was written down and committed before any result: 10 bills of 30 real artists, judged on
-      how many listeners each pair truly shares (Last.fm). Higher is better.</p>
+    <p class="hint">Pre-registered Test 28, written down and committed before any result: 10 bills of 30 real artists,
+      each scorer judged on how many listeners every pair truly shares (Last.fm). We report the ties as well as the wins.</p>
   </div>
-  <div class="panel c-evidence">
-    <table>
-      <thead><tr><th>Who scores fan overlap</th><th>Matches real fans</th><th>Timetable quality</th></tr></thead>
-      <tbody>
-        <tr class="c-q"><td>Qloo alone</td><td>0.72</td><td>0.66</td></tr>
-        <tr><td>Popularity only</td><td>0.39</td><td>0.04</td></tr>
-        <tr><td>Frontier model alone (GPT-6 Astra)</td><td>0.70</td><td>0.67</td></tr>
-        <tr class="c-q"><td>Frontier model with Qloo</td><td>0.73</td><td>0.70</td></tr>
-        <tr><td>Small model alone (gemini-3.8-flash)</td><td>0.70</td><td>0.69</td></tr>
-        <tr class="c-q"><td>Small model with Qloo</td><td>0.72</td><td>0.67</td></tr>
-      </tbody>
-    </table>
-    <ul class="c-claims">
-      <li>Qloo alone matches a frontier model on real fan overlap, and is far beyond popularity.</li>
-      <li>Adding Qloo made both models' fan overlap scores closer to real fans.</li>
-      <li>Timetables built from the model with Qloo were not shown to be better than the model alone. We say so.</li>
-      <li>Qloo needs no model call: instant, cheap and the same every time.</li>
-    </ul>
-    <p class="hint">Limits, stated before the result: the listening data is from about 2011 and holds each listener's
-      top 50 artists. Full protocol: PREREGISTRATION_28.md.</p>
+  <div class="c-vs" id="vs">
+    <div class="panel c-chart">
+      <p class="ph">Matches real fans</p>
+      <p class="hint">How well each scorer ranks pairs of acts by the fans they really share (Spearman).</p>
+      <div class="c-bars2" data-max="0.8">
+        <div class="b"><span>Popularity only</span><i style="--v:.394"></i><b>0.39</b></div>
+        <div class="b"><span>Frontier model alone</span><i style="--v:.697"></i><b>0.70</b></div>
+        <div class="b qb"><span>Qloo alone</span><i style="--v:.723"></i><b>0.72</b></div>
+        <div class="b qb best"><span>Frontier model with Qloo</span><i style="--v:.728"></i><b>0.73</b></div>
+      </div>
+    </div>
+    <div class="panel c-chart">
+      <p class="ph">Timetable quality</p>
+      <p class="hint">How close a timetable built from each scorer gets to the best possible one (0 random, 1 best).</p>
+      <div class="c-bars2" data-max="0.8">
+        <div class="b"><span>Popularity only</span><i style="--v:.043"></i><b>0.04</b></div>
+        <div class="b"><span>Frontier model alone</span><i style="--v:.669"></i><b>0.67</b></div>
+        <div class="b qb"><span>Qloo alone</span><i style="--v:.663"></i><b>0.66</b></div>
+        <div class="b qb best"><span>Frontier model with Qloo</span><i style="--v:.702"></i><b>0.70</b></div>
+      </div>
+    </div>
   </div>
+  <div class="c-verdicts">
+    <article class="win"><span class="tagline">Qloo vs popularity</span><h3>Qloo wins, by far</h3>
+      <p>Booking by fame alone barely beats a random timetable (0.04). Qloo gets two thirds of the way to the best (0.66).</p></article>
+    <article class="tie"><span class="tagline">Qloo vs a frontier model</span><h3>A tie</h3>
+      <p>Qloo alone matches a frontier model on real fans (0.72 and 0.70, no difference). It answers instantly, costs no
+        model call, and gives the same score every time.</p></article>
+    <article class="win"><span class="tagline">A model with Qloo</span><h3>Closest to real fans</h3>
+      <p>Adding Qloo moved both a frontier and a small model's scores closer to real fans (0.73 and 0.72). Timetables built
+        from them were not shown to be better, and we say so.</p></article>
+    <article class="model"><span class="tagline">Where the model leads</span><h3>Openers and tour order</h3>
+      <p>In our earlier tests a model picked openers and tour cities better than Qloo, so on this page the model leads
+        those two tools, labelled, and Qloo checks its picks against real fans.</p></article>
+  </div>
+  <p class="hint c-limits">Limits, stated before the result: the listening data is from about 2011 and holds each
+    listener's top 50 artists. Full protocol and readings: PREREGISTRATION_28.md and PROJECT_LOG.md.</p>
 </section>
 
 <footer class="foot">
@@ -286,8 +303,35 @@ try { var t = localStorage.getItem("ws-theme"); if (t === "light" || t === "dark
   <p>Qloo Agentic Hackathon 2026, by Athmeeya M Kashyap and Siddhant Gudwani. Fan overlap from Qloo's taste graph, and
     from Last.fm for acts Qloo does not hold; an act neither holds is shown as no data and never guessed.</p>
 </footer>
-<script src="/static/court.js?v=1"></script>
+<button type="button" class="c-askbtn" id="ask-open" aria-controls="ask-panel" aria-expanded="false">
+  <span class="dot" aria-hidden="true"></span>Ask the court
+</button>
+<aside class="c-ask" id="ask-panel" aria-hidden="true" aria-label="Ask the court">
+  <div class="c-askhead">
+    <div>
+      <p class="kicker">The clerk</p>
+      <h2>Ask the court</h2>
+    </div>
+    <button type="button" class="icon-btn" id="ask-close" aria-label="Close">&times;</button>
+  </div>
+  <p class="hint">Ask anything about this festival day, a city's month or the evidence. The agent picks its tools, and
+    you see each call. Every number is checked against the tool results.</p>
+  <div class="c-asklog" id="ask-log" aria-live="polite"></div>
+  <div class="chips c-asksuggest" id="ask-suggest"></div>
+  <form class="c-row c-askform" id="ask-form" autocomplete="off">
+    <input id="ask-text" maxlength="300" placeholder="Ask the court..." aria-label="Your question">
+    <button type="submit" class="primary c-auto" id="ask-send">Ask</button>
+  </form>
+</aside>
+<div class="c-tourbar" id="tour-bar" hidden aria-live="polite">
+  <span class="n" id="tour-n"></span>
+  <div><strong id="tour-t"></strong><span id="tour-s"></span></div>
+  <button type="button" class="quiet small" id="tour-stop">Stop the tour</button>
+</div>
+<script src="/static/court.js?v=2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
-<script src="/static/city.js?v=5"></script>
+<script src="/static/city.js?v=6"></script>
+<script src="/static/ask.js?v=1"></script>
+<script src="/static/tour.js?v=1"></script>
 </body>
 </html>

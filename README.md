@@ -17,6 +17,19 @@ Hackathon 2026 by Athmeeya M Kashyap and Siddhant Gudwani.
   - Openers and tour: a language model suggests openers and orders tour cities; Qloo and Ticketmaster check them.
 - **Your day.** A fan names favourite artists and gets a route through the festival; clashes they cannot avoid are
   filed with the court.
+- **Ask the court.** A conversational agent: ask anything about the festival day, a city's month or the evidence. The
+  model chooses its tools (Qloo overlap, the timetable, Ticketmaster listings, Test 28); each call appears as it runs;
+  every number in the answer is checked against the tool results. A booker order it issues replays the court.
+- **The map.** On the city desk the agent flies venue to venue through the shows that pull hardest on an artist's
+  fans, then the month's calendar fills in; promoter pairs are drawn as lines; a tour is drawn as a route.
+- **With and without Qloo.** Test 28 shown both ways: Qloo far beyond popularity, level with a frontier model, best
+  when the two work together; and where the model leads instead.
+
+## Try it in 90 seconds
+
+Press "Watch the 90-second tour" on the page (or open `/?watch=1`): the court sits, the city desk reads New York for
+Clairo, a promoter's portfolio is drawn, and the agent answers a question. Other demo links: `/?convene=1`,
+`/?book=Clairo`, `/?portfolio=1`, `/?friends=1`, `/?ask=Who shares the most fans with Hozier?`.
 
 ## Where every number comes from
 
@@ -54,12 +67,15 @@ uvicorn app:app --port 8000
 ```
 
 Open http://localhost:8000. Engine tests: `PYTHONPATH=. python tests/test_clash_schedule.py`.
+The page is open to anyone (no login), so model calls are limited per visitor per hour and capped per day
+(`DAILY_USD`, default 5); tools that need no model keep working when the cap is reached.
 Replies from Qloo, Ticketmaster and Last.fm are cached in `cache/` (git-ignored; Qloo data never goes in the repo).
 
 ## Code
 
 - `app.py`: the server. `clash/`: `overlap.py` (matching, pair table, Last.fm fill), `schedule.py` (clash score,
   rules, optimiser), `agents.py` (booker, fan agents, court cases), `fanroute.py`, `city.py`, `booking.py`,
-  `api.py`, `city_api.py`, `festivals/` (real set times). `static/`: the page.
+  `ask.py` (the conversational agent), `guard.py` (limits), `api.py`, `city_api.py`, `festivals/` (real set times).
+  `static/`: the page (`court.js` the court, `city.js` the city desk and map, `ask.js` the agent panel, `tour.js`).
 
 MIT licence.

@@ -3,7 +3,7 @@
 // court's plan (each set slides from where it was to where it ends up).
 const $ = (id) => document.getElementById(id);
 const PX = 1.05; // pixels per minute
-let state = null, published = null, busy = false, fast = false;
+let state = null, published = null, busy = false, fast = false, pace = 1; // pace < 1 speeds the court up (the tour)
 const instant = new URLSearchParams(location.search).has("fast"); // for screenshots and demo links
 
 async function post(path, body) {
@@ -20,7 +20,7 @@ function el(tag, cls, text) {
 }
 
 const clock = (m) => `${String(Math.floor(m / 60) % 24).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}`;
-const wait = (ms) => (fast || instant ? Promise.resolve() : new Promise((r) => setTimeout(r, ms)));
+const wait = (ms) => (fast || instant ? Promise.resolve() : new Promise((r) => setTimeout(r, ms * pace)));
 const heat = (x) => { const w = x.clashes.length ? x.clashes[0].weight : 0; return w >= 0.6 ? "hot" : w >= 0.35 ? "warm" : ""; };
 
 // ---------- timetable ----------
@@ -237,7 +237,7 @@ async function act(promise, opening) {
 }
 
 function convene() {
-  if (state) act(post("/api/clash/run", { session: state.session }));
+  if (state) return act(post("/api/clash/run", { session: state.session }));
 }
 
 function emergency(text) {
@@ -329,3 +329,24 @@ $("theme-toggle").addEventListener("click", () => {
   if (q.get("convene")) convene();
   else if (q.get("cmd")) emergency(q.get("cmd"));
 })();
+
+// Hooks for the other scripts on the page (Ask the court, the guided tour).
+window.court = {
+  session: () => state && state.session,
+  pace: (p) => { pace = p; },
+  festival: () => state && state.festival,
+  convene,
+  // A state the agent produced (for example after a booker order): replay the court with it.
+  async replay(s) {
+    if (busy) return;
+    busy = true;
+    try {
+      state = s;
+      drawMeta(s);
+      document.getElementById("court").scrollIntoView({ behavior: "smooth" });
+      await sit(s, s.rule ? `${s.rule.reads_as.charAt(0).toUpperCase() + s.rule.reads_as.slice(1)}. The court sits again.` : null);
+    } finally {
+      busy = false;
+    }
+  },
+};
