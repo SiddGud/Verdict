@@ -24,14 +24,16 @@ app.include_router(city_router)
 
 
 @app.get("/")
-def index():
-    return FileResponse(os.path.join(ROOT, "static", "court.html"), headers={"Cache-Control": "no-cache"})
-
-
 @app.get("/v2")
-def organised():
-    """The organised site: one page per audience (fans, festivals, promoters) and one for the evidence."""
+def index():
+    """The site: the festival court first, then pages for fans, promoters and the evidence."""
     return FileResponse(os.path.join(ROOT, "static", "site", "index.html"), headers={"Cache-Control": "no-cache"})
+
+
+@app.get("/classic")
+def classic():
+    """The earlier one-page site, kept as the backup."""
+    return FileResponse(os.path.join(ROOT, "static", "court.html"), headers={"Cache-Control": "no-cache"})
 
 
 @app.get("/clash")

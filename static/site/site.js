@@ -1,16 +1,11 @@
-// The organised site: one page per audience (home, fans, festivals, promoters, why Qloo), switched by the address
-// (#/fans and so on). Every page's parts stay in the document, so the court, the map and the chat keep one session;
+// The organised site: the festival court is the front page; fans, promoters and why Qloo are pages of their own,
+// switched by the address (#/fans and so on). Every page's parts stay in the document, so the court, the map and the chat keep one session;
 // a page that is not shown is only hidden. Anything that scrolls to a part on a hidden page opens that page first,
 // so the guided tour and the court's own jumps work unchanged.
 (() => {
-  const VIEWS = ["home", "fans", "festivals", "promoters", "why"];
+  const VIEWS = ["festivals", "fans", "promoters", "why"];
   const DAY_ON = new Set(["fans", "festivals", "why"]); // pages that work on the chosen festival day
   const SUGGEST = {
-    home: [
-      "Plan my day: I love Hozier, Jungle and Clairo",
-      "What are the worst clashes on this festival day?",
-      "Which night in Chicago in November should Clairo play?",
-    ],
     fans: [
       "Plan my day: I love Hozier, Jungle and Clairo",
       "Who on this bill shares the most fans with Chappell Roan?",
@@ -36,7 +31,7 @@
 
   const viewOf = (hash) => {
     const v = (hash || "").replace(/^#\/?/, "");
-    return VIEWS.includes(v) ? v : v === "" ? "home" : null;
+    return VIEWS.includes(v) ? v : v === "" ? "festivals" : null;
   };
 
   // The city desk is one panel (one map, one set of tabs): fans see only Friends' month, promoters the other three.
@@ -53,7 +48,7 @@
   }
 
   function show(view, { keepScroll = false } = {}) {
-    if (!VIEWS.includes(view)) view = "home";
+    if (!VIEWS.includes(view)) view = "festivals";
     const changed = view !== current;
     current = view;
     document.querySelectorAll(".s-view").forEach((v) => { v.hidden = v.dataset.view !== view; });
@@ -66,7 +61,7 @@
     // Leaflet and the graph measure their boxes; a page that was hidden has none until it is shown.
     requestAnimationFrame(() => window.dispatchEvent(new Event("resize")));
     if (changed && !keepScroll) window.scrollTo({ top: 0 });
-    const titles = { home: "Clash Court", fans: "Clash Court for fans", festivals: "Clash Court for festivals",
+    const titles = { festivals: "Clash Court", fans: "Clash Court for fans",
       promoters: "Clash Court for promoters", why: "Why Qloo, Clash Court" };
     document.title = titles[view];
   }
@@ -76,7 +71,7 @@
   Element.prototype.scrollIntoView = function (...args) {
     const page = this.closest && this.closest(".s-view");
     if (page && page.hidden) {
-      history.replaceState(null, "", "#/" + (page.dataset.view === "home" ? "" : page.dataset.view));
+      history.replaceState(null, "", "#/" + (page.dataset.view === "festivals" ? "" : page.dataset.view));
       show(page.dataset.view, { keepScroll: true });
     }
     return scroll.apply(this, args);
@@ -95,7 +90,7 @@
 
   function start() {
     window.addEventListener("hashchange", () => { const v = viewOf(location.hash); if (v) show(v); });
-    show(viewOf(location.hash) || "home");
+    show(viewOf(location.hash) || "festivals");
   }
   window.site = { start, show, current: () => current };
 })();

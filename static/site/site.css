@@ -128,3 +128,15 @@ form .s-try .s-try-k { margin: 0 .2rem 0 0; }
   .s-day .da { display: none; }
   .s-agenda li { grid-template-columns: minmax(0, 1fr); }
 }
+
+/* ---------- the same engine: fans, promoters and the evidence, under the court ---------- */
+.s-alsogrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
+.s-alsocard { display: grid; gap: .45rem; align-content: start; text-decoration: none; padding: 1.3rem; background: var(--surface);
+  border: 1px solid var(--rule); border-radius: 16px; transition: border-color .2s ease, transform .2s ease; }
+.s-alsocard:hover { border-color: var(--ink); transform: translateY(-2px); }
+.s-alsocard .kicker { margin: 0; }
+.s-alsocard strong { font: 400 1.55rem/1.1 var(--display); font-weight: 400; }
+.s-alsocard span:last-child { color: var(--muted); font-size: .93rem; }
+.s-alsocard span:last-child::after { content: " \2192"; color: var(--ink); font-weight: 600; }
+.s-alsocard.q { border-left: 4px solid var(--qloo); background: var(--qloo-tint); }
+@media (max-width: 1080px) { .s-alsogrid { grid-template-columns: minmax(0, 1fr); } }

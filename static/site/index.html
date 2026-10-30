@@ -16,16 +16,16 @@ try { var t = localStorage.getItem("ws-theme"); if (t === "light" || t === "dark
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <link rel="stylesheet" href="/static/site/style.css?v=1">
 <link rel="stylesheet" href="/static/site/court.css?v=1">
-<link rel="stylesheet" href="/static/site/site.css?v=5">
+<link rel="stylesheet" href="/static/site/site.css?v=6">
 </head>
 <body>
 <a class="skip" href="#main">Skip to the content</a>
 
 <nav class="nav" aria-label="Main">
-  <a class="logo" href="#/" aria-label="Clash Court, home"><span class="logo-mark c-mark" aria-hidden="true"></span>Clash Court</a>
+  <a class="logo" href="#/" aria-label="Clash Court, the festival court"><span class="logo-mark c-mark" aria-hidden="true"></span>Clash Court</a>
   <div class="nav-links s-links">
+    <a href="#/" data-view="festivals">Festival court</a>
     <a href="#/fans" data-view="fans"><span class="s-for">For </span>fans</a>
-    <a href="#/festivals" data-view="festivals"><span class="s-for">For </span>festivals</a>
     <a href="#/promoters" data-view="promoters"><span class="s-for">For </span>promoters</a>
     <a class="how" href="#/why" data-view="why">Why Qloo</a>
   </div>
@@ -38,79 +38,12 @@ try { var t = localStorage.getItem("ws-theme"); if (t === "light" || t === "dark
 
 <main id="main">
 
-<!-- ======================= HOME ======================= -->
-<div class="s-view" data-view="home" id="v-home">
-  <header class="top s-top" id="top">
-    <div class="grid-art" aria-hidden="true"></div>
-    <div class="s-homehero">
-      <p class="eyebrow">Live music, mapped by shared fans</p>
-      <h1 class="wordmark">Fans shouldn't have to <em>choose.</em></h1>
-      <p class="lede">Two acts that share fans, on two stages, at the same time: someone misses one. Clash Court uses
-        <span class="src qloo">Qloo's taste data</span> to see which acts share fans. Festivals use it to stop those
-        clashes, promoters to stop booking against their own audience, and fans to plan a day where they miss nothing.</p>
-      <div class="s-herobtns">
-        <button type="button" id="tour-start" class="c-tourbtn"><span class="c-play" aria-hidden="true"></span>Watch the 2-minute tour</button>
-        <a class="s-ghost" href="#/festivals">Try the festival court</a>
-      </div>
-    </div>
-    <div class="s-doors">
-      <a class="s-door" href="#/fans">
-        <span class="s-who">I'm a fan</span>
-        <strong>Plan a day where you miss nothing</strong>
-        <span class="s-what">Name the artists you love. Get every act on the bill scored for you and your best path through the
-          festival day. Plan a month of shows with friends.</span>
-        <span class="s-go">For fans</span>
-      </a>
-      <a class="s-door" href="#/festivals">
-        <span class="s-who">I run a festival</span>
-        <strong>Put the timetable's clashes on trial</strong>
-        <span class="s-what">AI agents argue every clash and the timetable is rebuilt without breaking your rules. You have the
-          final say. Type an emergency, drag sets, or bring your own lineup.</span>
-        <span class="s-go">For festivals</span>
-      </a>
-      <a class="s-door" href="#/promoters">
-        <span class="s-who">I book or promote shows</span>
-        <strong>Stop booking against your own audience</strong>
-        <span class="s-what">Every show on sale in a city this month, scored by how much it shares fans with yours. Find the
-          best night, see which of your shows compete, pick openers.</span>
-        <span class="s-go">For promoters</span>
-      </a>
-    </div>
-  </header>
-
-  <section class="band">
-    <div class="band-head">
-      <div>
-        <p class="kicker big">How it works</p>
-        <h2>Three steps, every time</h2>
-      </div>
-    </div>
-    <ol class="s-steps3">
-      <li><span class="s-n">1</span><h3>Qloo says who shares fans</h3><p>Every act is matched in Qloo's taste graph. Qloo
-        scores how much each pair of acts' fans are the same people, from real behaviour, and gives the same answer
-        every time. Last.fm fills in the few acts Qloo lacks.</p></li>
-      <li><span class="s-n">2</span><h3>Agents and code do the work</h3><p>AI agents argue for each act's fans, a booker agent
-        checks the rules, a judge rules. Code checks every move, so nothing breaks a rule, and an optimiser tidies the
-        rest.</p></li>
-      <li><span class="s-n">3</span><h3>You decide</h3><p>You can overrule the court, drag sets yourself, type emergencies in
-        plain words, or ask the clerk anything in the chat at the bottom right of every page.</p></li>
-    </ol>
-    <a class="s-why" href="#/why">
-      <span class="kicker">Why Qloo</span>
-      <strong>Tested before we built on it.</strong>
-      <span>Asked the same question twice, a frontier model alone changed its answer by 10 points or more on up to 46 of
-        903 pairs of acts. Qloo gives the same answer every time. See the tests</span>
-    </a>
-  </section>
-</div>
-
 <!-- ============ THE FESTIVAL DAY BAR (fans and festivals) ============ -->
 <div class="s-daybar" id="daybar" hidden>
   <div class="s-dayin">
     <label for="festival">Festival day</label>
     <select id="festival" aria-label="Festival day"></select>
     <button type="button" class="c-linkbtn" id="lineup-open">Or bring your own lineup</button>
-    <span class="s-dayname" aria-hidden="true"><span id="fest-short">Lollapalooza Chicago</span></span>
   </div>
 </div>
 
@@ -183,10 +116,11 @@ try { var t = localStorage.getItem("ws-theme"); if (t === "light" || t === "dark
     <div class="grid-art" aria-hidden="true"></div>
     <div class="hero">
       <div class="brand">
-        <p class="eyebrow">For festivals and bookers</p>
-        <h1 class="wordmark">Put the clashes <em>on trial.</em></h1>
-        <p class="lede">A clash is two acts that share many fans, playing at the same time on different stages. The court
-          finds every clash and fixes it without breaking the festival's rules.</p>
+        <p class="eyebrow">Festival timetables <span id="fest-short">Lollapalooza Chicago</span></p>
+        <h1 class="wordmark">Fans shouldn't have to <em>choose.</em></h1>
+        <p class="lede">A clash is two acts that share many fans, playing at the same time on different stages: someone
+          misses one. Clash Court uses <span class="src qloo">Qloo's taste data</span> to find every clash, and AI agents
+          put each one on trial and fix it without breaking the festival's rules.</p>
         <ol class="s-how">
           <li>Pick a festival day in the bar above, or bring your own lineup.</li>
           <li>Press <b>Convene the court</b>. AI agents argue each clash: one speaks for each act's fans, a booker agent
@@ -209,6 +143,7 @@ try { var t = localStorage.getItem("ws-theme"); if (t === "light" || t === "dark
           Lower is better.</p>
         <button type="button" id="convene" class="primary">Convene the court</button>
         <button type="button" id="convene-live" class="quiet small c-live">Run the agents live (about 3 minutes)</button>
+        <button type="button" id="tour-start" class="c-tourbtn"><span class="c-play" aria-hidden="true"></span>Watch the 2-minute tour</button>
         <form id="cmd" class="c-cmd" autocomplete="off">
           <label for="text">Booker's emergency</label>
           <div class="c-row">
@@ -305,6 +240,35 @@ try { var t = localStorage.getItem("ws-theme"); if (t === "light" || t === "dark
       <li><h3>Emergencies</h3><p>Type "Tyla just cancelled" or "Kesha arrives at 4pm". The booker reads it into a checked rule and the timetable is rebuilt.</p></li>
       <li><h3>Fans weigh in</h3><p>A fan's route flags the clashes they cannot avoid. Each report adds weight to that pair the next time the court sits.</p></li>
     </ol>
+  </section>
+  <section class="band s-also">
+    <div class="band-head">
+      <div>
+        <p class="kicker big">The same engine</p>
+        <h2>Two more ways to use it</h2>
+      </div>
+      <p class="hint">The fan overlap that defines a clash also plans a fan's day and reads a city's month for a promoter.</p>
+    </div>
+    <div class="s-alsogrid">
+      <a class="s-alsocard" href="#/fans">
+        <span class="kicker">For fans</span>
+        <strong>Plan a day where you miss nothing</strong>
+        <span>Name the artists you love: every act on the bill is scored for you and your route through the day is planned.
+          With friends, get a month of nights out on a calendar.</span>
+      </a>
+      <a class="s-alsocard" href="#/promoters">
+        <span class="kicker">For promoters and booking agents</span>
+        <strong>Stop booking against your own audience</strong>
+        <span>Every show on sale in a city this month, scored by how much it shares fans with yours: the best night, your
+          own shows that compete, openers and a tour route.</span>
+      </a>
+      <a class="s-alsocard q" href="#/why">
+        <span class="kicker">Why Qloo</span>
+        <strong>Tested before we built on it</strong>
+        <span>Asked the same question twice, a frontier model alone changed its answer by 10 points or more on up to 46 of
+          903 pairs of acts. Qloo gives the same answer every time.</span>
+      </a>
+    </div>
   </section>
 </div>
 
@@ -560,7 +524,7 @@ try { var t = localStorage.getItem("ws-theme"); if (t === "light" || t === "dark
   <div><strong id="tour-t"></strong><span id="tour-s"></span></div>
   <button type="button" class="quiet small" id="tour-stop">Stop the tour</button>
 </div>
-<script src="/static/site/site.js?v=1"></script>
+<script src="/static/site/site.js?v=2"></script>
 <script src="/static/site/court.js?v=2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script src="/static/site/city.js?v=3"></script>
