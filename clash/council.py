@@ -115,7 +115,7 @@ def _agent(role, instructions, prompt, tools, run, emit, check):
         body = {"model": llm.MODEL, "instructions": instructions + " Reply with JSON only, no prose, no code fences.",
                 "input": inp, "tools": tools, "tool_choice": "auto" if calls < MAX_TOOL_CALLS else "none",
                 "stream": False, "reasoning": {"effort": "low"}, "max_output_tokens": 900}
-        d = llm.hedged_response(body)
+        d = _call(body)
         fcs = [o for o in d.get("output", []) if o.get("type") == "function_call"]
         if not fcs:
             text = llm._text(d).strip()
@@ -138,6 +138,17 @@ def _agent(role, instructions, prompt, tools, run, emit, check):
             inp += [{"type": "function_call", "call_id": fc["call_id"], "name": fc["name"], "arguments": fc.get("arguments") or "{}"},
                     {"type": "function_call_output", "call_id": fc["call_id"], "output": json.dumps(out)[:8000]}]
     raise llm.LLMError(f"{role} gave no usable reply")
+
+
+def _call(body):
+    """One model turn; when the provider says it is busy (HTTP 429), wait and try again, up to three times."""
+    for wait in (5, 15, 30, None):
+        try:
+            return llm.hedged_response(body)
+        except llm.LLMError as e:
+            if "429" not in str(e) or wait is None:
+                raise
+            time.sleep(wait)
 
 
 def _brief(name, out):
