@@ -83,14 +83,14 @@ def tour(artist, cities, start, end):
     for c in o["order"]:
         lo, hi = day, min(last, day + datetime.timedelta(days=4))
         if lo > last:
-            legs.append({"city": names[c], "error": "no dates left in the window"})
+            legs.append({"city": names[c], "slug": c, "error": "no dates left in the window"})
             continue
         p = ct.plan(c, artist, lo.isoformat(), hi.isoformat())
         if "error" in p:
             return p
         ok = [n for n in p["nights"] if not n["few_announced"]] or p["nights"]
         best = min(ok, key=lambda n: (n["pull"], n["date"]))
-        legs.append({"city": names[c], "date": best["date"], "weekday": best["weekday"], "pull": best["pull"],
+        legs.append({"city": names[c], "slug": c, "date": best["date"], "weekday": best["weekday"], "pull": best["pull"],
                      "rivals": best["rivals"][:2], "few_announced": best["few_announced"]})
         day = datetime.date.fromisoformat(best["date"]) + datetime.timedelta(days=1)
     return {"artist": artist, "route_why": str(o.get("why", ""))[:200], "legs": legs,

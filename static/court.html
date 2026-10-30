@@ -13,8 +13,9 @@ try { var t = localStorage.getItem("ws-theme"); if (t === "light" || t === "dark
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400..700&family=Geist+Mono:wght@400..600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <link rel="stylesheet" href="/static/style.css?v=6">
-<link rel="stylesheet" href="/static/court.css?v=1">
+<link rel="stylesheet" href="/static/court.css?v=4">
 </head>
 <body>
 <a class="skip" href="#court">Skip to the court</a>
@@ -140,6 +141,21 @@ try { var t = localStorage.getItem("ws-theme"); if (t === "light" || t === "dark
         <select id="d-city" aria-label="City"></select>
         <select id="d-month" aria-label="Month"></select>
       </div>
+    </div>
+
+    <div class="map-wrap c-mapwrap">
+      <div id="d-map" class="map c-map" aria-label="Map of the city's shows this month"></div>
+      <div class="c-capcard" id="d-cap" hidden aria-live="polite">
+        <span class="k" id="d-cap-k"></span>
+        <strong id="d-cap-t"></strong>
+        <span class="s" id="d-cap-s"></span>
+        <button type="button" class="c-capskip" id="d-skip">Skip</button>
+      </div>
+    </div>
+    <div class="map-key c-mapkey" id="d-key">
+      <span><i class="dot q"></i>Pulls on your fans (bigger, stronger)</span>
+      <span><i class="dot g"></i>Other shows this month</span>
+      <span><i class="dot l"></i>From Last.fm</span>
     </div>
 
     <form class="c-tab" data-tab="book" id="f-book" autocomplete="off">
@@ -271,6 +287,7 @@ try { var t = localStorage.getItem("ws-theme"); if (t === "light" || t === "dark
     from Last.fm for acts Qloo does not hold; an act neither holds is shown as no data and never guessed.</p>
 </footer>
 <script src="/static/court.js?v=1"></script>
-<script src="/static/city.js?v=1"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="/static/city.js?v=5"></script>
 </body>
 </html>

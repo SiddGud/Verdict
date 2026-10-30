@@ -61,7 +61,8 @@ def shows(city, start, end):
         for e in d.get("_embedded", {}).get("events", []):
             acts = [a["name"] for a in e.get("_embedded", {}).get("attractions", []) if a.get("name")]
             date = e["dates"]["start"].get("localDate")
-            venue = (e.get("_embedded", {}).get("venues") or [{}])[0].get("name", "")
+            v = (e.get("_embedded", {}).get("venues") or [{}])[0]
+            venue, loc = v.get("name", ""), v.get("location") or {}
             if (not acts or not date or not start <= date <= end  # the search window is in UTC; keep local dates
                     or any(w in e["name"].lower() for w in SKIP) or len(acts) > 6):
                 continue
@@ -71,7 +72,9 @@ def shows(city, start, end):
             seen.add(k)
             out.append({"date": date, "time": (e["dates"]["start"].get("localTime") or "")[:5], "venue": venue,
                         "act": acts[0], "support": acts[1:3], "url": e.get("url", ""),
-                        "promoter": (e.get("promoter") or {}).get("name") or ""})
+                        "promoter": (e.get("promoter") or {}).get("name") or "",
+                        "lat": float(loc["latitude"]) if loc.get("latitude") else None,
+                        "lon": float(loc["longitude"]) if loc.get("longitude") else None})
         if page + 1 >= d.get("page", {}).get("totalPages", 0):
             break
     return out
@@ -140,7 +143,7 @@ def plan(city, artist, start, end, weekends=False):
         n["pull"] += w
         if w >= 0.2:
             n["rivals"].append({"act": r["act"], "venue": r["venue"], "time": r["time"], "weight": round(w, 3),
-                                "source": src, "rank": None})
+                                "source": src, "rank": None, "lat": r["lat"], "lon": r["lon"]})
     ranked = sorted((w for w, _ in scores.values()), reverse=True)
     usual = {}  # how many shows a night of this weekday usually lists in the window
     for n in nights.values():
@@ -156,13 +159,17 @@ def plan(city, artist, start, end, weekends=False):
         n["rivals"] = n["rivals"][:4]
     # nights with too few shows announced yet are not called best: they may only look quiet
     order = sorted((n for n in nights.values() if not n["few_announced"]), key=lambda n: (n["pull"], n["date"]))
-    partners = sorted(({"act": r["act"], "venue": r["venue"], "date": r["date"], "weight": round(scores[r["act"]][0], 3),
+    partners = sorted(({"act": r["act"], "venue": r["venue"], "date": r["date"], "lat": r["lat"], "lon": r["lon"],
+                        "weight": round(scores[r["act"]][0], 3),
                         "source": scores[r["act"]][1], "rank": 1 + sum(v > scores[r["act"]][0] for v in ranked)}
                        for r in rows if r["act"] in scores and scores[r["act"]][0] >= 0.3), key=lambda x: -x["weight"])
     return {"artist": found[0]["name"], "city": CITIES[city][0], "start": start, "end": end, "shows": len(rows),
             "scored": len(scores), "nights": sorted(nights.values(), key=lambda n: n["date"]),
             "best": [n["date"] for n in order[:3]], "worst": [n["date"] for n in order[::-1][:3]],
-            "partners": partners[:8]}
+            "partners": partners[:8],
+            "map": [{"act": r["act"], "venue": r["venue"], "date": r["date"], "lat": r["lat"], "lon": r["lon"],
+                     "weight": round(scores.get(r["act"], (0.0, None))[0], 3), "source": scores.get(r["act"], (0, None))[1]}
+                    for r in rows if r["lat"] is not None and r["date"] in nights]}
 
 
 def portfolio(city, promoter, start, end):
