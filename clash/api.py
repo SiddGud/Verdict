@@ -365,7 +365,8 @@ def council(req: Council, request: Request):
         with LOCK:
             s["pos"], s["cases"], s["version"] = dict(rec["final"]), [], s["version"] + 1
         st = _state(s, [{"who": "referee", "text": _council_summary_text(rec["summary"])}])
-        return {"recorded": rec["recorded"], "events": rec["events"], "summary": rec["summary"], "state": st}
+        events = [{**e, "summary": rec["summary"]} if e["type"] == "tidy" else e for e in rec["events"]]  # the full summary
+        return {"recorded": rec["recorded"], "events": events, "summary": rec["summary"], "state": st}
     why = guard.admit(guard.visitor(request), "model", model=True)
     if why:
         return JSONResponse({"error": why}, status_code=429)

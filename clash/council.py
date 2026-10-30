@@ -26,6 +26,8 @@ from clash import overlap as ov
 from clash import schedule as sc
 
 CASES = 5
+RED = 0.45      # shared-fan weight at which an overlap is a clash (the page's red line)
+EVERY = 30      # with every=True the court argues every red clash, up to this many cases
 MAX_TOOL_CALLS = 3
 
 
@@ -181,21 +183,24 @@ JUDGE = ("You are the judge of Clash Court. Choose the proposal that frees the m
          "{\"choice\": proposal number or null, \"ruling\": \"two short sentences: the decision and why, citing the numbers; name the act, stage and time of each proposal you mention, never its number\"}.")
 
 
-def run_cases(fest, w, base, extra, emit, n=CASES, stop=None):
-    """Argue the n worst clashes of base with the agents, applying each decided move. Returns (Day, decided moves)."""
+def run_cases(fest, w, base, extra, emit, n=CASES, stop=None, every=False):
+    """Argue the n worst clashes of base with the agents, applying each decided move; with every=True, argue every red
+    clash (weight at least RED) until none is left unargued. Returns (Day, decided moves, proposals refused)."""
     day = Day(fest, w, base, extra)
-    decided, argued = [], []
-    for i in range(n):
+    decided, argued, refused = [], [], 0
+    for i in range(EVERY if every else n):
         if stop and stop():
             break
         # each clash is argued once: a case the court could not settle is not argued again
-        worst = [x for x in sc.worst(day.pos, w, fest, 20) if x[0] > 0 and {x[2], x[3]} not in argued]
+        worst = [x for x in sc.worst(day.pos, w, fest, 60) if x[0] > 0 and {x[2], x[3]} not in argued
+                 and (not every or x[1] >= RED)]
         if not worst:
             break
         x, wt, a, b, mins = worst[0]
         argued.append({a, b})
         when = ov.clock(max(fest["cells"][day.pos[a]]["start"], fest["cells"][day.pos[b]]["start"]))
-        emit({"type": "case", "n": i + 1, "of": n, "acts": [a, b], "when": when, "minutes": mins, "weight": round(wt, 2)})
+        emit({"type": "case", "n": i + 1, "of": None if every else n, "acts": [a, b], "when": when, "minutes": mins,
+              "weight": round(wt, 2)})
 
         def fan_tools(me, other):
             def run(name, args):
@@ -299,6 +304,7 @@ def run_cases(fest, w, base, extra, emit, n=CASES, stop=None):
         down = [x for x in (props[0]["statement"], props[1]["statement"], bo["statement"], jo["ruling"]) if "could not answer" in x]
         if len(down) == 4:  # every agent failed (the model provider refused): stop rather than pretend the court sat
             raise llm.LLMError("the agents are unavailable right now " + down[0][down[0].find("("):][:120])
+        refused += sum(1 for p in board if p["breaks"])
         chosen = board[jo["choice"] - 1] if jo.get("choice") else None
         note = None
         if chosen and (chosen["breaks"] or chosen["clash_score_after"] >= chosen["clash_score_before"]):
@@ -308,21 +314,21 @@ def run_cases(fest, w, base, extra, emit, n=CASES, stop=None):
         move = None
         if chosen:
             swapped = day.apply(chosen["act"], chosen["cell"])
-            move = {"act": chosen["act"], "cell": chosen["cell"], "to": chosen["to"], "swaps_with": swapped}
+            move = {"act": chosen["act"], "cell": chosen["cell"], "to": chosen["to"], "swaps_with": swapped, "by": chosen["from"]}
             decided.append({"pair": [a, b], **move})
         left = day.minutes(a, b)
         outcome = "resolved" if not left else "eased" if left < mins else "stands"
         emit({"type": "ruling", "text": jo["ruling"], "clerk": note, "outcome": outcome, "move": move,
               "minutes_after": left, "clash_score": round(day.score(), 3), "pos": day.pos})
-    return day, decided
+    return day, decided, refused
 
 
-def sit(fest, w, base, extra, emit, stop=None):
+def sit(fest, w, base, extra, emit, stop=None, every=False):
     """The whole sitting: the cases, then the optimiser tidies the rest with the agents' moves pinned. Returns the
     final timetable and a summary with both scores."""
     t0, usd0 = time.time(), llm.SPEND["usd"]
     start = sc.clash_score(base, w, fest)
-    day, decided = run_cases(fest, w, base, extra, emit, stop=stop)
+    day, decided, refused = run_cases(fest, w, base, extra, emit, stop=stop, every=every)
     pins = []
     for d in decided:
         for act in (d["act"], d["swaps_with"]):
@@ -335,12 +341,18 @@ def sit(fest, w, base, extra, emit, stop=None):
     summary = {"start": round(start, 3), "after_cases": round(after_cases, 3), "final": round(sc.clash_score(final, w, fest), 3),
                "optimiser_alone": round(sc.clash_score(alone, w, fest), 3), "decided": len(decided),
                "seconds": round(time.time() - t0), "model_usd": round(llm.SPEND["usd"] - usd0, 3),
-               "broken": sc.violations(final, fest, extra)}
+               "broken": sc.violations(final, fest, extra), "every": every,
+               # proof the agents choose: who proposed each applied move, how many proposals the code refused,
+               # and how many applied moves the optimiser on its own would not have made
+               "by_fans": sum(1 for d in decided if d["by"].startswith("fans")),
+               "by_booker": sum(1 for d in decided if d["by"] == "the booker"),
+               "refused": refused,
+               "not_the_optimisers": sum(1 for d in decided if alone.get(d["act"]) != final.get(d["act"]))}
     emit({"type": "tidy", "summary": summary})
     return final, summary
 
 
-def record(slug):
+def record(slug, every=False):
     """Run a sitting on the published timetable and save every event, for replay without model calls."""
     sys.stdout.reconfigure(encoding="utf-8")
     fest = ov.load(os.path.join(os.path.dirname(__file__), "festivals", f"{slug}.json"))
@@ -357,7 +369,8 @@ def record(slug):
             print(f"  [judge] {e['text']} -> {e['outcome']} {e['clerk'] or ''}")
         elif e["type"] == "tool":
             print(f"    tool {e['agent']} {e['name']}: {e['summary'][:90]}")
-    final, summary = sit(fest, w, sc.published(fest), [], emit)
+    final, summary = sit(fest, w, sc.published(fest), [], emit, every=every)
+    summary["cases"] = sum(1 for e in events if e["type"] == "case")
     failed = [e for e in events if e["type"] in ("say", "ruling") and "could not answer" in (e.get("text") or "")]
     if failed:  # a sitting where an agent failed is not a sitting: never replay it as one
         print(f"NOT SAVED: {len(failed)} agent replies failed, for example: {failed[0]['text'][:160]}")
@@ -373,4 +386,4 @@ def recorded(slug):
 
 
 if __name__ == "__main__":
-    record(sys.argv[1] if len(sys.argv) > 1 else "lolla2024thu")
+    record(sys.argv[1] if len(sys.argv) > 1 else "lolla2024thu", every="--every" in sys.argv)

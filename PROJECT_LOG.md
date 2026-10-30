@@ -194,3 +194,15 @@ matched in Qloo with progress, stored privately. The "what Qloo adds" panel uses
 identity, the pair-level gain and cost, and says so. Model provider: CometAPI (OpenRouter and OpenAI wired as
 alternatives; four pasted keys were rejected as expired or invalid before a working one).
 
+## 58. Second review: why five clashes, and are the agents decorative (Oct 30, 2026)
+
+DeepSeek raised two risks. (1) "Why 5 clashes?": the court can now argue every red clash (shared-fan weight at least
+0.45; 17 on Lollapalooza Thursday 2024, `python -m clash.council <day> --every`); other days keep the five worst, labelled
+"of the 5 worst" on the page. The every-clash recording for the default day stopped at case 4 when the model credit ran
+out and was not saved; the five-worst recording stays until credit returns. (2) "Code checks every move" could read
+as agents that cannot act: each accepted move now names whose proposal won, and the judgment adds a tally. Default day:
+of 5 moves, 3 were proposed by fan agents (one by the fan agent of the other act in the pair) and 2 by the booker; the
+code refused 6 rule-breaking proposals; 4 of the 5 moves are not ones the optimiser on its own would have made. 2026
+Saturday: 2 fan, 3 booker, 3 of 5 not the optimiser's. Older recordings were backfilled from their saved events (each
+applied move matched exactly one proposal), with no model calls.
+

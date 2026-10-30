@@ -478,7 +478,7 @@ async function council(live) {
   published.sets.forEach((x) => { if (x.act) pos[x.act] = x.cell; });
   const gone = new Set((state.rules || []).filter((r) => r.type === "cancel").map((r) => r.act));
   gone.forEach((a) => delete pos[a]);
-  let cases = 0, finalState = null, handedOff = false;
+  let cases = 0, finalState = null, handedOff = false, savedPace = null;
   $("skip").hidden = false;
   $("transcript").innerHTML = "";
   $("docket").innerHTML = "";
@@ -493,7 +493,8 @@ async function council(live) {
       li.append(el("span", "n", String(e.n).padStart(2, "0")), el("span", "", `${e.acts[0]} v. ${e.acts[1]}`), el("span", "tag", ""));
       [...$("docket").children].forEach((x) => x.classList.remove("now"));
       $("docket").append(li);
-      $("case-no").textContent = `Case ${e.n} of ${e.of}, ${e.when}, ${e.minutes} min overlap`;
+      $("case-no").textContent = (e.of ? `Case ${e.n} of the ${e.of} worst` : `Case ${e.n}, every red clash`) + `, ${e.when}, ${e.minutes} min overlap`;
+      if (replay && e.n === 6) { savedPace = pace; pace = Math.min(pace, 0.35); } // a long docket replays faster after case 5
       $("case-title").innerHTML = "";
       $("case-title").append(faceoff(e.acts[0], e.acts[1]));
       $("transcript").innerHTML = "";
@@ -513,7 +514,13 @@ async function council(live) {
       if (replay) await wait(500);
     } else if (e.type === "ruling") {
       const stamp = el("span", "c-stamp " + e.outcome, VERDICT[e.outcome]);
-      await say("j", "Judge agent", e.text, stamp);
+      let tagged = stamp;
+      if (e.move && e.move.by) { // whose proposal won: the agents choose, the code only refuses rule-breaking moves
+        tagged = el("div", "c-rulingfoot");
+        const by = e.move.by.startsWith("fans of ") ? `${e.move.by.slice(8)}'s fan agent` : "the booker agent";
+        tagged.append(stamp, el("span", "c-by", `Accepted: ${e.move.act} to ${e.move.to}, proposed by ${by}; keeps every rule`));
+      }
+      await say("j", "Judge agent", e.text, tagged);
       if (e.clerk) await say("o", "Clerk (code check)", e.clerk);
       const tag = $("docket").lastChild && $("docket").lastChild.querySelector(".tag");
       if (tag) { tag.className = "tag " + e.outcome; tag.textContent = VERDICT[e.outcome]; }
@@ -529,9 +536,16 @@ async function council(live) {
       $("case-no").textContent = "Judgment";
       $("case-title").textContent = "The agents ruled; the optimiser tidies the rest.";
       $("transcript").innerHTML = "";
-      await say("j", "The court", `The agents decided ${m.decided} moves: clash score ${m.start.toFixed(2)} to ${m.after_cases.toFixed(2)}. ` +
+      if (savedPace !== null) { pace = savedPace; savedPace = null; }
+      await say("j", "The court", (m.every ? `The agents argued every red clash (${m.cases} cases) and decided ${m.decided} moves` :
+        `The agents argued the ${m.cases || 5} worst clashes and decided ${m.decided} moves`) +
+        `: clash score ${m.start.toFixed(2)} to ${m.after_cases.toFixed(2)}. ` +
         `The optimiser then tidied the rest of the day with those moves pinned: ${m.final.toFixed(2)}. ` +
         `For comparison, the optimiser alone reaches ${m.optimiser_alone.toFixed(2)}.`);
+      if (m.by_fans !== undefined) {
+        await say("e", "Who decided", `Of the ${m.decided} moves made, ${m.by_fans} were proposed by fan agents and ${m.by_booker} by the booker. ` +
+          `The code refused ${m.refused} proposals that broke a rule. ${m.not_the_optimisers} of the moves are not ones the optimiser on its own would have made.`);
+      }
     } else if (e.type === "final") {
       finalState = e.state;
     } else if (e.type === "error") {
