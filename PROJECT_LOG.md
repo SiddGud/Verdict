@@ -240,4 +240,6 @@ failed replies. Clash score 10.85 to 5.92; the optimiser alone reaches 5.45, so 
 optimiser, and the page says so. 352 s, $0.76. This recording replaces the top-five one (backup kept locally).
 The model-alone comparison for Lollapalooza 2026 Thursday ran: 9 of 903 pairs moved by 10 points or more between two
 asks; the model did not know 6 acts, Qloo lacked 14 (the model knew 9 of those), Qloo held 1 the model did not know.
-Friday and Saturday stopped on insufficient quota and were not saved; their "What Qloo adds" panels stay empty.
+Friday and Saturday stopped on insufficient quota. With a further key Friday ran: 46 of 903 pairs moved by 10 points
+or more; the model did not know 7 acts, Qloo lacked 19 (the model knew 12 of those). Saturday stopped again after its
+first run on insufficient quota; one run is not a comparison, so its "What Qloo adds" panel stays empty.
