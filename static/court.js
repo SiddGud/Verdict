@@ -508,7 +508,7 @@ async function council(live) {
   published.sets.forEach((x) => { if (x.act) pos[x.act] = x.cell; });
   const gone = new Set((state.rules || []).filter((r) => r.type === "cancel").map((r) => r.act));
   gone.forEach((a) => delete pos[a]);
-  let cases = 0, finalState = null, handedOff = false, savedPace = null, gated = false;
+  let cases = 0, finalState = null, handedOff = false, savedPace = null, gated = false, yourPick = null;
   $("skip").hidden = false;
   $("transcript").innerHTML = "";
   $("docket").innerHTML = "";
@@ -610,7 +610,7 @@ async function council(live) {
             await say("e", "Booker (you)", pick.kind === "approve" ? `I approve ${pick.p.act} to ${pick.p.to}, proposed by ${pick.p.by}.`
               : "The clash stands: I approve none of these moves.");
           }
-          if (!same) { diverged = { pair: caseEv.acts, pick }; break; }
+          if (!same) { diverged = { pair: caseEv.acts, pick }; yourPick = pick; break; }
         }
       }
       if (diverged) {
@@ -655,6 +655,13 @@ async function council(live) {
       $("transcript").innerHTML = "";
       $("case-no").textContent = "The agents are unavailable";
       $("case-title").textContent = "The quick ruling (optimiser, no agents) sits instead.";
+      if (yourPick && yourPick.kind === "approve") {
+        // keep the booker's ruling: place the approved move first (it is then pinned), so the quick ruling plans around it
+        const f = state.festival, slot = published.sets.find((x) => `${f.stages[x.stage]} at ${clock(x.start)}` === yourPick.p.to);
+        if (slot) {
+          try { state = await post("/api/clash/move", { session: state.session, act: yourPick.p.act, cell: slot.cell }); } catch (_) { /* the quick ruling still runs */ }
+        }
+      }
       busy = false;
       handedOff = true; // the quick ruling now owns the busy flag and the buttons
       await wait(1500);

@@ -221,3 +221,12 @@ buttons (one disabled with its rule), agreeing with the judge (replay continues 
 model credit (the live continuation fails, the page says the agents are unavailable and runs the quick ruling). The
 live continuation and the new per-case speed still need credit to measure.
 
+## 60. Live overrule measured; the fallback keeps the booker's ruling (Oct 31, 2026)
+
+With credit, overruling the judge on case 1 ("the clash stands") made the agents argue cases 2 to 5 live from that
+timetable: 4 moves (2 by fan agents, 2 by the booker), 10.85 to 7.21, tidied 5.49 (optimiser alone 5.45), 76 s and
+$0.23 in all, about 18 s a case (down from about 30 s with tool round trips). If the agents are unavailable after the
+booker approves a move the judge did not choose, that move is now placed (and so pinned) before the quick ruling runs.
+The every-red-clash recording reached case 10 of 17 and the model-alone runs for 2026 Thursday to Saturday did not
+start before the credit ran out again; neither was saved.
+
