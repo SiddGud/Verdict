@@ -4,6 +4,8 @@ Every show fights for the same fans. Verdict maps who shares fans across live mu
 and real listings, so shows stop fighting over the same people and start finding them. Entry for the Qloo Agentic
 Hackathon 2026 by Athmeeya M Kashyap and Siddhant Gudwani.
 
+Everything in one file (features, architecture, decisions, every test): [llms.txt](llms.txt), also served at `/llms.txt`.
+
 ## The site
 
 - **Festival court** (`/`, the front page): the court, the timetable you can drag, emergencies, your own lineup, and

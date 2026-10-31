@@ -1,69 +1,524 @@
 # Verdict
 
-> An AI war-room that builds a music festival timetable so fans do not have to choose between two acts they love.
-> Qloo's taste graph scores how much every pair of acts on the bill shares fans; code builds the timetable that keeps
-> those pairs apart within the booker's rules; language-model agents read the booker's plain-word orders and explain
-> every move. Entry for the Qloo Agentic Hackathon 2026 by Athmeeya M Kashyap and Siddhant Gudwani. MIT licence.
+> Fans shouldn't have to choose. Verdict is an agentic system for live music that finds which acts share fans, using
+> Qloo's taste graph, and acts on it: AI agents put every festival timetable clash on trial and rebuild the day without
+> breaking the festival's rules; promoters see which nights and which of their own shows compete for the same fans;
+> fans get a day and a month of nights out planned around the artists they love, with food and drinks to match.
+> In 28 pre-registered tests over 22 days, Qloo made GPT-6 Astra, OpenAI's frontier reasoning model, measurably better
+> against real-world data. Entry for the Qloo Agentic Hackathon 2026 by Athmeeya M Kashyap and Siddhant Gudwani.
+> MIT licence.
 
-## What it does
+- Live site: https://clash-court-1s4a.onrender.com
+- Code: https://github.com/SiddGud/Clash-Court
+- This file: https://clash-court-1s4a.onrender.com/llms.txt (also llms.txt at the repo root)
+- Test 28 protocol, registered before any result: PREREGISTRATION_28.md
+- Full build and test log, dated: PROJECT_LOG.md
 
-- Loads a festival day: stages, real set times and the published timetable.
-- Matches every act to a Qloo artist (exact names only, never guessed); acts Qloo lacks fall back to Last.fm
-  listening data, labelled as such.
-- Asks Qloo how much each pair of acts shares fans, for the whole bill. Clash = shared fans times minutes of overlap.
-- Moves sets between existing slots to cut clashes, keeping the rules: headliners close, no act moves more than two
-  hours from its billed time, set lengths stay the same, locked stages stay locked, plus any rule the booker adds.
-- A booker agent turns orders such as "Mitski just cancelled" or "Doechii arrives at 3pm" into checked rules. Fan
-  agents argue for their acts with Qloo's numbers. A referee makes each move and explains it.
-- A fan names up to five artists they love; Qloo scores every act on the bill for them and the page plans their best
-  path through the day, flagging the clashes they cannot avoid. Those reports weigh the next re-plan.
+Contents: 1 Summary in numbers. 2 The judging criteria, answered. 3 The problem and the market. 4 Every feature, page
+by page. 5 The agents. 6 How Qloo is used. 7 Architecture. 8 Algorithms. 9 Testing: method and every result.
+10 Design decisions and why. 11 Limits, stated plainly. 12 API reference. 13 Run it, deploy it. 14 Repository map.
 
-## Ask the court (conversational agent)
+---
 
-A tool-using loop: the model chooses among timetable, where_is, shares_fans_with, clash_between, booker_order,
-fan_route, city_plan, promoter_portfolio, promoters and evidence; code runs them; every number in the answer is
-checked against the tool results and unmatched numbers are flagged. Endpoint: POST /api/clash/ask (server-sent events).
+## 1. Summary in numbers
 
-## The bill as a graph
+| What | Number | Source |
+|---|---|---|
+| GPT-6 Astra, Friday closing time of real NYC restaurants | 0 of 30 alone, 29 of 30 with Qloo | Test 20 |
+| Gemini 3.8 Flash, same question | 3 of 30 alone (6 wrong), 29 of 30 with Qloo | Test 20 |
+| GPT-6 Astra ranking pairs of acts by fans they truly share (Spearman) | 0.697 alone, 0.728 with Qloo, gain +0.031 [0.005, 0.056], significant | Test 28 |
+| Gemini 3.8 Flash, same | 0.695 alone, 0.723 with Qloo, gain +0.028 [0.003, 0.056], significant | Test 28 |
+| Same question asked twice: pairs whose score moved 10 points or more | GPT-6 Astra alone up to 46 of 903; Qloo 0 | Five real festival days |
+| Places a model named that Qloo found | 119 of 120 | Test 22 |
+| Clash on a real Lollapalooza day after the AI court | 10.85 to 5.92, 45% fewer, 0 rules broken | Recorded sitting |
+| Rule-breaking agent proposals refused by code | 15 | Same sitting |
+| Pre-registered tests | 28, over 22 days (Oct 9 to Oct 30, 2026) | Logs |
+| Cost to score every pair on a festival day | about 76 cached Qloo calls, no model; a model alone about $0.50 and minutes each time | Measured |
 
-GET /api/clash/graph?session=... returns each act (with Qloo's photo and short description) and its closest acts on
-the bill, flagged where the pair overlaps in time as published and after the court.
+Brackets are 95% bootstrap intervals. "Significant" means the interval of the difference excludes zero.
 
-## How Qloo is used
+---
 
-- `/search` (artist) to resolve each act by exact name; its photo and short description are shown (allowed for hackathon demos).
-- `/v2/insights` with `filter.type=urn:entity:artist`, one act as `signal.interests.entities` and the rest of the bill
-  in `filter.results.entities`: the pair overlap table (about one call per act, cached).
-- The same endpoint with a fan's favourites as the signal: the fan's fit for every act on the bill (one call).
+## 2. The judging criteria, answered
 
-## Where a model alone falls short (shown on the page)
+### Technological implementation (how thoroughly Qloo is used)
+- Qloo is the engine, not a garnish. Every clash, every booking night, every portfolio pair, every fan route and
+  every evening out is computed from Qloo's taste graph. Four Qloo uses, each with its own test (section 6):
+  1. Entity resolution (`/search`): every act matched by exact name, with ID, photo and description.
+  2. Artist to artist affinity (`/v2/insights`, artist signal, artist results): the pair overlap table for a whole
+     festival bill or a city's month of shows.
+  3. Fan to artist affinity (`/v2/insights`, a fan's favourites as signal): a personal fit for every act.
+  4. Music taste to places (`/v2/insights`, artists as signal, place results near a point): cross-domain picks of where
+     to eat before a show and drink after, with Qloo's opening hours deciding what is open.
+- Agentic: four court agents (two fan agents, a booker, a judge) call tools over Qloo's data and the live timetable; a
+  separate conversational agent chooses among 10 tools; code verifies every move and every number.
+- Engineering: a constrained timetable optimiser, server-sent event streaming, recorded sittings with a human gate,
+  per-visitor rate limits and a daily model budget, a private cache served to the host from a private dataset.
 
-Asked the same question twice with no Qloo, a frontier model's pair scores move between answers (on a 40-act test
-bill, 144 of 780 pairs moved by 10 points or more; on the real Lollapalooza 2026 Sunday, 13 of 903; on the Thursday, 9 of 903; on the Friday, 46 of 903; on the Saturday, 9 of 903). Qloo returns the same
-scores every time for every act it holds. On coverage the model is not worse: on that Sunday it claimed to know 9
-acts Qloo lacks; on the Thursday it said it did not know 6 acts, Qloo lacked 14, the model knew 9 of those, and Qloo held 1 the model did not know; on the Friday it did not know 7, Qloo lacked 19, and the model knew 12 of those; on the Saturday it did not know 7, Qloo lacked 18, the model knew 12 of those, and Qloo held 1 the model did not know. Whether Qloo or the model matches real fans better is being tested (pre-registered Test 28).
+### Design (a complete product)
+- One site, organised by audience: Festival court (front page), For promoters, For fans, Why Qloo. Dark by default.
+- A 2-minute guided tour that plays the whole product with no clicks, the first thing on the page.
+- Every page says what it is for, how to use it (folded behind "How it works" so the page stays clean) and gives
+  examples to try. Works on phones; light and dark themes; motion reduced for visitors who ask for it.
 
-## Honest limits
+### Potential impact (a real problem, a real audience)
+- Live music ticket sales passed $40 billion in 2025 and are heading to $50 billion by 2030 (Omdia). One company, Live
+  Nation, had 159 million fans at 55,000 shows in 2025 ($25.2 billion revenue, $20.9 billion of it concerts).
+- Three paying audiences: festivals (timetables), promoters and booking agents (dates, portfolios, openers, tours),
+  fans (days and nights out). On one real Lollapalooza day we found 17 pairs of acts that share fans playing at the
+  same time; in one New York month, Live Nation's own calendar holds 51 pairs of shows with the same fans within a week.
 
-- Qloo does not hold every act: on the four Lollapalooza 2026 days it matched 24 to 29 of 43 acts by exact name
-  (new breakout acts and small early sets lag its catalogue); on Thursday Aug 1, 2024 (the default day) 38 of 44.
-  For acts Qloo lacks, fan overlap comes from Last.fm's real listening data (artist.getsimilar match, used directly
-  as the weight), shown on the page as "Last.fm" with a dotted outline. With both, every act has data on every day
-  except one local showcase act (Chicago Made). Last.fm matches by name too, so a generic name can land on a
-  different artist (2026 Saturday's "Ink" returns drum and bass neighbours and may be the wrong act).
-  The fan route still scores only acts Qloo holds.
-- Qloo's raw affinity scores are bunched (unrelated acts and near-twins score close together), so each act's scores are
-  ranked against the rest of the bill before use.
-- A real timetable has reasons a score cannot see (contracts, production, travel). The booker states them as rules;
-  the tool never claims its plan is final.
-- Every claim the team tests is pre-registered before data is seen; see the PREREGISTRATION files and PROJECT_LOG.md.
+### Quality of the idea (creative, non-obvious use of Qloo)
+- Using a taste graph to keep audiences apart (a timetable clash) rather than to recommend more of the same.
+- Turning Qloo's pair affinity into a measurable objective (the clash score) that an optimiser and a court of agents
+  can argue over, with a human booker who can overrule.
+- Cross-domain: the same fan overlap that schedules a festival also books a city's nights and picks the restaurant and
+  bar for a night out, matched to the group's music taste.
 
-## Code
+---
 
-- [clash/overlap.py](clash/overlap.py): festival files, Qloo matching, the pair table and clash weights
-- [clash/schedule.py](clash/schedule.py): clash score on real set times, rules, optimiser
-- [clash/agents.py](clash/agents.py): booker command reader, fan agents, referee
-- [clash/fanroute.py](clash/fanroute.py): a fan's best path through the day
-- [clash/baseline.py](clash/baseline.py): the model-alone comparison
-- [clash/api.py](clash/api.py), [static/clash.html](static/clash.html): the web app
-- [tests/test_clash_schedule.py](tests/test_clash_schedule.py): engine tests
+## 3. The problem and the market
+
+Two acts that share fans, on two stages, at the same time: someone misses one. Festivals publish timetables with many
+such clashes because nobody puts a number on shared audiences before tickets go on sale. The same blind spot costs
+promoters: shows that draw the same people land on the same night or week. And fans plan their days and nights around
+a few artists with no help joining them up.
+
+Market figures shown on the site, with sources:
+- $40B+: live music ticket sales worldwide in 2025, heading to $50B by 2030 (Omdia, 2026).
+- 159M fans at 55,000 shows for Live Nation in 2025; $25.2B revenue, $20.9B from concerts (Live Nation 2025 results,
+  Form 10-K).
+- 170+ acts on 8 stages over 4 days at Lollapalooza Chicago; its 2024 edition brought over $440M to the city
+  (Lollapalooza 2025 lineup coverage; reported economic impact).
+- 17 clashes on one real day we tested (Lollapalooza Thursday 2024, Qloo).
+
+---
+
+## 4. Every feature, page by page
+
+### Site-wide
+- Pages, switched by the address: `/` (Festival court), `/#/promoters`, `/#/fans`, `/#/why`. `/classic` keeps the
+  earlier one-page site.
+- Menu: Festival court, For promoters, For fans, Why Qloo. The header steps aside when scrolling down and returns when
+  scrolling up.
+- Festival day bar (on the court, fans and Why Qloo pages): pick one of five real Lollapalooza days (Thursday 2024;
+  Thursday, Friday, Saturday, Sunday 2026, published set times) or a test bill, or bring your own lineup.
+- Dark by default with a light theme toggle; works at phone width; headings and panels rise into view on scroll;
+  explanations fold behind "How it works" and "How to use" toggles.
+- "Ask the AI agent": a floating button on every page opens the conversational agent, with example questions that
+  change with the page.
+- A short, checked description beside every act (for example "Hozier: Irish singer, 'Take Me to Church'") in the
+  court, the timetable, the fan route and the graph, so people who do not know the artists can follow. 225 of 248 acts
+  have one; an act the model was not sure of has none rather than a guess.
+
+### Front page: Festival court
+- "Watch the 2-minute tour": plays the product end to end with a narration bar (the problem, the bill as Qloo sees it,
+  the court sitting, a city's month for an artist, a promoter's portfolio, the agent answering, the evidence). It
+  switches pages by itself. Stop at any time.
+- "Enter the courtroom": scrolls to the court and convenes it. "Talk to the AI agent": opens the agent.
+- Section buttons: Better than GPT-6 Astra alone, The $40B problem, Watch the court, The bill as Qloo sees it, How it
+  works, For fans and promoters.
+- The result band: "28 pre-registered tests over 22 days found: Qloo makes GPT-6 Astra better", three before and after
+  numbers (0/30 to 29/30 facts; 0.697 to 0.728 real fans; 46 to 0 answers that change), link to every test.
+- The agent band: what makes it agentic, a live-typed example of tool calls, a question box and example questions.
+- The market band: four sourced figures (section 3).
+- The bench:
+  - Clash score as published and after the court; "Not run yet" until the court sits. The score: shared fans times
+    hours of overlap, summed over every pair on the bill. Lower is better.
+  - Convene the court: replays the recorded sitting of four AI agents (instant, no model cost), with the booker's gate.
+  - Run the agents live (about 3 minutes): the agents argue again, fresh, streamed as they speak.
+  - Booker's emergency: plain words such as "Tyla just cancelled", "Kesha arrives at 4pm" or "keep Hozier and Lizzy
+    McAlpine apart" become checked rules and the day is rebuilt. Example chips per festival.
+  - Back to the published timetable.
+  - Stats: acts on the bill, stages, pairs scored, clashes cut.
+- The courtroom (beside the timetable):
+  - Each case is one red clash: the two acts face off with photos and descriptions; the transcript shows the tool
+    calls and each agent's statement; the proposal chips show where each move lands and the clash score after it.
+  - The booker's gate (human in the loop): on case 1 the recording pauses with "You have the floor, booker": approve a
+    proposal that keeps every rule, let the clash stand, or let the judge decide; the judge decides after 30 seconds of
+    silence. If your ruling differs from the judge's, the agents argue the rest of the day live from your timetable.
+  - The docket lists every case and its outcome; the judgment shows who decided each move (fan agents, the booker,
+    you), how many proposals the code refused, how many moves the optimiser alone would not have made, and both
+    scores: the court's and the optimiser's alone, reported honestly.
+  - Skip to the verdict.
+- The timetable:
+  - Stages as columns, time down the side, every set with photo, name, description on hover, time.
+  - Red: shares many fans with a set at the same time. Pink: some shared fans. Dashed blue: fan data from Last.fm.
+  - Clash lines (arcs) join pairs that must choose; hovering a set lights its own lines and fades the rest.
+  - Slider: "Draw a clash line when fans overlap at least 0.45", from 0.30 to 0.90, with a live count of lines.
+  - Drag any set to another slot: before dropping, the slot shows red or green for whether that act's fans would
+    clash there and with whom; the move is re-scored, broken house rules are listed, Undo puts it back, and the act
+    stays pinned when the court plans the rest.
+  - One-line source note for the published set times, expandable.
+- The bill as Qloo sees it: every act drawn with its photo in a force layout, pulled toward the acts its fans share;
+  pink lines are pairs on at the same time; toggle "As published" and "After the court" (9 pairs to 1 on Lollapalooza
+  Thursday 2024); click an act for its closest acts, its clashes and its description.
+- Who is in the room: six one-line steps (the clerk reads the bill, fan agents file cases, the booker objects, the
+  judge rules, emergencies, fans weigh in).
+- Two more ways to use it: cards to the promoters and fans pages, and to Why Qloo.
+- Bring your own lineup (dialog): paste one set per line (stage, act, start, end; commas or tabs; 13:00 or 1pm; at
+  least 4 and at most 80 sets). Every act is matched in Qloo (Last.fm where Qloo has none), the overlap is scored, and
+  the day opens like a built-in one, with progress streamed as it builds.
+
+### For promoters (city desk)
+- Cities on the demo: New York and Chicago, November 2026, loaded ahead (386 and 203 shows on sale, from
+  Ticketmaster). Any US city works the same way; the list is set by one setting.
+- The map: every show of the month; the shows that pull hardest on the artist's fans stand up as pins (pink for Qloo,
+  blue for Last.fm), bigger for a stronger pull; the agent flies venue to venue as it reads the month. The first visit
+  runs the Clairo example so the pins are there at once.
+- Book a date: type an artist; every night of the month is scored by how much the city's other shows that night pull
+  on that artist's fans. A calendar heat map (darker nights pull harder), the best nights to book, the nights to avoid
+  and which show makes them bad, and partners (shows whose fans are your fans, to market alongside). Fridays and
+  Saturdays only, if wanted.
+- Promoter portfolio: pick a promoter (for example Live Nation, 114 New York shows in November). Pairs of its own shows
+  that share fans are sorted into: compete (same night), sequence (within a week: market the second show to the first
+  one's audience) and co-promote (further apart). Pairs drawn on the map.
+- Openers and tour: the model suggests openers for a headliner; each is checked against Qloo (held, fan overlap with
+  the headliner, a smaller draw) and against listings. Pick cities and Route the tour: the model orders the cities,
+  then the engine picks each city's night with the least competition, one to four days apart. The model leads these
+  two tools because our tests found it better there (section 9), and the page says so.
+
+### For fans
+- Plan my day: name up to five artists you love (they need not play the festival). Every act on the bill is scored for
+  your taste by Qloo, and the best path through the day is planned. A clash you cannot avoid is filed with the court as
+  your case and weighs the next ruling. Example buttons fill the form.
+- Friends' month, with food and drinks: add each friend and the artists they love; get a month of nights out:
+  - A calendar with each night out, the act and the initials of who goes (pink when the whole group goes).
+  - A dated agenda: date, time, act, venue, who goes, the other show that night if you would rather swap, tickets.
+  - Each night as a timetable: a place before the show, the show, a bar after, each near the venue, matched by Qloo to
+    the group's music taste and kept only if Qloo's hours say it is open then. Example: "19:45 Before the show:
+    Joyface (cocktail bar), 9 minutes' walk, open 19:00 to 03:00; 21:00 Gus Dapperton at Mercury Lounge; 23:30 After:
+    Old Flings (cocktail bar), open to 04:00."
+  - "On the map" flies to the venue and drops labelled Before and After pins.
+  - Who goes: a person goes to a show they would love (about their own top tenth of the month); nights the whole group
+    would love come first, then nights two or more would love; anyone left with fewer than two nights gets their own
+    best shows, so a taste nobody else shares still gets a night.
+
+### Why Qloo
+- Headline: "Qloo makes every model better", four big numbers.
+- Interactive charts, every mark with a hover tooltip:
+  - Test 20 answer rings: GPT-6 Astra and Gemini 3.8 Flash, alone and with Qloo; right, wrong, did not know.
+  - Dumbbells: each model alone to with Qloo, with 95% intervals and a significance label (shared fans for both
+    models, timetable quality, small artists).
+  - Qloo against popularity in six tests, paired bars.
+  - Identity rings: 119 of 120 places found; 38 of 44 festival acts matched.
+  - Ask the same question twice: a grid of every pair of acts on a festival day; lit squares changed. Switch between
+    five days and between GPT-6 Astra alone and Qloo (46 of 903 against 0 on Friday 2026). The count is measured;
+    where the lit squares sit is illustrative.
+- Eight test cards: question, data, results, verdict.
+- What Qloo adds, live, for the chosen festival day: acts matched with ID and photo, answers that change, acts each
+  side does not know, cost.
+- How we tested: registered first, outside references only, two model families.
+
+### Ask the AI agent (conversational)
+- Plain-word questions; the agent chooses among 10 tools; each call appears as it runs; every number in the answer
+  is checked against the tool results and unmatched numbers are flagged. Remembers the conversation. Orders change
+  the real timetable. Example questions per page.
+
+---
+
+## 5. The agents
+
+### The court (clash/council.py)
+For each red clash (shared-fan weight 0.45 or more and overlapping sets), worst first:
+1. Two fan agents, one per act, run in parallel. Tools: `fans_of` (the act's closest acts on the bill, from Qloo) and
+   `moves_for` (candidate moves for either act and the clash score after each). They are briefed with the first tool
+   results up front, so most answer in one round trip. Each proposes a move (any move: fans need not respect rules).
+2. The booker agent checks every proposal with `check_move` (which house and booker rules it breaks) and
+   `legal_moves`; it objects, naming the rule, and may counter-propose a legal move.
+3. The judge agent compares the proposals (may confirm with `score_move`) and rules: the move that frees the most fans
+   while keeping every rule, or none.
+4. The clerk (code) refuses any ruling that breaks a rule or does not improve the day; the move is made at once.
+5. After the cases, the optimiser tidies the rest of the day with the agents' moves pinned.
+- Modes: the five worst clashes, or every red clash (up to 30 cases; each pair argued once).
+- Recordings: a full sitting is recorded once (cache/council_<day>.json) and replayed instantly; a sitting where any
+  agent failed is never saved. If all four agents fail in a case, the quick ruling (optimiser) sits instead.
+- Human gate and continue: after the booker's ruling on case 1 differs from the judge's, POST /api/clash/council/continue
+  applies the booker's move (marked "by you") and the agents argue the remaining cases live (about 18 seconds a case).
+- Reliability: waits and retries on provider busy (HTTP 429: 5, 15, 30 seconds). Agents name moves by stage and time,
+  never by slot number.
+
+### The conversational agent (clash/ask.py)
+Ten tools: `timetable` (score, worst clashes, rules), `where_is` (an act now and as published, its cases),
+`shares_fans_with` (closest acts on the bill), `clash_between` (two acts' overlap and minutes), `booker_order` (plain
+words to a checked rule, replays the court), `fan_route` (a fan's day), `city_plan` (best nights in a city month),
+`promoter_portfolio`, `promoters`, `evidence` (Test 28). Code checks every number in the answer against the tool
+results.
+
+### The booker's words (clash/agents.py)
+Patterns first (cancel, arrives at, cannot play after or before, must finish by, keep apart, put on a stage, at a
+time), then the model for anything the patterns miss. Rule types: cancel, not_after, not_before, end_by, apart,
+on_stage, at_time. Every rule is checked by code before the optimiser runs.
+
+### Model-led tools, checked by Qloo (clash/booking.py)
+Openers: the model proposes; Qloo checks each (held, overlap with the headliner ranked among the ideas, smaller draw by
+Qloo popularity) and listings check whether it is playing nearby. Tour: the model orders the cities; the engine picks
+each city's night from real listings.
+
+### Models
+GPT-6 Astra (OpenAI) through CometAPI by default; providers are one setting (CometAPI, Kie, OpenRouter, OpenAI). The
+recorded sittings, the graph, the timetable, the fan route, the city desk, the evenings and Why Qloo need no model at
+all.
+
+---
+
+## 6. How Qloo is used
+
+| Qloo call | Parameters | Used for | Tested in |
+|---|---|---|---|
+| `/search` | artist name | match each act by exact name; ID, photo, description | festival days (38 of 44); Test 22 (places, 119 of 120) |
+| `/v2/insights` | `filter.type=urn:entity:artist`, `signal.interests.entities`=one act, `filter.results.entities`=the rest of the bill | the pair overlap table for a festival day (about one call per act) | Test 28 |
+| `/v2/insights` | same, signal = a fan's favourites | a fan's fit for every act; Plan my day | Test 27 |
+| `/v2/insights` | same, over a city's month of acts | book a date, portfolio, friends' month | Tests 14, 15, 27, 28 |
+| `/v2/insights` | `filter.type=urn:entity:place`, `filter.location`=the venue, radius 900 m, signal = the group's artists | places before and after a show, with hours | Tests 12, 20 |
+
+How the overlap becomes a clash weight: Qloo's raw affinities are bunched together, so each act's scores are ranked
+against the rest of the bill, the two directions averaged and the result cubed, so near-twins dominate. Acts Qloo does
+not hold take Last.fm's similar-artist match directly, labelled on the page. An act neither source holds is shown as no
+data and never guessed.
+
+---
+
+## 7. Architecture
+
+```
+Browser (vanilla JS, D3, Leaflet)            Server (Python, FastAPI)                     Data
+-------------------------------------        ------------------------------------------   -----------------------
+Festival court   court.js, graph.js    --->  clash/api.py      sessions, court, moves      Qloo API (taste graph)
+For promoters    city.js (map, desk)   --->  clash/city_api.py city desk                   Ticketmaster (listings)
+For fans         court.js, city.js     --->  clash/fanroute.py, clash/city.py              Last.fm (fill-in)
+Why Qloo         why.js, qloo_adds.js  --->  clash/baseline.py (model-alone runs)          Published set times
+Agent            ask.js  (SSE)         --->  clash/ask.py      tool loop                   Model provider (CometAPI)
+Tour, pages      tour.js, site.js            clash/council.py  court agents (SSE)
+Lineup           lineup.js (SSE)       --->  clash/lineup.py
+                                              clash/schedule.py optimiser and rules
+                                              clash/agents.py   booker words to rules
+                                              clash/overlap.py  Qloo and Last.fm tables
+                                              clash/booking.py  openers, tour
+                                              clash/guard.py    rate limits, daily budget
+                                              qloo.py, llm.py   cached clients
+```
+
+- Sessions: the server holds each visitor's timetable and is the only source of truth; every reply carries the full
+  state.
+- Streaming: the court, the live overrule, the agent and the lineup builder stream server-sent events (a thread and a
+  queue behind a StreamingResponse).
+- Caching: every Qloo, Ticketmaster and Last.fm reply is cached on the server (listings for a day, the rest kept).
+  Qloo data never goes in the public repo: on the host, the cache is downloaded at start-up from a private dataset.
+- Guards (public demo): per visitor per hour 20 questions, 10 model calls, 40 commands, 60 lookups, 3 lineups; model
+  spend stops at $5 a day while every no-model feature keeps working.
+- Hosting: Render (Python web service), health check `/health` (GET and HEAD), an uptime monitor keeps it awake.
+- Front end: no framework; one HTML page per site with views switched by the address; D3 7.9 for the graph and charts,
+  Leaflet 1.9 for maps; CSS custom properties for both themes.
+
+---
+
+## 8. Algorithms
+
+- Clash score: for every pair of acts, shared-fan weight (0 to 1) times hours their sets overlap, summed over the bill.
+  A red clash: weight 0.45 or more and overlapping (the same line in the cells, the arcs and the drag preview).
+- House rules: headliners close their stages; no act moves more than 2 hours from its billed time; set length within 15
+  minutes of the published one; acts stay on stages of their size (main, mid, small); locked stages (the dance stage)
+  stay; plus the booker's own rules.
+- Optimiser (clash/schedule.py): swaps acts between existing slots; 12 seeded local searches within 2 seconds, best
+  kept; pinned acts (the agents' moves, your drags) never move.
+- Fan route (clash/fanroute.py): a set's value is the fan's fit above their median for the bill; best path by weighted
+  interval scheduling (dynamic programming), allowing a short walk between stages; a clash is flagged when an overlapping set is nearly as good (within 0.03) and
+  in the fan's top quarter.
+- Book a date (clash/city.py): a night's pull = how much the other shows that night draw on the artist's fans (Qloo fit
+  of each act for a fan of the artist, ranked within the month and cubed).
+- Portfolio: pairs of one promoter's shows with high shared fans, sorted by days apart into compete (0), sequence
+  (within 7) and co-promote.
+- Friends' month: a person loves a show at fit 0.7 or more (about their top tenth of the month); greedy plan, one show a
+  night, each act once, up to 10 nights; everyone first, then two or more, then each person's own two best.
+- Evenings: for each night, places within 900 m ranked by Qloo for the group's artists; a place before the show must be
+  a restaurant genre, open 75 minutes before and until 15 minutes before the start; a bar after must be open at least
+  3 hours after the start; concert venues, galleries and places closed that day are left out.
+
+---
+
+## 9. Testing: method and every result
+
+Method. Every test was pre-registered: its question, data, metric and decision rule were written down and committed to
+git before any code or result, and deviations were recorded. 28 tests, Oct 9 to Oct 30, 2026. Tests 1 to 27 were run
+in the team's earlier project on New York restaurant, music and listening data; Test 28 (the clash score) is in this
+repo with its protocol. References are always outside Qloo: Google Maps hours read by a person, real listeners (Last.fm,
+GroupLens HetRec 2011), real tour bills and bookings (Ticketmaster), published set times, MLB attendance, NYC records.
+Two model families: GPT-6 Astra (frontier) and Gemini 3.8 Flash (small). 95% intervals by bootstrap.
+
+### Where Qloo made a model better (the same model, alone and with Qloo)
+
+| Test | Task (reference) | Metric | Alone | With Qloo | Difference | Verdict |
+|---|---|---|---|---|---|---|
+| 20 | Friday closing time, 30 NYC restaurants (Google Maps) | right within 30 min | GPT-6 Astra 0/30 | 29/30 | +0.967 [0.90, 1.0] | Significant |
+| 20 | same | same | Gemini 3.8 Flash 3/30, 6 wrong | 29/30 | +0.867 [0.70, 1.0] | Significant |
+| 28 | Pairs of acts by real shared listeners, 10 bills of 30 artists, 4,350 pairs (Last.fm) | Spearman | GPT-6 Astra 0.697 | 0.728 | +0.031 [0.005, 0.056] | Significant |
+| 28 | same | Spearman | Gemini 3.8 Flash 0.695 | 0.723 | +0.028 [0.003, 0.056] | Significant |
+| 28 | Timetable built from the scores, judged by real listeners | gain, 0 random to 1 best | GPT-6 Astra 0.669 | 0.702 | +0.033 [0.000, 0.063] | Higher, borderline |
+| 27 | Small artists a real listener played, 40 listeners | AUC | GPT-6 Astra 0.865 | 0.874 | +0.010 | Higher |
+
+With Qloo, the small Gemini model (0.723) scored above GPT-6 Astra alone (0.697) on real shared fans.
+
+### Qloo against simple baselines
+
+| Test | Task | Qloo | Baseline | Verdict |
+|---|---|---|---|---|
+| 28 | Timetable quality | 0.663 | Popularity 0.043 | Qloo, +0.62 |
+| 28 | Shared fans (Spearman) | 0.723 | Popularity 0.394 | Qloo, +0.33 |
+| 27 | Small artists (AUC) | 0.841 | Popularity 0.516 | Qloo, +0.324 |
+| 15 | Real tour bills (AUC) | 0.875 | Popularity 0.473, genre 0.714 | Qloo over both |
+| 18 | Films a person loves (AUC) | 0.758 | Popularity 0.687, genre 0.578 | Qloo over both |
+| 14 | Venue bookings (AUC) | 0.589 | Popularity 0.485 | Qloo over popularity |
+
+### Qloo's data: facts, identity, steadiness
+
+| Test | What | Result |
+|---|---|---|
+| 12 | Friday closing time vs Google Maps | 29 of 30 (35 of 36 on all places) within 30 minutes |
+| 22 | Places named in model-written plans found by Qloo | 119 of 120 |
+| Festival days | Acts matched with ID, photo, description (Lollapalooza Thursday 2024) | 38 of 44; Last.fm fills 6 |
+| Festival days | Same question twice, pairs moved 10+ points (model alone / Qloo) | 4 of 946 / 0; 9 of 903 / 0; 46 of 903 / 0; 9 of 903 / 0; 13 of 903 / 0 |
+| Festival days | Acts the model said it did not know (2026 Thu, Fri, Sat, Sun) | 6, 7, 7, 8; Qloo held no data for 14, 19, 18, 16 (filled from Last.fm) |
+| 13 | Idea screen, consistency of Qloo's lists for sibling branches | partners +0.33, scene +0.267, twin city +0.276 pass |
+| 6 | Audience tags vs independent data | Affluent Diners vs income 0.405, Business Professionals vs jobs 0.378 hold |
+
+### Where a frontier model alone is level or ahead (reported, and why the product uses both)
+
+| Test | Task | Qloo alone | GPT-6 Astra alone | Reading |
+|---|---|---|---|---|
+| 28 | Shared fans | 0.723 | 0.697 | Level (not a significant gap), Qloo higher |
+| 28 | Timetable quality | 0.663 | 0.669 | Level |
+| 27 | Small artists | 0.841 | 0.865 | Level |
+| 15 | Tour bills | 0.883 | 0.976 | Model ahead |
+| 14 | Venue bookings | 0.592 | 0.814 | Model ahead |
+| 16 | Openers from scratch | 0.159 | 0.319 | Model ahead |
+| 17 | Cities artists play | 0.63 | 0.739 | Model ahead |
+
+Consequences in the product: the clash score uses Qloo (level on taste, steady, no model cost, and it makes the model
+better when combined); openers and tour order are led by the model and checked by Qloo; places use Qloo's hours, where
+models alone fail.
+
+Earlier tests that shaped the scope, briefly: Qloo's area heatmaps did not predict where a cuisine opens (Test 1),
+music-audience maps did not carry resident taste (Test 2), Qloo added nothing to city records for leases (Tests 4, 7)
+or survival (Test 5), and Qloo-grounded briefs did not beat briefs from city records (Tests 8, 9). Tests 16, 18, 21,
+24, 25, 26 found no gain from adding Qloo for openers from scratch, films, lesser-known headliners, age trends, new
+restaurants' cuisine or MLB theme nights. These results are why Verdict is built on artist-to-artist overlap and place
+facts, where Qloo holds up.
+
+### Product metrics: the court (Lollapalooza Chicago, Thursday August 1, 2024: 44 acts, 7 stages, 946 pairs)
+
+| Metric | Value |
+|---|---|
+| Clash score, published | 10.85 |
+| After the agents argued every red clash | 5.92 (45% fewer) |
+| Optimiser alone | 5.45 |
+| Red clashes at the start | 17 pairs |
+| Cases argued / moves decided | 10 / 9 |
+| Moves proposed by fan agents / by the booker | 3 / 6 |
+| Rule-breaking proposals refused by code / rules broken | 15 / 0 |
+| Moves the optimiser alone would not have made | 6 |
+| Full sitting, time and model cost | 352 s, $0.76 |
+| Live overrule (agents argue cases 2 to 5) | 76 s, $0.23, about 18 s a case |
+| Pairs fans must choose between (graph) | 9 to 1 |
+| Live site response times | load a day 1 s, court replay 1 s, Plan my day 1 s, book a date 3 s, friends' month 2 to 5 s |
+
+The court scores slightly worse than the optimiser alone (5.92 against 5.45); the page reports both. The agents' value
+is explanation, human control (the gate), emergencies in plain words and moves a booker can follow.
+
+---
+
+## 10. Design decisions and why
+
+1. Qloo for the clash score, not a model: in Test 28 Qloo alone matched a frontier model on real shared fans, gives the
+   same answer every time (a model changed up to 46 of 903 pairs between two identical requests), costs no model call,
+   and made the model itself better when combined.
+2. Rank and cube Qloo's affinities: raw scores are bunched; ranking within the bill and cubing lets near-twins
+   dominate, so only real clashes turn red.
+3. Code decides, models talk: agents propose and argue; the clerk refuses any move that breaks a rule or does not
+   help. Nothing an agent says can break a festival rule.
+4. A human booker has the final say: the gate on case 1, drag and drop, plain-word emergencies, Undo.
+5. Record once, replay free: judges and visitors see the full agent sitting instantly with no model cost; "Run the
+   agents live" and the overrule show it is real.
+6. Never guess an act: exact-name matching; Last.fm fills in, labelled; no data is shown as no data.
+7. The model leads where tests found it better (openers, tour order) and the page says so; Qloo checks its picks.
+8. Places by Qloo's hours: models alone either refuse or guess wrong (Test 20); Qloo's hours were right for 29 of 30.
+9. Every claim on the site is a test result with its interval; ties are reported.
+10. Qloo data stays private: cached on the server, never in the public repo; the host loads it from a private dataset.
+11. A public demo must survive judges: rate limits per visitor, a daily model budget, every no-model feature always on,
+    cities loaded ahead so no answer waits minutes.
+12. Organised by audience: the festival court first (the most agentic, most original part), then promoters, fans and
+    the evidence, each self-explanatory with a tour for anyone in a hurry.
+
+---
+
+## 11. Limits, stated plainly
+
+- Qloo does not hold every act (on the 2026 days it lacked 14 to 19 of 43); Last.fm fills in, labelled.
+- On taste alone, Qloo and a frontier model are level; the win is Qloo with the model, steadiness, identity, place
+  facts and cost.
+- The court scores slightly worse than the optimiser alone; both scores are shown.
+- Last.fm listening data (Test 28's reference) is from about 2011 and holds each listener's top 50 artists.
+- Evenings: some nights have no place that fits the times nearby, and those lines are simply left out. Qloo's hours
+  matched Google's for 29 of 30 places tested; a place with no hours that day is never suggested.
+- The demo loads New York and Chicago for November 2026; other cities work but load slowly the first time.
+- Live agent features need model credit; the recorded court and every no-model feature do not.
+
+---
+
+## 12. API reference
+
+Pages: `GET /` (the site), `GET /classic` (earlier one-page site), `GET /health` (GET and HEAD), `GET /llms.txt`.
+
+Festival court (`clash/api.py`):
+- `GET /api/clash/festivals`: the festival days.
+- `POST /api/clash/load {festival}`: a session, the day's state, photos, descriptions, weights.
+- `POST /api/clash/run {session}`: the quick ruling (optimiser).
+- `POST /api/clash/command {session, text}`: a booker's order in plain words.
+- `POST /api/clash/reset {session}`: back to the published timetable.
+- `POST /api/clash/move {session, act, cell}` and `POST /api/clash/undo {session}`: drag and drop.
+- `POST /api/clash/route {session, favourites}`: a fan's day.
+- `GET /api/clash/graph?session=`: the bill as a graph.
+- `GET /api/clash/baseline?festival=`: the model-alone comparison for the day.
+- `POST /api/clash/council {session, live}`: the court (recorded replay, or live and streamed). The every-clash recording is made offline with `python -m clash.council <day> --every`.
+- `POST /api/clash/council/continue {session, pair, act, to}`: the booker's ruling on case 1, then the agents live.
+- `POST /api/clash/ask {session, question, history}`: the conversational agent (streamed).
+- `POST /api/clash/lineup {name, text}`: build a day from a pasted lineup (streamed).
+
+City desk (`clash/city_api.py`):
+- `GET /api/city/options`: cities and months on the demo.
+- `POST /api/city/plan {city, month, artist, weekends}`: book a date.
+- `GET /api/city/promoters?city=&month=` and `POST /api/city/portfolio {city, month, promoter}`.
+- `POST /api/city/friends {city, month, people}`: the friends' month, with evenings.
+- `POST /api/city/support {headliner}`: openers. `POST /api/city/tour {artist, cities, month}`: tour route.
+
+---
+
+## 13. Run it, deploy it
+
+```
+python -m venv .venv
+.venv/Scripts/pip install -r requirements.txt      # fastapi, uvicorn, pydantic
+# .env: QLOO_API_KEY, TICKETMASTER_API_KEY, LASTFM_API_KEY, COMET_API_KEY, LLM_PROVIDER=comet
+.venv/Scripts/python -m uvicorn app:app --port 8000
+```
+Tests: `PYTHONPATH=. python tests/test_clash_schedule.py`. Record a sitting: `python -m clash.council <day> [--every]`.
+Model-alone comparison: `python -m clash.baseline <day>`.
+Deploy: render.yaml (Render, Python). Secrets in the host's settings; `CACHE_DATASET` and `HF_TOKEN` load the private
+cache at start-up; `DAILY_USD`, `ASKS_PER_HOUR`, `CITIES_READY` tune the public demo.
+
+---
+
+## 14. Repository map
+
+- `app.py`: the web server, pages, start-up cache.
+- `clash/`: `api.py`, `city_api.py` (routes); `council.py` (court agents); `ask.py` (conversational agent);
+  `agents.py` (booker's words to rules); `schedule.py` (rules, clash score, optimiser); `overlap.py` (Qloo and Last.fm
+  tables, weights); `fanroute.py`; `city.py` (listings, book a date, portfolio, friends' month, evenings);
+  `booking.py` (openers, tour); `lineup.py`; `baseline.py` (model-alone runs); `guard.py`; `who.json` (act
+  descriptions); `festivals/` (five real days and a test bill).
+- `static/site/`: the site (`index.html`, `site.js`, `site.css`, `court.js`, `city.js`, `graph.js`, `why.js`,
+  `ask.js`, `tour.js`, `lineup.js`, `qloo_adds.js`). `static/court.html`: the earlier one-page site.
+- `qloo.py`, `llm.py`: cached Qloo client with a quota guard; model providers with cost tracking.
+- `tests/test_clash_schedule.py`; `PREREGISTRATION_28.md`; `PROJECT_LOG.md`; `README.md`; `render.yaml`.
+
+Team: Athmeeya M Kashyap and Siddhant Gudwani. Qloo Agentic Hackathon 2026.
