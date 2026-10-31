@@ -440,6 +440,21 @@
       if (p.everyone) who.append(el("b", "", "All of you"));
       else who.append(el("span", "", p.going.join(" and ") + (p.going.length === 1 && many ? " (just you)" : "")));
       what.append(who);
+      if (p.dinner || p.after) { // the evening as a timetable: before the show, the show, after
+        const tl = el("div", "s-tl");
+        const spot = (x, cls, label) => {
+          const r = el("div", "s-tli " + cls);
+          r.append(el("b", "", x.at), el("span", "", `${label}: ${x.name}` + (x.kind ? ` (${x.kind.toLowerCase()})` : "")),
+            el("i", "", `${x.walk} min walk, open ${x.opens} to ${x.closes}`));
+          return r;
+        };
+        if (p.dinner) tl.append(spot(p.dinner, "pre", "Before the show"));
+        const show = el("div", "s-tli show");
+        show.append(el("b", "", p.time ? p.time.slice(0, 5) : ""), el("span", "", `${p.act} at ${p.venue}`), el("i", "", "the show"));
+        tl.append(show);
+        if (p.after) tl.append(spot(p.after, "post", "After"));
+        what.append(tl);
+      }
       if (p.alt) what.append(el("span", "s-alt", `Or that night: ${p.alt.act} at ${p.alt.venue} (${p.alt.going.join(", ")})`));
       const go = el("div", "s-act");
       const map = el("button", "quiet small", "On the map");
@@ -458,10 +473,19 @@
     }
     friendsOnMap({ picks: plan });
   }
+  let spots = null;
   function nightOut(p) {
     if (!ensureMap() || p.lat == null) return;
     caption(fmt(p.date), p.act, `at ${p.venue}, ${p.everyone ? "all of you" : p.going.join(" and ")}`);
-    fly([p.lat, p.lon], 15, 1.2);
+    if (spots) spots.remove();
+    spots = L.layerGroup().addTo(map);
+    [[p.dinner, "pre", "Before"], [p.after, "post", "After"]].forEach(([x, cls, label]) => {
+      if (!x) return;
+      L.marker([x.lat, x.lon], { icon: L.divIcon({ className: "", iconSize: [26, 26], iconAnchor: [13, 26],
+        html: `<div class="m-pin ${cls}" style="--s:26px"><i></i></div>` }) })
+        .bindTooltip(esc(`${label} ${x.at}: ${x.name}, open ${x.opens} to ${x.closes}`), { direction: "top", offset: [0, -24], permanent: true }).addTo(spots);
+    });
+    fly([p.lat, p.lon], 16, 1.2);
     document.getElementById("d-map").scrollIntoView({ behavior: "smooth", block: "center" });
   }
 

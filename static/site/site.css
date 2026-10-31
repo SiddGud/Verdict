@@ -417,3 +417,15 @@ body.nav-up .s-daybar { transform: translateY(calc(-100% - var(--nav))); }
 .c-askbtn .dot { background: #fff !important; animation: s-ping 1.8s infinite; }
 @keyframes s-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
 @media (prefers-reduced-motion: reduce) { .s-cta button::after, .s-pulse, .c-askbtn, .c-askbtn .dot, .s-trace span { animation: none; opacity: 1; } }
+
+/* ---------- a night out as a timetable ---------- */
+.s-tl { display: grid; gap: 0; margin: .5rem 0 .2rem; border-left: 2px solid var(--rule-2); padding-left: .9rem; }
+.s-tli { position: relative; display: grid; grid-template-columns: 3.2rem minmax(0, 1fr); column-gap: .6rem; padding: .25rem 0; font-size: .86rem; }
+.s-tli::before { content: ""; position: absolute; left: calc(-.9rem - 6px); top: .55rem; width: 10px; height: 10px; border-radius: 50%;
+  background: var(--surface); border: 2px solid var(--rule-2); }
+.s-tli b { font: 600 .8rem var(--mono); color: var(--ink); }
+.s-tli i { grid-column: 2; font-style: normal; font-size: .76rem; color: var(--muted); }
+.s-tli.show::before { background: var(--qloo); border-color: var(--qloo); }
+.s-tli.show span { font-weight: 600; }
+.s-tli.pre::before { border-color: #E8A33D; } .s-tli.post::before { border-color: #8AA0FF; }
+.m-pin.pre::before { background: #E8A33D; } .m-pin.post::before { background: #5B6CFF; }

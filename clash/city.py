@@ -249,7 +249,63 @@ def friends(city, people, start, end):
             pairs.append({"people": [a, b], "shared": round(share, 3), "count": len(hi)})
     pairs.sort(key=lambda p: -p["shared"])
     return {"people": names, "shows": len(rows), "picks": top[:8], "pairs": pairs, "start": start, "end": end,
-            "plan": plan_month(rows, fits, names)}
+            "plan": evenings(plan_month(rows, fits, names), [a for v in people.values() for a in v])}
+
+
+VENUES = {"concert_hall", "live_music_venue", "music_venue", "theater", "arena", "stadium", "night_club", "dance_club",
+          "karaoke", "karaoke_bar", "coffee_shop", "shopping", "art_gallery", "museum", "park", "university"}
+DRINK = {"bar", "cocktail_bar", "wine_bar", "pub", "lounge", "lounge_bar", "brewery", "brewpub", "speakeasy", "beer_bar",
+         "gastropub", "beer_garden", "irish_pub", "sports_bar", "tiki_bar", "rooftop_bar", "taproom"}
+
+
+def _hm(t):
+    """'T19:30:00' as minutes after midnight; a close before 06:00 is after midnight (so later than 23:59)."""
+    if not t:
+        return None
+    h, m = int(t.lstrip("T")[:2]), int(t.lstrip("T")[3:5])
+    return h * 60 + m + (1440 if h < 6 else 0)
+
+
+def evenings(plan, favourites):
+    """For each night out, a place to eat before the show and a bar for after, near the venue, ranked by Qloo for the
+    group's music taste and kept only if Qloo's hours say it is open then. Qloo's closing times matched Google's for
+    29 of 30 places in our Test 12; a place with no hours that day is left out."""
+    ids = [e["id"] for e in (ov.resolve(a) for a in dict.fromkeys(favourites)) if e][:5]
+    for n in plan:
+        n["dinner"] = n["after"] = None
+        if not ids or n.get("lat") is None:
+            continue
+        try:
+            d = qloo.get("/v2/insights", **{"filter.type": "urn:entity:place", "filter.location": f"POINT({n['lon']:.4f} {n['lat']:.4f})",
+                                            "filter.location.radius": 900, "signal.interests.entities": ",".join(ids), "take": 25})
+        except Exception:
+            continue
+        day = datetime.date.fromisoformat(n["date"]).strftime("%A").lower()
+        start = _hm("T" + (n.get("time") or "20:00") + ":00")
+        for x in qloo.results(d, "entities"):
+            pr, loc = x.get("properties", {}), x.get("location") or {}
+            tags = x.get("tags") or []
+            last = {t.get("id", "").rsplit(":", 1)[-1] for t in tags}
+            eat = any(t.get("id", "").startswith("urn:tag:genre:place:restaurant") for t in tags)
+            drink = bool(last & DRINK)
+            if pr.get("is_closed") or loc.get("lat") is None or last & VENUES or not (eat or drink):
+                continue
+            slots = [h for h in (pr.get("hours") or {}).get(day, []) if not h.get("closed") and h.get("opens") and h.get("closes")]
+            if not slots:
+                continue
+            opens, closes = _hm(slots[0]["opens"]), _hm(slots[-1]["closes"])
+            metres = round(((float(loc["lat"]) - n["lat"]) * 111000) ** 2 + ((float(loc["lon"]) - n["lon"]) * 84000) ** 2) ** 0.5
+            kind = next((t.get("name") for t in tags if "genre:place" in t.get("id", "") and t.get("name")
+                         and t.get("name").lower() not in ("place", "restaurant", "bar", "tourist attraction")), None)
+            spot = {"name": x["name"], "kind": kind, "walk": max(1, round(metres / 80)), "opens": slots[0]["opens"].lstrip("T")[:5],
+                    "closes": slots[-1]["closes"].lstrip("T")[:5], "lat": float(loc["lat"]), "lon": float(loc["lon"])}
+            if not n["dinner"] and eat and opens <= start - 75 and closes >= start - 15:
+                n["dinner"] = {**spot, "at": f"{(start - 75) // 60:02d}:{(start - 75) % 60:02d}"}
+            elif not n["after"] and drink and closes >= start + 180:
+                n["after"] = {**spot, "at": f"{(start + 150) // 60 % 24:02d}:{(start + 150) % 60:02d}"}
+            if n["dinner"] and n["after"]:
+                break
+    return plan
 
 
 LOVES, NIGHTS, OWN = 0.7, 10, 2  # 0.7 is about a person's top tenth of the month's acts (0.89 ranked, cubed)
