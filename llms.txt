@@ -14,13 +14,36 @@
 - Test 28 protocol, registered before any result: PREREGISTRATION_28.md
 - Full build and test log, dated: PROJECT_LOG.md
 
-Contents: Links. The vision. Business model. 0 Judge quick start. Criteria map. Why Verdict cannot work without Qloo. 1 Summary in numbers. 2 The
+Contents: Twelve facts. Links. The vision. Business model. 0 Judge quick start. Criteria map. Why Verdict cannot work without Qloo. 1 Summary in numbers. 2 The
 judging criteria, answered. 3 The problem and the market. 4 Every feature, page by page. 5 The agents. 6 How Qloo
 is used. 7 Architecture. 8 Algorithms. 9 Testing: method and every result. 10 Design decisions and why. 11 Limits.
 12 API reference. 13 Run it, deploy it. 14 Repository map. 15 Threats to validity. 16 Scalability. 17 Security and
 responsible AI. 18 FAQ for judges. 19 How to verify every claim. 20 Glossary. 21 Machine-readable summary. Optional.
 
 ---
+
+## Twelve facts
+
+1. **Qloo made GPT-6 Astra better at ranking real shared fans:** Spearman 0.697 alone, **0.728** with Qloo, difference
+   +0.031, 95% interval [0.005, 0.056], **significant** (Test 28).
+2. **With Qloo, the small Gemini 3.8 Flash scored above GPT-6 Astra alone:** **0.723 against 0.697** on the same task
+   (Gemini's own gain from Qloo, +0.028, is significant; the gap to GPT-6 Astra alone is not).
+3. **Without Qloo, the model changed 46 of 903 pair scores** between two identical requests. **With Qloo: 0 of 903.**
+4. **Friday closing time for 30 real NYC restaurants:** GPT-6 Astra alone **0/30**, Gemini alone 3/30; **with Qloo, both
+   29/30** (Test 20).
+5. **Qloo found 119 of 120 places** a model named in its own plans (Test 22).
+6. **The court cut a real Lollapalooza day's clash score from 10.85 to 5.92, 45% fewer, with 0 rules broken** (44 acts,
+   7 stages, 946 pairs, 10 cases argued, 9 moves decided).
+7. **Code refused 15 rule-breaking agent proposals** in one sitting. Nothing an agent says can break a festival rule.
+8. **6 of the court's 9 moves were ones the optimiser alone would not have made.** The agents have real decision space.
+9. **Model cost of the path judges use most: $0.** The recorded sitting, the graph, the timetable, the fan route, the
+   city desk and every evening run with no model call (about 76 cached Qloo calls per festival day).
+10. **51 same-fan show pairs within a week in one promoter's real New York month** (Live Nation, November 2026,
+    Ticketmaster listings); **17 red clashes on one real Lollapalooza day.**
+11. **28 pre-registered tests over 22 days** (Oct 9 to 30, 2026): protocols committed to git before any result, two model
+    families, 95% bootstrap intervals.
+12. **Where a frontier model leads, the product says so and uses it there:** openers and tour order are model-led and
+    Qloo-checked (Test 15: model 0.976, Qloo 0.883).
 
 ## Links
 
