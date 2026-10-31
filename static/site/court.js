@@ -38,6 +38,8 @@ function avatar(name, size) {
   } else w.textContent = initials(name);
   return w;
 }
+// A few words on an act (for people who do not know it), from the festival's checked descriptors.
+const who = (n) => (((state || published || {}).festival || {}).who || {})[n] || "";
 const initials = (n) => n.replace(/\(.*\)/, "").split(/\s+/).filter(Boolean).map((x) => x[0]).join("").slice(0, 2).toUpperCase();
 
 // ---------- timetable ----------
@@ -89,9 +91,10 @@ function drawGrid(view, { trial = [], landed = [], flip = false } = {}) {
         name.append(avatar(x.act, "xs"), document.createTextNode(x.act));
         d.append(name);
         d.append(el("div", "t", `${clock(x.start)} to ${clock(x.end)}`));
-        d.title = x.clashes.length
+        d.title = (who(x.act) ? `${x.act} (${who(x.act)})
+` : "") + (x.clashes.length
           ? `${x.act} shares fans with ${x.clashes.map((c) => `${c.act} (${c.minutes} min overlap)`).join(", ")}`
-          : `${x.act}: no real clash`;
+          : `${x.act}: no real clash`);
       } else d.append(el("div", "t", "open"));
       col.append(d);
     });
@@ -327,7 +330,7 @@ function say(kind, who, text, extra, face) {
 }
 
 function faceoff(a, b) {
-  const side = (n) => { const d = el("div", "side"); d.append(avatar(n, "lg"), el("span", "nm", n), el("span", "fans", "fans")); return d; };
+  const side = (n) => { const d = el("div", "side"); d.append(avatar(n, "lg"), el("span", "nm", n), el("span", "wd", who(n)), el("span", "fans", "fans")); return d; };
   const f = el("div", "c-faceoff");
   f.append(side(a), el("span", "v", "v."), side(b));
   return f;
@@ -742,7 +745,7 @@ async function planDay(e) {
       const row = el("div", "r" + (h.top ? " top" : "") + (h.source === "lastfm" ? " lfm" : ""));
       row.append(el("span", "tm", `${h.start} to ${h.end}`));
       const txt = el("div", "", "");
-      txt.append(el("strong", "", h.act), ` on ${h.stage}, fit ${h.fit.toFixed(2)}${h.source === "lastfm" ? " (Last.fm)" : ""}`);
+      txt.append(el("strong", "", h.act), who(h.act) ? el("span", "wd", ` (${who(h.act)})`) : "", ` on ${h.stage}, fit ${h.fit.toFixed(2)}${h.source === "lastfm" ? " (Last.fm)" : ""}`);
       if (h.clash_with) txt.append(el("span", "must", `Clash: ${h.clash_with.act} (fit ${h.clash_with.fit.toFixed(2)}) at the same time. Filed with the court.`));
       row.append(txt);
       out.append(row);

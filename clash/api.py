@@ -28,6 +28,10 @@ PHOTOS = {}  # festival -> {act: Qloo image URL}
 MAX_SESSIONS = 500
 
 
+_WHO = os.path.join(os.path.dirname(__file__), "who.json")
+WHO = json.load(open(_WHO, encoding="utf-8")) if os.path.exists(_WHO) else {}  # act -> short descriptor (checked by hand)
+
+
 def _festival(slug):
     path = lu.path(slug) if slug.startswith("custom-") else os.path.join(FESTIVALS, f"{slug}.json")
     if not os.path.exists(path):
@@ -37,6 +41,7 @@ def _festival(slug):
     if slug not in PHOTOS:
         PHOTOS[slug] = ov.photos(fest)
     fest["photos"] = PHOTOS[slug]
+    fest["who"] = {a: WHO[a] for a in fest["acts"] if WHO.get(a)}  # a few words on each act, for people who do not know them
     return fest, t, ov.weights(t)
 
 
@@ -56,7 +61,7 @@ def _state(s, feed=None, rule=None):
     pub = sc.published(fest)
     return {"session": s["id"], "version": s["version"], "festival": {"slug": fest["slug"], "name": fest["name"],
             "note": fest.get("note", ""), "stages": fest["stages"], "day": fest["day"],
-            "examples": fest.get("examples", []), "photos": fest.get("photos", {})},
+            "examples": fest.get("examples", []), "photos": fest.get("photos", {}), "who": fest.get("who", {})},
             "sets": sets, "score": sc.clash_score(pos, w, fest), "published_score": sc.clash_score(pub, w, fest),
             "worst": [{"weight": wt, "acts": [a, b], "minutes": m,
                        "from": ov.clock(max(fest["cells"][pos[a]]["start"], fest["cells"][pos[b]]["start"]))}
@@ -278,7 +283,7 @@ def graph(session: str = Query(max_length=40), top: int = 3):
                           "clash_now": round(h[pos[a]][pos[b]] * 60) if a in pos and b in pos else 0})
     src = lambda a: "qloo" if a in t["matched"] else "lastfm" if a in t.get("lastfm", {}) else None  # noqa: E731
     nodes = [{"id": a, "stage": fest["cells"][pub[a]]["stage"], "photo": fest.get("photos", {}).get(a),
-              "source": src(a), "about": ABOUT[slug].get(a), "cancelled": a not in pos} for a in fest["acts"]]
+              "source": src(a), "about": WHO.get(a) or ABOUT[slug].get(a), "cancelled": a not in pos} for a in fest["acts"]]
     return {"stages": fest["stages"], "nodes": nodes, "links": links,
             "court_has_sat": s["version"] > 0 and pos != pub}
 

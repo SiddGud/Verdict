@@ -176,3 +176,23 @@ form .s-try .s-try-k { margin: 0 .2rem 0 0; }
   .s-tests { grid-template-columns: minmax(0, 1fr); }
 }
 @media (max-width: 700px) { .s-res div { grid-template-columns: minmax(0, 1fr); gap: .1rem; } }
+
+/* ---------- the market, on the front page ---------- */
+.s-market h2 em { font-style: italic; color: var(--qloo); }
+.s-mstats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+.s-mstat { background: var(--surface); border: 1px solid var(--rule); border-radius: 14px; padding: 18px; display: grid; gap: .4rem; align-content: start; }
+.s-mstat b { font: 400 clamp(2rem, 3.4vw, 2.8rem)/1 var(--display); font-weight: 400; }
+.s-mstat span { font-size: .9rem; color: var(--ink-2); }
+.s-mstat i { font: 400 .7rem var(--mono); color: var(--muted); font-style: normal; }
+.s-mstat.q { background: var(--qloo-tint); border-color: var(--qloo); }
+.s-mstat.q b { color: var(--qloo); }
+.s-cases { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-top: 14px; }
+.s-case { border: 1px solid var(--rule); border-left: 4px solid var(--qloo); border-radius: 12px; padding: 18px; background: var(--surface); display: grid; gap: .45rem; align-content: start; }
+.s-case .kicker { margin: 0; }
+.s-case h3 { font: 400 1.4rem/1.12 var(--display); font-weight: 400; }
+.s-case p { font-size: .9rem; color: var(--ink-2); }
+.s-src { margin-top: 1rem !important; font-size: .78rem; }
+.c-faceoff .wd { display: block; font-size: .74rem; color: var(--muted); max-width: 16ch; text-align: center; line-height: 1.25; margin-top: .15rem; }
+.c-route .wd { color: var(--muted); font-size: .85em; }
+@media (max-width: 1080px) { .s-mstats { grid-template-columns: repeat(2, minmax(0, 1fr)); } .s-cases { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 560px) { .s-mstats { grid-template-columns: minmax(0, 1fr); } }
