@@ -73,10 +73,17 @@
     const q = token("--qloo"), l = token("--lfm"), g = token("--faint");
     points.forEach((p) => {
       const on = p.weight >= 0.2, col = !on ? g : p.source === "lastfm" ? l : q;
+      const tip = esc(`${p.act}, ${fmt(p.date)} at ${p.venue}` + (on && artist ? ` (pulls on ${artist}'s fans)` : ""));
+      if (p.weight >= 0.5) { // the shows that pull hardest stand up as pins, bigger for a stronger pull
+        const s = Math.round(18 + p.weight * 14);
+        L.marker([p.lat, p.lon], { icon: L.divIcon({ className: "", iconSize: [s, s], iconAnchor: [s / 2, s],
+          html: `<div class="m-pin${p.source === "lastfm" ? " lfm" : ""}" style="--s:${s}px"><i></i></div>` }), zIndexOffset: Math.round(p.weight * 1000) })
+          .bindTooltip(tip, { direction: "top", offset: [0, -s] }).addTo(layer);
+        return;
+      }
       L.circleMarker([p.lat, p.lon], { radius: on ? 4 + p.weight * 9 : 3, color: col, fillColor: col,
         fillOpacity: on ? 0.35 + p.weight * 0.5 : 0.35, weight: on ? 1.5 : 0.5 })
-        .bindTooltip(esc(`${p.act}, ${fmt(p.date)} at ${p.venue}` + (on && artist ? ` (pulls on ${artist}'s fans)` : "")))
-        .addTo(layer);
+        .bindTooltip(tip).addTo(layer);
     });
   }
   // A new sweep cancels the one before it; Skip jumps to the end of the current one.

@@ -16,7 +16,7 @@ try { var t = localStorage.getItem("ws-theme"); if (t === "light" || t === "dark
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <link rel="stylesheet" href="/static/site/style.css?v=1">
 <link rel="stylesheet" href="/static/site/court.css?v=1">
-<link rel="stylesheet" href="/static/site/site.css?v=16">
+<link rel="stylesheet" href="/static/site/site.css?v=18">
 </head>
 <body>
 <a class="skip" href="#main">Skip to the content</a>
@@ -254,6 +254,9 @@ try { var t = localStorage.getItem("ws-theme"); if (t === "light" || t === "dark
       <section class="panel c-table" aria-label="Timetable">
         <div class="c-tablehead">
           <p class="ph">Timetable <span class="c-draghint">Drag any set to move it. You decide; the court advises.</span></p>
+          <div class="s-range"><label for="arc-min">Draw a clash line when fans overlap at least</label>
+            <input type="range" id="arc-min" min="0.3" max="0.9" step="0.05" value="0.45" style="--p:25%">
+            <output id="arc-out" for="arc-min">0.45</output><span class="s-rangen" id="arc-count"></span></div>
           <div class="c-legend">
             <span><i class="sw hot"></i>Clash: shares many fans with a set at the same time</span>
             <span><i class="sw warm"></i>Some shared fans</span>
@@ -718,9 +721,9 @@ try { var t = localStorage.getItem("ws-theme"); if (t === "light" || t === "dark
   <button type="button" class="quiet small" id="tour-stop">Stop the tour</button>
 </div>
 <script src="/static/site/site.js?v=6"></script>
-<script src="/static/site/court.js?v=5"></script>
+<script src="/static/site/court.js?v=6"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
-<script src="/static/site/city.js?v=6"></script>
+<script src="/static/site/city.js?v=7"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
 <script src="/static/site/graph.js?v=1"></script>
 <script src="/static/site/ask.js?v=1"></script>

@@ -129,7 +129,10 @@ document.addEventListener("mouseover", (e) => {
   });
 });
 
+let arcMin = 0.45, lastArcs = null; // the slider above the timetable sets arcMin
+
 function drawArcs(view, trial = []) {
+  lastArcs = [view, trial];
   const g = $("grid"), token = ++arcToken;
   g.querySelectorAll(".c-arcs").forEach((x) => x.remove());
   const box = g.getBoundingClientRect(), at = {};
@@ -140,7 +143,7 @@ function drawArcs(view, trial = []) {
   const seen = new Set();
   view.sets.forEach((x) => x.act && x.clashes.forEach((c) => {
     const key = [x.act, c.act].sort().join("|");
-    if (c.weight < 0.45 || seen.has(key) || !at[x.act] || !at[c.act]) return;
+    if (c.weight < arcMin || seen.has(key) || !at[x.act] || !at[c.act]) return;
     seen.add(key);
     const a = at[x.act], b = at[c.act];
     const [l, r] = a.left < b.left ? [a, b] : [b, a];
@@ -156,7 +159,15 @@ function drawArcs(view, trial = []) {
     svg.append(path);
   }));
   if (token === arcToken) g.append(svg);
+  const out = $("arc-count");
+  if (out) out.textContent = `${seen.size} clash line${seen.size === 1 ? "" : "s"}`;
 }
+if ($("arc-min")) $("arc-min").addEventListener("input", (e) => {
+  arcMin = +e.target.value;
+  $("arc-out").textContent = arcMin.toFixed(2);
+  e.target.style.setProperty("--p", `${((arcMin - 0.3) / 0.6) * 100}%`);
+  if (lastArcs) drawArcs(...lastArcs);
+});
 const fadeArcs = () => $("grid").querySelectorAll(".c-arcs").forEach((x) => x.classList.add("gone"));
 
 // ---------- the booker moves sets by hand ----------
