@@ -88,7 +88,18 @@
     $(b.dataset.submit).requestSubmit();
   });
 
+  // Section headings (and the panels under them) rise into place as they scroll into view.
+  function reveal() {
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches || !("IntersectionObserver" in window)) return;
+    const io = new IntersectionObserver((seen) => seen.forEach((e) => {
+      if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); }
+    }), { threshold: 0.15, rootMargin: "0px 0px -8% 0px" });
+    document.querySelectorAll(".band-head, .s-test, .s-mstat, .s-case, .w-panel, .s-alsocard, .sources article, .flow li")
+      .forEach((el, i) => { el.classList.add("rv"); el.style.setProperty("--rv", (i % 4) * 70 + "ms"); io.observe(el); });
+  }
+
   function start() {
+    reveal();
     window.addEventListener("hashchange", () => { const v = viewOf(location.hash); if (v) show(v); });
     show(viewOf(location.hash) || "festivals");
   }

@@ -254,3 +254,14 @@ svg path.k-right, svg path.k-wrong, svg path.k-none, svg path.k-alt, svg rect.k-
 .w-legend i.k-alt { background: var(--city); }
 .w-dumb, #w-pop { min-height: 120px; }
 .w-charts { grid-template-columns: minmax(0, 1fr); } .w-panel, .w-two > * { min-width: 0; }
+
+/* ---------- headings and panels rise into place on scroll ---------- */
+.rv { opacity: 0; transform: translateY(22px); transition: opacity .7s ease var(--rv, 0ms), transform .7s cubic-bezier(.2, .8, .2, 1) var(--rv, 0ms); }
+.rv.in { opacity: 1; transform: none; }
+.band-head.rv .kicker { position: relative; display: inline-block; }
+.band-head.rv .kicker::after { content: ""; position: absolute; left: 0; bottom: -5px; height: 2px; width: 0; background: var(--qloo);
+  transition: width .9s cubic-bezier(.2, .8, .2, 1) .25s; }
+.band-head.rv.in .kicker::after { width: 100%; }
+.band-head.rv h2 { transition: letter-spacing .9s ease .1s; letter-spacing: .01em; }
+.band-head.rv.in h2 { letter-spacing: -.01em; }
+@media (prefers-reduced-motion: reduce) { .rv { opacity: 1; transform: none; transition: none; } }
