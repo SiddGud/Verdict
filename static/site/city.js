@@ -29,7 +29,7 @@
 
   function ensureMap() {
     if (map || !window.L) return map;
-    map = L.map("d-map", { scrollWheelZoom: false }).setView(CENTRE["new-york"], 12);
+    map = L.map("d-map", { scrollWheelZoom: false }).setView(CENTRE["new-york"], 13);
     L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
       maxZoom: 19, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
     }).addTo(map);
@@ -41,10 +41,10 @@
     if (skip || REDUCE) { map.setView(ll, zoom, { animate: false }); return Promise.resolve(); }
     return new Promise((done) => { map.once("moveend", done); map.flyTo(ll, zoom, { duration: secs }); setTimeout(done, secs * 1000 + 500); });
   }
-  function fit(points, maxZoom = 13) {
+  function fit(points, maxZoom = 14) {
     const pts = points.filter((p) => p[0] != null);
     // extra room at the bottom, where the caption card sits over the map
-    if (pts.length) map.flyToBounds(pts, { paddingTopLeft: [50, 40], paddingBottomRight: [50, 150], maxZoom, duration: skip || REDUCE ? 0.01 : 1.2 });
+    if (pts.length) map.flyToBounds(pts, { paddingTopLeft: [30, 30], paddingBottomRight: [30, 120], maxZoom: Math.max(maxZoom, 14), duration: skip || REDUCE ? 0.01 : 1.2 });
   }
   // The city's core: drop the farthest tenth of venues on each side, so one outlying venue does not zoom the map out.
   function core(points) {
@@ -519,7 +519,7 @@
     });
     ["d-city", "d-month"].forEach((id) => $(id).addEventListener("change", () => { promotersFor = ""; if (!$("f-port").hidden) loadPromoters(); }));
     if (ensureMap()) {
-      $("d-city").addEventListener("change", () => { begin(); layer.clearLayers(); uncaption(); fly(CENTRE[$("d-city").value], 12, 1.4); });
+      $("d-city").addEventListener("change", () => { begin(); layer.clearLayers(); uncaption(); fly(CENTRE[$("d-city").value], 13, 1.4); });
     }
     const q = new URLSearchParams(location.search);
     if (q.get("book")) { $("b-artist").value = q.get("book"); $("f-book").requestSubmit(); }

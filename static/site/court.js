@@ -50,7 +50,7 @@ function drawGrid(view, { trial = [], landed = [], flip = false } = {}) {
   if (flip) g.querySelectorAll(".c-cell[data-act]").forEach((c) => { before[c.dataset.act] = c.getBoundingClientRect(); });
   g.innerHTML = "";
   g.classList.toggle("trial", trial.length > 0);
-  g.style.gridTemplateColumns = `44px repeat(${f.stages.length}, minmax(96px, 1fr))`;
+  g.style.gridTemplateColumns = `44px repeat(${f.stages.length}, minmax(118px, 1fr))`;
   g.append(el("div", "c-h", ""));
   f.stages.forEach((s) => g.append(el("div", "c-h", s)));
   const axis = el("div", "c-axis");
@@ -118,6 +118,17 @@ function drawGrid(view, { trial = [], landed = [], flip = false } = {}) {
 // Clash arcs: a curve between every two sets that overlap in time and share many fans, thicker for more shared fans.
 // They are drawn from where the sets sit, so when the court moves sets, the arcs it resolved are simply gone.
 let arcToken = 0;
+// Hovering a set lights its own clash lines and fades the rest, so a busy day stays readable.
+document.addEventListener("mouseover", (e) => {
+  const g = $("grid"), cell = e.target.closest && e.target.closest("#grid .c-cell[data-act]");
+  if (!g || g.classList.contains("trial")) return;
+  const act = cell && cell.dataset.act;
+  g.querySelectorAll(".c-arcs .arc").forEach((p) => {
+    const mine = act && (p.dataset.a === act || p.dataset.b === act);
+    p.classList.toggle("hl", !!mine); p.classList.toggle("fade", !!act && !mine);
+  });
+});
+
 function drawArcs(view, trial = []) {
   const g = $("grid"), token = ++arcToken;
   g.querySelectorAll(".c-arcs").forEach((x) => x.remove());
@@ -141,6 +152,7 @@ function drawArcs(view, trial = []) {
     path.setAttribute("pathLength", "1");
     path.setAttribute("class", "arc" + (trial.length && trial.includes(x.act) && trial.includes(c.act) ? " trial" : trial.length ? " dim" : ""));
     path.style.setProperty("--w", c.weight);
+    path.dataset.a = x.act; path.dataset.b = c.act;
     svg.append(path);
   }));
   if (token === arcToken) g.append(svg);

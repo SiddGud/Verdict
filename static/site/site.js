@@ -98,8 +98,41 @@
       .forEach((el, i) => { el.classList.add("rv"); el.style.setProperty("--rv", (i % 4) * 70 + "ms"); io.observe(el); });
   }
 
+  // The header steps aside while reading down the page and returns as soon as the reader scrolls up.
+  function autoHide() {
+    let last = scrollY;
+    addEventListener("scroll", () => {
+      const y = scrollY;
+      if (y > last + 6 && y > 160) document.body.classList.add("nav-up");
+      else if (y < last - 6 || y < 160) document.body.classList.remove("nav-up");
+      last = y;
+    }, { passive: true });
+  }
+
+  // Less text on screen: each section's explanation folds behind "How it works", and a page's numbered steps fold
+  // behind "How to use". Why Qloo keeps everything open: there the detail is the point.
+  function fold() {
+    document.querySelectorAll('.s-view:not([data-view="why"]) .band-head > p.hint').forEach((hint) => {
+      const b = document.createElement("button");
+      b.type = "button"; b.className = "s-info"; b.setAttribute("aria-expanded", "false");
+      b.innerHTML = '<span aria-hidden="true">i</span>How it works';
+      hint.classList.add("s-fold");
+      hint.before(b);
+      b.addEventListener("click", () => { const open = b.getAttribute("aria-expanded") !== "true"; b.setAttribute("aria-expanded", String(open)); hint.classList.toggle("open", open); });
+    });
+    const note = document.getElementById("festnote"); // the timetable's source note: one line until clicked
+    if (note) { note.title = "Click to read the whole note"; note.addEventListener("click", () => note.classList.toggle("open")); }
+    document.querySelectorAll(".s-how").forEach((ol) => {
+      const d = document.createElement("details"), sum = document.createElement("summary");
+      d.className = "s-howto"; sum.textContent = `How to use, in ${ol.children.length} steps`;
+      ol.before(d); d.append(sum, ol);
+    });
+  }
+
   function start() {
     reveal();
+    autoHide();
+    fold();
     window.addEventListener("hashchange", () => { const v = viewOf(location.hash); if (v) show(v); });
     show(viewOf(location.hash) || "festivals");
   }

@@ -265,3 +265,36 @@ svg path.k-right, svg path.k-wrong, svg path.k-none, svg path.k-alt, svg rect.k-
 .band-head.rv h2 { transition: letter-spacing .9s ease .1s; letter-spacing: .01em; }
 .band-head.rv.in h2 { letter-spacing: -.01em; }
 @media (prefers-reduced-motion: reduce) { .rv { opacity: 1; transform: none; transition: none; } }
+
+/* ---------- header steps aside on scroll down ---------- */
+.nav, .s-daybar { transition: transform .32s cubic-bezier(.2, .8, .2, 1); }
+body.nav-up .nav { transform: translateY(-100%); }
+body.nav-up .s-daybar { transform: translateY(calc(-100% - var(--nav))); }
+
+/* ---------- folded explanations ---------- */
+.s-fold { display: none; }
+.s-fold.open { display: block; animation: c-in .3s ease both; }
+.s-info { display: inline-flex; align-items: center; gap: .45rem; align-self: flex-end; background: none; border: 1px solid var(--rule-2);
+  border-radius: 999px; padding: .32rem .8rem .32rem .4rem; font-size: .82rem; color: var(--ink-2); }
+.s-info span { width: 18px; height: 18px; border-radius: 50%; display: grid; place-items: center; background: var(--ink); color: var(--bg);
+  font: 600 .7rem var(--mono); font-style: italic; }
+.s-info:hover, .s-info[aria-expanded="true"] { border-color: var(--ink); color: var(--ink); }
+.band-head:has(.s-fold.open) { align-items: flex-start; }
+.s-howto { margin-top: 1.3rem; }
+.s-howto summary { cursor: pointer; display: inline-flex; align-items: center; gap: .5rem; color: var(--h-ink); font-weight: 600; font-size: .92rem;
+  list-style: none; border: 1px solid var(--h-rule); border-radius: 999px; padding: .4rem .9rem; }
+.s-howto summary::-webkit-details-marker { display: none; }
+.s-howto summary::after { content: "+"; font: 500 1rem var(--mono); color: #FF7FB0; }
+.s-howto[open] summary::after { content: "\2212"; }
+.s-howto .s-how { margin-top: .9rem; }
+
+/* ---------- timetable: names wrap, arcs stay quiet until a set is pointed at ---------- */
+.c-grid { min-width: 920px; }
+.c-cell .a { white-space: normal; align-items: flex-start; gap: .3rem; font-size: .76rem; line-height: 1.2; max-height: 2.45em; overflow: hidden; }
+.c-cell .a .c-av { flex: none; margin-top: 1px; }
+.c-arcs .arc { stroke-width: calc(1px + var(--w) * 2.2px); opacity: calc(.14 + var(--w) * .3); filter: none; }
+.c-arcs .arc.hl { opacity: .95; stroke-width: 3.5px; }
+.c-arcs .arc.fade { opacity: .05; }
+.c-festnote { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; cursor: pointer; }
+.c-festnote::before { content: "Source note: "; font-weight: 600; }
+.c-festnote.open { -webkit-line-clamp: unset; }
