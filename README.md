@@ -101,11 +101,37 @@ agents argue, code decides.**
 | **Reliability** | Recorded sittings replay instantly; failed sittings are never saved; fallback to the optimiser; retries when a provider is busy |
 
 ### The court, one case
-```
-fan agent A ─┐   tools: fans_of, moves_for           (Qloo overlap, candidate moves)
-             ├─> booker: check_move, legal_moves     (objects, may counter-propose a legal move)
-fan agent B ─┘        └─> judge: score_move          (frees the most fans, keeps every rule)
-                               └─> clerk (code)      (refuses anything illegal or unhelpful; applies the move)
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant Q as Qloo taste graph
+    participant FA as Fan agent A
+    participant FB as Fan agent B
+    participant B as Booker agent
+    participant J as Judge agent
+    participant C as Clerk (code)
+    participant H as You (the booker)
+    Note over FA,FB: one red clash: two acts that share fans, on at the same time
+    par in parallel
+        FA->>Q: fans_of(act A), moves_for(act A)
+        FB->>Q: fans_of(act B), moves_for(act B)
+    end
+    FA->>B: proposal: move A to a stage and time
+    FB->>B: proposal: move B to a stage and time
+    B->>B: check_move on each, legal_moves
+    B->>J: objections naming the rule broken, plus a legal counter-proposal
+    J->>J: score_move, pick the move that frees the most fans
+    J->>C: ruling
+    alt breaks a rule or does not help
+        C-->>J: refused (15 refusals on the default day)
+    else keeps every rule and lowers the clash
+        C->>C: apply the move, pin it; the next case starts from here
+    end
+    opt case 1 of a recorded sitting
+        C->>H: You have the floor: approve, let it stand, or let the judge decide
+        H-->>C: a different ruling: the agents argue the rest live
+    end
 ```
 
 ---
@@ -144,24 +170,133 @@ fan agent B ─┘        └─> judge: score_move          (frees the most fan
 
 ## Architecture
 
-```
-Browser (vanilla JS, D3, Leaflet)        Server (Python, FastAPI)                       Data
-Festival court, promoters, fans,   -->   court agents, chat agent (streamed),    -->    Qloo taste graph
-Why Qloo, tour, agent                     optimiser and rules, city desk,               Ticketmaster listings
-                                          fan route, evenings, rate limits              Last.fm (fill-in)
-                                          cached Qloo and model clients                 published set times
-```
-- The server holds each visitor's timetable; every reply carries the full state.
-- Court, live overrule, agent and lineup builder stream server-sent events.
-- Every Qloo, Ticketmaster and Last.fm reply is cached; Qloo data never enters this repo (the host loads it from a
-  private dataset at start-up).
-- Public-demo guards: per-visitor hourly limits and a $5 daily model budget; no-model features always on.
-- Models: GPT-6 Astra through CometAPI by default; providers switch with one setting.
+### System
 
-Clash score = shared-fan weight × hours of overlap, summed over every pair. Qloo's affinities are ranked within the bill,
-averaged both ways and cubed so near-twins dominate. House rules: headliners close, moves within 2 hours, set lengths
-within 15 minutes, stage sizes kept, locked stages stay. The optimiser runs 12 seeded searches in 2 seconds with the
-agents' and your moves pinned.
+```mermaid
+flowchart LR
+    subgraph Browser["Browser: vanilla JS, D3 7.9, Leaflet 1.9"]
+        P1["Festival court<br/>court.js, graph.js"]
+        P2["For promoters<br/>city.js, map"]
+        P3["For fans<br/>route, friends' month"]
+        P4["Why Qloo<br/>why.js charts"]
+        P5["AI agent<br/>ask.js"]
+        P6["Tour<br/>tour.js, site.js"]
+    end
+    subgraph Server["Server: Python, FastAPI, uvicorn"]
+        API["clash/api.py<br/>sessions, moves, court"]
+        CITY["clash/city_api.py<br/>city desk"]
+        COUNCIL["council.py<br/>court agents"]
+        ASK["ask.py<br/>10-tool agent"]
+        SCHED["schedule.py<br/>rules, clash score, optimiser"]
+        RULES["agents.py<br/>words to rules"]
+        OVER["overlap.py<br/>shared-fan tables"]
+        CTY["city.py<br/>listings, nights, evenings"]
+        GUARD["guard.py<br/>rate limits, budget"]
+        CACHE[("cache<br/>every reply")]
+    end
+    subgraph Data["Outside data"]
+        QLOO[["Qloo API"]]
+        TM[["Ticketmaster"]]
+        LFM[["Last.fm"]]
+        LLM[["GPT-6 Astra<br/>via CometAPI"]]
+    end
+    P1 & P3 & P4 & P6 --> API
+    P2 & P3 --> CITY
+    P5 -- "server-sent events" --> ASK
+    API --> COUNCIL & SCHED & RULES & OVER
+    CITY --> CTY
+    COUNCIL & ASK & RULES --> LLM
+    COUNCIL --> SCHED
+    OVER & CTY --> CACHE
+    CACHE --> QLOO & TM & LFM
+    API & CITY --> GUARD
+```
+
+### From Qloo to a clash score
+
+```mermaid
+flowchart TD
+    A["Festival bill<br/>44 acts, 7 stages"] --> B["/search: match each act by exact name"]
+    B -->|found| C["/v2/insights: one act as signal,<br/>the rest of the bill as results"]
+    B -->|not in Qloo| L["Last.fm similar artists<br/>labelled on the page"]
+    C --> D["Raw affinities, bunched together"]
+    D --> E["Rank each act's scores within the bill,<br/>average both directions, cube"]
+    E --> W["Shared-fan weight, 0 to 1"]
+    L --> W
+    W --> S["Clash score = sum over pairs of<br/>weight x hours of overlap"]
+    S --> R{"weight 0.45 or more<br/>and sets overlap?"}
+    R -->|yes| RED["Red clash: a case for the court"]
+    R -->|no| OK["no case"]
+    RED --> CT["Court of agents"] --> OPT["Optimiser tidies the rest,<br/>agents' moves pinned"]
+```
+
+### A night out with friends
+
+```mermaid
+flowchart LR
+    F["Each friend's<br/>favourite artists"] --> FIT["Qloo fit for every act<br/>in the city's month"]
+    TM["Ticketmaster listings<br/>386 shows in New York"] --> FIT
+    FIT --> PLAN["Month plan: whole-group nights first,<br/>then two or more, then each person's own"]
+    PLAN --> NIGHT["Each night: venue, time"]
+    NIGHT --> PL["Qloo places within 900 m,<br/>ranked by the group's music taste"]
+    PL --> H{"Qloo's hours:<br/>open then?"}
+    H -->|before the show| EAT["A place to eat"]
+    H -->|after the show| BAR["A bar"]
+    EAT & BAR --> TT["The evening as a timetable,<br/>pins on the map"]
+```
+
+### Deployment
+
+```mermaid
+flowchart LR
+    DEV["Code"] -->|git push| GH["GitHub<br/>SiddGud/Verdict"]
+    GH -->|auto deploy| R["Render web service<br/>uvicorn app:app"]
+    HF[("Private dataset<br/>Qloo cache")] -->|"download at start-up"| R
+    R -->|"/health GET and HEAD"| UR["Uptime monitor<br/>every 5 minutes"]
+    R --> U["Judges and visitors"]
+    K["Secrets in Render settings:<br/>Qloo, Ticketmaster, Last.fm, CometAPI"] --> R
+```
+
+### Technical details
+
+| Area | Detail |
+|---|---|
+| Clash score | sum over pairs of shared-fan weight (0 to 1) x hours of overlap; red at weight 0.45 or more |
+| Weights | Qloo affinities ranked within the bill, both directions averaged, cubed; Last.fm match used directly for acts Qloo lacks |
+| House rules | headliners close; moves within 2 hours of billed time; set length within 15 minutes; stage sizes kept (main, mid, small); locked stages stay; booker rules: cancel, not_before, not_after, end_by, apart, on_stage, at_time |
+| Optimiser | swaps between existing slots; 12 seeded local searches in 2 seconds, best kept; pinned acts never move |
+| Court | 2 fan agents in parallel, booker, judge; tools fans_of, moves_for, check_move, legal_moves, score_move; briefed with the first tool results (one round trip); every red clash up to 30 cases; recorded once, replayed free; failed sittings never saved; retries on HTTP 429 at 5, 15, 30 s |
+| Conversational agent | 10 tools; every number in the answer checked against tool results |
+| Fan route | weighted interval scheduling (dynamic programming) over sets valued by fit above the fan's median |
+| City desk | a night's pull from the other shows' Qloo fit for the artist's fans; portfolio pairs as compete (same night), sequence (within a week), co-promote |
+| Evenings | places within 900 m ranked by the group's artists; before: a restaurant genre open 75 minutes before; after: a bar open 3 hours after the start |
+| Streaming | court, live overrule, agent and lineup builder stream server-sent events (thread and queue behind a StreamingResponse) |
+| State | the server holds each session's timetable; every reply carries the full state |
+| Caching | every Qloo, Ticketmaster and Last.fm reply cached (listings for a day); Qloo quota read from `X-Month-RateLimit-Remaining`, live lookups pause below a reserve of 300 |
+| Guards | per visitor per hour: 20 questions, 10 model calls, 40 commands, 60 lookups, 3 lineups; $5 a day model budget |
+| Validation | typed request models with length limits; listing names escaped before reaching the map |
+| Front end | no framework; one page with views switched by the address; D3 force graph and charts; Leaflet maps with custom pins; CSS custom properties for both themes; reduced motion honoured |
+| Models | GPT-6 Astra through CometAPI by default; CometAPI, Kie, OpenRouter or OpenAI by one setting |
+
+### API
+
+| Method | Path | Does |
+|---|---|---|
+| GET | `/api/clash/festivals` | festival days |
+| POST | `/api/clash/load` | a session and the day's state |
+| POST | `/api/clash/council` | the court (recorded or live, streamed) |
+| POST | `/api/clash/council/continue` | the booker's ruling on case 1, then the agents live |
+| POST | `/api/clash/command` | a booker's order in plain words |
+| POST | `/api/clash/move`, `/api/clash/undo` | drag and drop |
+| POST | `/api/clash/run`, `/api/clash/reset` | quick ruling, back to published |
+| POST | `/api/clash/route` | a fan's day |
+| GET | `/api/clash/graph`, `/api/clash/baseline` | the bill as a graph, the model-alone comparison |
+| POST | `/api/clash/ask` | the conversational agent (streamed) |
+| POST | `/api/clash/lineup` | your own lineup (streamed) |
+| GET | `/api/city/options`, `/api/city/promoters` | cities, promoters |
+| POST | `/api/city/plan`, `/api/city/portfolio`, `/api/city/friends` | book a date, portfolio, friends' month |
+| POST | `/api/city/support`, `/api/city/tour` | openers, tour route |
+| GET | `/llms.txt`, `/health` | the whole project in one file, health check |
 
 ---
 
