@@ -126,7 +126,7 @@ sequenceDiagram
     alt breaks a rule or does not help
         C-->>J: refused (15 refusals on the default day)
     else keeps every rule and lowers the clash
-        C->>C: apply the move, pin it; the next case starts from here
+        C->>C: apply the move, pin it, the next case starts from here
     end
     opt case 1 of a recorded sitting
         C->>H: You have the floor: approve, let it stand, or let the judge decide
