@@ -1,4 +1,4 @@
-// Clash Court page. The server holds the timetable; every reply carries the full state. When the court sits, the
+// Verdict page. The server holds the timetable; every reply carries the full state. When the court sits, the
 // worst clashes are argued one case at a time on the timetable as published, then the whole timetable moves to the
 // court's plan (each set slides from where it was to where it ends up).
 const $ = (id) => document.getElementById(id);

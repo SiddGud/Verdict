@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Clash Court</title>
-<meta name="description" content="Clash Court maps which acts share fans with Qloo's taste data, so festivals stop clashing them, promoters stop booking against their own audience, and fans miss nothing.">
+<title>Verdict</title>
+<meta name="description" content="Verdict maps which acts share fans with Qloo's taste data, so festivals stop clashing them, promoters stop booking against their own audience, and fans miss nothing.">
 <meta name="theme-color" content="#0A0A0B">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230A0A0B'/%3E%3Crect x='7' y='9' width='8' height='14' fill='none' stroke='%23fff' stroke-width='2.5'/%3E%3Crect x='17' y='9' width='8' height='14' fill='%23FF7FB0'/%3E%3C/svg%3E">
 <script>
@@ -16,13 +16,13 @@ try { var t = localStorage.getItem("ws-theme"); if (t === "light" || t === "dark
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <link rel="stylesheet" href="/static/site/style.css?v=1">
 <link rel="stylesheet" href="/static/site/court.css?v=1">
-<link rel="stylesheet" href="/static/site/site.css?v=14">
+<link rel="stylesheet" href="/static/site/site.css?v=16">
 </head>
 <body>
 <a class="skip" href="#main">Skip to the content</a>
 
 <nav class="nav" aria-label="Main">
-  <a class="logo" href="#/" aria-label="Clash Court, the festival court"><span class="logo-mark c-mark" aria-hidden="true"></span>Clash Court</a>
+  <a class="logo" href="#/" aria-label="Verdict, the festival court"><span class="logo-mark c-mark" aria-hidden="true"></span>Verdict</a>
   <div class="nav-links s-links">
     <a href="#/" data-view="festivals">Festival court</a>
     <a href="#/fans" data-view="fans"><span class="s-for">For </span>fans</a>
@@ -56,7 +56,7 @@ try { var t = localStorage.getItem("ws-theme"); if (t === "light" || t === "dark
         <p class="eyebrow">For fans</p>
         <h1 class="wordmark">Plan a day where you <em>miss nothing.</em></h1>
         <p class="lede">Tell us the artists you love, even ones not playing. Qloo scores every act on the bill for your
-          taste, and Clash Court plans your best path through the festival day.</p>
+          taste, and Verdict plans your best path through the festival day.</p>
         <ol class="s-how">
           <li>Pick the festival day in the bar above.</li>
           <li>Type up to five artists you love and press <b>Plan my day</b>.</li>
@@ -119,8 +119,16 @@ try { var t = localStorage.getItem("ws-theme"); if (t === "light" || t === "dark
         <p class="eyebrow">Festival timetables <span id="fest-short">Lollapalooza Chicago</span></p>
         <h1 class="wordmark">Fans shouldn't have to <em>choose.</em></h1>
         <p class="lede">A clash is two acts that share many fans, playing at the same time on different stages: someone
-          misses one. Clash Court uses <span class="src qloo">Qloo's taste data</span> to find every clash, and AI agents
+          misses one. Verdict uses <span class="src qloo">Qloo's taste data</span> to find every clash, and AI agents
           put each one on trial and fix it without breaking the festival's rules.</p>
+        <nav class="s-jump" aria-label="On this page">
+          <button type="button" data-go="proof">Better than GPT-6 Astra alone</button>
+          <button type="button" data-go="market">The $40B problem</button>
+          <button type="button" data-go="court">Watch the court</button>
+          <button type="button" data-go="graph">The bill as Qloo sees it</button>
+          <button type="button" data-go="how">How it works</button>
+          <button type="button" data-go="also">For fans and promoters</button>
+        </nav>
         <ol class="s-how">
           <li>Pick a festival day in the bar above, or bring your own lineup.</li>
           <li>Press <b>Convene the court</b>. AI agents argue each clash: one speaks for each act's fans, a booker agent
@@ -139,9 +147,11 @@ try { var t = localStorage.getItem("ws-theme"); if (t === "light" || t === "dark
           <div><span class="c-k">After the court</span><span class="c-n" id="now">0.00</span></div>
           <div class="c-cut" id="cut"></div>
         </div>
-        <p class="hint c-scorehint">Clash score: shared fans times hours of overlap, added up over every pair on the bill.
-          Lower is better.</p>
+        <p class="hint c-scorehint"><b>What the number means:</b> how many fans are forced to choose between two acts they
+          love (shared fans times hours of overlap, over every pair). Lower is better.</p>
         <button type="button" id="convene" class="primary">Convene the court</button>
+        <p class="hint s-cvhint">Four AI agents argue each clash with Qloo's fan data: one for each act's fans, a booker who
+          checks the rules, a judge who rules. You get the final say on the first case.</p>
         <button type="button" id="convene-live" class="quiet small c-live">Run the agents live (about 3 minutes)</button>
         <button type="button" id="tour-start" class="c-tourbtn"><span class="c-play" aria-hidden="true"></span>Watch the 2-minute tour</button>
         <form id="cmd" class="c-cmd" autocomplete="off">
@@ -164,6 +174,26 @@ try { var t = localStorage.getItem("ws-theme"); if (t === "light" || t === "dark
     </dl>
   </header>
 
+  <section class="band s-proof" id="proof">
+    <div class="s-proofin">
+      <div class="s-proofhead">
+        <p class="kicker big">The result</p>
+        <h2>Qloo makes <em>GPT-6 Astra</em> better.</h2>
+        <p class="hint">The same frontier model, asked the same questions, alone and with Qloo's data, scored against real-world
+          truth. Pre-registered tests; Gemini 3.8 Flash gains the same way.</p>
+        <a class="s-proofgo" href="#/why">See every test and chart</a>
+      </div>
+      <div class="s-prooftiles">
+        <div class="s-pt"><span class="s-pk">Real-world facts</span><div class="s-pv"><s>0/30</s><b>29/30</b></div>
+          <span class="s-ps">restaurant closing times right, GPT-6 Astra alone vs with Qloo</span></div>
+        <div class="s-pt"><span class="s-pk">Real fans</span><div class="s-pv"><s>0.697</s><b>0.728</b></div>
+          <span class="s-ps">ranking of acts by fans they truly share; significant gain</span></div>
+        <div class="s-pt"><span class="s-pk">Same answer twice</span><div class="s-pv"><s>46</s><b>0</b></div>
+          <span class="s-ps">of 903 pairs changing between two identical requests, model vs Qloo</span></div>
+      </div>
+    </div>
+  </section>
+
   <section class="band s-market" id="market">
     <div class="band-head">
       <div>
@@ -171,7 +201,7 @@ try { var t = localStorage.getItem("ws-theme"); if (t === "light" || t === "dark
         <h2>A $40 billion business runs on one question: <em>who shares fans?</em></h2>
       </div>
       <p class="hint">Every timetable, every booking date and every marketing plan in live music depends on which acts
-        draw the same people. Today nobody puts a number on it before the tickets go on sale. Clash Court does, with
+        draw the same people. Today nobody puts a number on it before the tickets go on sale. Verdict does, with
         Qloo.</p>
     </div>
     <div class="s-mstats">
@@ -201,14 +231,14 @@ try { var t = localStorage.getItem("ws-theme"); if (t === "light" || t === "dark
       <article class="s-case">
         <span class="kicker">The fan side</span>
         <h3>Millions of fans, choosing between acts they love</h3>
-        <p>Every one of those 159 million fans plans a night or a day around a few artists. Clash Court plans the day
+        <p>Every one of those 159 million fans plans a night or a day around a few artists. Verdict plans the day
           around the acts you love, files the clashes you cannot avoid with the court, and lays out a month of nights
           out for you and your friends.</p>
       </article>
     </div>
     <p class="hint s-src">Sources: Omdia, "Global live music market to exceed $50 billion by 2030" (2026); Live Nation
       Entertainment, full year 2025 results and Form 10-K; Lollapalooza 2025 lineup coverage (Pollstar, ABC7 Chicago);
-      Clash Court's own runs on the published Lollapalooza timetable and Ticketmaster listings.</p>
+      Verdict's own runs on the published Lollapalooza timetable and Ticketmaster listings.</p>
   </section>
 
   <section class="band c-courtband" id="court">
@@ -288,7 +318,7 @@ try { var t = localStorage.getItem("ws-theme"); if (t === "light" || t === "dark
       <li><h3>Fans weigh in</h3><p>A fan's route flags the clashes they cannot avoid. Each report adds weight to that pair the next time the court sits.</p></li>
     </ol>
   </section>
-  <section class="band s-also">
+  <section class="band s-also" id="also">
     <div class="band-head">
       <div>
         <p class="kicker big">The same engine</p>
@@ -579,7 +609,7 @@ try { var t = localStorage.getItem("ws-theme"); if (t === "light" || t === "dark
           <div><dt>Acts</dt><dd><b>38 of 44</b> matched with an ID, a photo and a description; Last.fm fills the rest</dd></div></dl>
       </article>
       <article class="s-test">
-        <header><span class="s-tn">Clash Court</span><span class="s-chip sig">Every rule kept</span></header>
+        <header><span class="s-tn">Verdict</span><span class="s-chip sig">Every rule kept</span></header>
         <h3>The court: fewer fans forced to choose</h3>
         <p><b>Question.</b> On a real published Lollapalooza day, how much clash does the court remove without breaking
           a festival rule?</p>
@@ -629,7 +659,7 @@ try { var t = localStorage.getItem("ws-theme"); if (t === "light" || t === "dark
           Qloo's and not one model's quirk.</p></article>
     </div>
     <p class="hint c-limits">Qloo alone and GPT-6 Astra alone are level on taste (Test 28: 0.723 and 0.697, not a
-      significant gap), which is why Clash Court uses them together. Full protocols and readings: PREREGISTRATION_28.md
+      significant gap), which is why Verdict uses them together. Full protocols and readings: PREREGISTRATION_28.md
       and PROJECT_LOG.md.</p>
   </section>
 </div>
@@ -637,7 +667,7 @@ try { var t = localStorage.getItem("ws-theme"); if (t === "light" || t === "dark
 </main>
 
 <footer class="foot">
-  <a class="logo" href="#/"><span class="logo-mark c-mark" aria-hidden="true"></span>Clash Court</a>
+  <a class="logo" href="#/"><span class="logo-mark c-mark" aria-hidden="true"></span>Verdict</a>
   <p>Qloo Agentic Hackathon 2026, by Athmeeya M Kashyap and Siddhant Gudwani. Fan overlap from Qloo's taste graph, and
     from Last.fm for acts Qloo does not hold; an act neither holds is shown as no data and never guessed.</p>
 </footer>
@@ -687,8 +717,8 @@ try { var t = localStorage.getItem("ws-theme"); if (t === "light" || t === "dark
   <div><strong id="tour-t"></strong><span id="tour-s"></span></div>
   <button type="button" class="quiet small" id="tour-stop">Stop the tour</button>
 </div>
-<script src="/static/site/site.js?v=5"></script>
-<script src="/static/site/court.js?v=4"></script>
+<script src="/static/site/site.js?v=6"></script>
+<script src="/static/site/court.js?v=5"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script src="/static/site/city.js?v=6"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>

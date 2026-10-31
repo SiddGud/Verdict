@@ -1,4 +1,4 @@
-# Clash Court
+# Verdict
 
 > An AI war-room that builds a music festival timetable so fans do not have to choose between two acts they love.
 > Qloo's taste graph scores how much every pair of acts on the bill shares fans; code builds the timetable that keeps

@@ -1,4 +1,4 @@
-"""Ask the court: questions in plain words, answered by a tool-using loop (the same pattern as the earlier project's
+"""Ask the court: questions in plain words, answered by a tool-using loop (the same pattern as the team's earlier
 follow-ups). The model chooses which tools to call; code runs them on the session's timetable, Qloo's fan overlap
 (Last.fm for acts Qloo lacks), Ticketmaster listings and the pre-registered Test 28. At most MAX_CALLS tool calls a
 question. Every number in the answer is checked against the tool results; numbers found in none are flagged.
@@ -21,7 +21,7 @@ MONTHS = {k: v for k, v in {"2026-11": ("2026-11-01", "2026-11-30"), "2026-12": 
           if k in ct.READY_MONTHS}
 
 INSTRUCTIONS = (
-    "You are the clerk of Clash Court, an agent that keeps acts who share fans from playing at the same time, and "
+    "You are the clerk of Verdict, an agent that keeps acts who share fans from playing at the same time, and "
     "reads a city's month of shows for promoters and fans. Answer with the tools. Rules: take every number, act, venue "
     "and date from tool results, never from memory; fan overlap comes from Qloo (or Last.fm where Qloo has no data, "
     "say so when it matters); say plainly when the tools cannot answer. If the user asks to change the timetable (a "

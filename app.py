@@ -1,4 +1,4 @@
-"""Clash Court web server: the festival court, the city desk and their APIs.
+"""Verdict web server: the festival court, the city desk and their APIs.
 
 Keys stay in .env or server environment variables. Qloo, Ticketmaster and Last.fm replies are cached privately in
 cache/ (git-ignored); model calls happen only for plain-word booker orders the patterns cannot read, the openers
@@ -43,7 +43,7 @@ def fetch_cache():
 
 fetch_cache()
 
-app = FastAPI(title="Clash Court")
+app = FastAPI(title="Verdict")
 app.mount("/static", StaticFiles(directory=os.path.join(ROOT, "static")), name="static")
 app.include_router(clash_router)
 app.include_router(city_router)

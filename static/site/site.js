@@ -61,8 +61,8 @@
     // Leaflet and the graph measure their boxes; a page that was hidden has none until it is shown.
     requestAnimationFrame(() => window.dispatchEvent(new Event("resize")));
     if (changed && !keepScroll) window.scrollTo({ top: 0 });
-    const titles = { festivals: "Clash Court", fans: "Clash Court for fans",
-      promoters: "Clash Court for promoters", why: "Why Qloo, Clash Court" };
+    const titles = { festivals: "Verdict", fans: "Verdict for fans",
+      promoters: "Verdict for promoters", why: "Why Qloo, Verdict" };
     document.title = titles[view];
   }
 
@@ -130,6 +130,10 @@
   }
 
   function start() {
+    document.querySelectorAll(".s-jump [data-go]").forEach((b) => b.addEventListener("click", () => {
+      const t = document.getElementById(b.dataset.go);
+      if (t) t.scrollIntoView({ behavior: "smooth", block: "start" });
+    }));
     reveal();
     autoHide();
     fold();

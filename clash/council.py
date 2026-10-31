@@ -177,7 +177,7 @@ BOOKER = ("You are the booker agent for the festival. The house rules: headliner
           "none is legal, or a better legal move exists, find one with legal_moves and counter-propose it. Reply as JSON: "
           "{\"statement\": \"two short sentences for the court naming each move by act, stage and time, never by number\", \"objections\": [proposal numbers you object to], "
           "\"counter\": {\"act\": name, \"cell\": slot} or null}.")
-JUDGE = ("You are the judge of Clash Court. Choose the proposal that frees the most fans while keeping every rule; the "
+JUDGE = ("You are the judge of Verdict. Choose the proposal that frees the most fans while keeping every rule; the "
          "clerk has already checked each one (see breaks and clash_score_after). You may confirm a number with "
          "score_move. Choosing none is allowed if every proposal breaks a rule or makes the day worse. Reply as JSON: "
          "{\"choice\": proposal number or null, \"ruling\": \"two short sentences: the decision and why, citing the numbers; name the act, stage and time of each proposal you mention, never its number\"}.")

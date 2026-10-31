@@ -66,7 +66,7 @@
       go("evidence");
       bar(0, "With and without Qloo", "Tested before we built on it: Qloo far beyond popularity, level with a frontier model, and best of all when the two work together.");
       await sleep(7000);
-      bar(0, "That's Clash Court", "Try it yourself: convene the court, type an emergency, ask the clerk anything.");
+      bar(0, "That's Verdict", "Try it yourself: convene the court, type an emergency, ask the clerk anything.");
       await sleep(6000);
       $("tour-bar").hidden = true;
     } finally {

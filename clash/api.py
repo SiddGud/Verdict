@@ -1,4 +1,4 @@
-"""HTTP routes for the Clash Court page. The server holds each visitor's timetable and is the only source of truth:
+"""HTTP routes for the Verdict page. The server holds each visitor's timetable and is the only source of truth:
 every reply carries the full state and a version number, and the page redraws from it."""
 import glob
 import json

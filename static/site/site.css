@@ -1,4 +1,4 @@
-/* The organised site: one page per audience. Built on the the earlier project design (style.css) and the court's parts
+/* The organised site: one page per audience. Built on the base design (style.css) and the court's parts
    (court.css); this file only adds the pages, the doors on the home page and the "how to use" steps. */
 
 /* ---------- pages ---------- */
@@ -298,3 +298,32 @@ body.nav-up .s-daybar { transform: translateY(calc(-100% - var(--nav))); }
 .c-festnote { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; cursor: pointer; }
 .c-festnote::before { content: "Source note: "; font-weight: 600; }
 .c-festnote.open { -webkit-line-clamp: unset; }
+
+/* ---------- front page: section buttons, the headline result, the score before the court sits ---------- */
+.s-jump { display: flex; flex-wrap: wrap; gap: .45rem; margin-top: 1.3rem; }
+.s-jump button { background: rgba(255, 255, 255, .04); border: 1px solid var(--h-rule); color: var(--h-ink); border-radius: 999px;
+  padding: .38rem .85rem; font-size: .84rem; }
+.s-jump button:first-child { border-color: #FF7FB0; color: #FF7FB0; }
+.s-jump button:hover { border-color: var(--h-ink); background: rgba(255, 255, 255, .1); }
+.c-n.pending { color: var(--faint); }
+.s-cvhint { margin-top: .45rem; font-size: .8rem; }
+.c-scorehint b { color: var(--ink); font-weight: 600; }
+.s-proof { background: var(--qloo-tint); border-top: 1px solid color-mix(in srgb, var(--qloo) 30%, transparent); }
+.s-proofin { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.6fr); gap: 2rem; align-items: center; }
+.s-proofhead h2 { font: 400 clamp(2rem, 3.6vw, 3rem)/1.04 var(--display); letter-spacing: -.015em; }
+.s-proofhead h2 em { color: var(--qloo); }
+.s-proofhead .hint { margin-top: .7rem; max-width: 42ch; }
+.s-proofgo { display: inline-block; margin-top: 1rem; font-weight: 600; color: var(--qloo); }
+.s-proofgo::after { content: " \2192"; }
+.s-prooftiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.s-pt { background: var(--surface); border: 1px solid color-mix(in srgb, var(--qloo) 35%, transparent); border-radius: 14px; padding: 18px;
+  display: grid; gap: .5rem; align-content: start; }
+.s-pk { font: 600 .66rem var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+.s-pv { display: flex; align-items: baseline; gap: .6rem; flex-wrap: wrap; }
+.s-pv s { font: 400 1.5rem var(--display); color: var(--faint); text-decoration-thickness: 2px; }
+.s-pv b { font: 400 clamp(2.4rem, 4vw, 3.2rem)/1 var(--display); color: var(--qloo); font-weight: 400; }
+.s-pv s::after { content: " \2192"; text-decoration: none; display: inline-block; margin-left: .3rem; color: var(--muted); }
+.s-ps { font-size: .84rem; color: var(--ink-2); }
+@media (max-width: 1000px) { .s-proofin { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 640px) { .s-prooftiles { grid-template-columns: minmax(0, 1fr); } }
+.c-score:has(.c-n.pending) .c-cut { color: var(--muted); font-weight: 500; }

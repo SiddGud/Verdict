@@ -1,8 +1,8 @@
 # Clash Court: project log
 
 Decisions, build findings and test results for Clash Court. Sections keep the numbers they had in the shared
-log (sections 1 to 50 are the the earlier project project and the Qloo tests that led to this idea; they live in the
-the earlier project log). Test 28's code runs from the the earlier project folder (backtest28.py imports its test helpers).
+log (sections 1 to 50 are the team's earlier NYC project and the Qloo tests that led to this idea; they live in that
+project's log). Test 28's code runs from that project's folder (backtest28.py imports its test helpers).
 
 ## 51. The pick and the build: Clash Court (Oct 28 to 29)
 
@@ -19,7 +19,7 @@ fell to 8.5, tied with Opening Night. The team chose Clash Court.
 love. Qloo scores how much every pair of acts on a bill shares fans; code moves sets to keep those pairs apart within
 the booker's rules; agents read the booker's words and explain each move; a fan side plans one person's day.
 Code: clash/ (overlap, schedule, agents, fanroute, baseline, api), static/clash.*, tests/test_clash_schedule.py
-(8 tests). It is now the site's front page; the earlier project moved to /whitespace.
+(8 tests). It is now the site's front page; the earlier project's page moved out of this site.
 
 **Findings while building (in the order they came up).**
 1. *Qloo's raw affinity is bunched.* On a 40-act test bill, 780 pairs sat in a narrow high band, so unrelated acts
@@ -145,7 +145,7 @@ Scope widened after the team found a timetable fixer alone too narrow: one fan-o
 (avoid a clash, find a partner, book a night nobody serves). City desk on Ticketmaster listings for 12 US cities:
 book a date, a promoter's portfolio (Live Nation, New York, November: 1 same-night pair, 52 within a week, 34 to
 co-promote), friends' month; openers and tour order led by the model (it beat Qloo in Tests 15 to 17), labelled.
-Map on the earlier project's design: the agent flies venue to venue, the calendar fills in after. Ask the court: the earlier project's
+Map on the base design: the agent flies venue to venue, the calendar fills in after. Ask the court: the earlier project's
 follow-up pattern (model picks tools, numbers checked); three test questions answered with no unchecked numbers.
 Limits for a public page: per-visitor hourly counts and a daily model spend cap (guard.py); the booker's model
 fallback stops at the cap, pattern orders keep working. Guided tour (/?watch=1) checked end to end in a real browser
@@ -245,3 +245,9 @@ or more; the model did not know 7 acts, Qloo lacked 19 (the model knew 12 of tho
 insufficient quota; with another key its second run completed ($0.30): 9 of 903 pairs moved by 10 points or more; the
 model did not know 7 acts, Qloo lacked 18 (the model knew 12 of those), Qloo held 1 the model did not know. All four
 Lollapalooza 2026 days now have the comparison.
+
+## 62. Renamed Verdict; the site organised by audience (Oct 31, 2026)
+
+The product is now called Verdict (it was Clash Court; another entry uses a similar name). The site has a page per
+audience: the festival court is the front page; fans, promoters and Why Qloo are pages of their own. Sections above
+that keep the old name are left as written.

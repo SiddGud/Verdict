@@ -1,4 +1,4 @@
-// Clash Court page. The server holds the timetable; every reply carries the full state. When the court sits, the
+// Verdict page. The server holds the timetable; every reply carries the full state. When the court sits, the
 // worst clashes are argued one case at a time on the timetable as published, then the whole timetable moves to the
 // court's plan (each set slides from where it was to where it ends up).
 const $ = (id) => document.getElementById(id);
@@ -288,6 +288,14 @@ function animateNumber(node, to) {
 
 function drawScore(s, animate = false) {
   $("pub").textContent = s.published_score.toFixed(2);
+  const untouched = Math.abs(s.score - s.published_score) < 0.005; // the court has not changed anything yet
+  $("now").classList.toggle("pending", untouched);
+  if (untouched) {
+    $("now").textContent = "—";
+    $("cut").textContent = "Not run yet: press Convene the court";
+    $("st-cut").textContent = "0%";
+    return;
+  }
   if (animate) animateNumber($("now"), s.score); else $("now").textContent = s.score.toFixed(2);
   const cut = s.published_score ? (100 * (s.published_score - s.score)) / s.published_score : 0;
   $("cut").textContent = cut > 0.5 ? `${cut.toFixed(0)}% fewer clashes, every rule kept` : "";
@@ -578,6 +586,7 @@ async function council(live) {
         pos = { ...e.pos };
         drawGrid(viewOf(pos), { flip: true, landed: [e.move.act, e.move.swaps_with].filter(Boolean) });
       }
+      $("now").classList.remove("pending");
       $("now").textContent = e.clash_score.toFixed(2);
       if (replay) await wait(1300);
     } else if (e.type === "tidy") {

@@ -1,6 +1,6 @@
-# Clash Court
+# Verdict
 
-Every show fights for the same fans. Clash Court maps who shares fans across live music, using Qloo's taste graph
+Every show fights for the same fans. Verdict maps who shares fans across live music, using Qloo's taste graph
 and real listings, so shows stop fighting over the same people and start finding them. Entry for the Qloo Agentic
 Hackathon 2026 by Athmeeya M Kashyap and Siddhant Gudwani.
 

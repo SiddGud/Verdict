@@ -1,4 +1,4 @@
-// Clash Court page. The server holds the timetable; every reply carries the full state and a version, and the page
+// Verdict page. The server holds the timetable; every reply carries the full state and a version, and the page
 // redraws from it. Sets are drawn on a time axis (one column per stage). Referee moves in a feed are replayed on the
 // timetable one by one, then the final state is drawn.
 const $ = (id) => document.getElementById(id);

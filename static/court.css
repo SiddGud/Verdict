@@ -1,4 +1,4 @@
-/* Clash Court on the the earlier project design. Pink marks Qloo (fan overlap); blue marks Last.fm, which fills in for acts
+/* Verdict's design. Pink marks Qloo (fan overlap); blue marks Last.fm, which fills in for acts
    Qloo does not hold. Amber is the booker's objection; ink is the court. */
 :root { --lfm: var(--city); --lfm-tint: var(--city-tint); --obj: var(--warn); --px: 1.05px; }
 
