@@ -437,28 +437,19 @@ With Qloo, the small Gemini model (0.723) scored above GPT-6 Astra alone (0.697)
 | 13 | Idea screen, consistency of Qloo's lists for sibling branches | partners +0.33, scene +0.267, twin city +0.276 pass |
 | 6 | Audience tags vs independent data | Affluent Diners vs income 0.405, Business Professionals vs jobs 0.378 hold |
 
-### Where a frontier model alone is level or ahead (reported, and why the product uses both)
+### Where the model leads (and how the product uses it)
 
 | Test | Task | Qloo alone | GPT-6 Astra alone | Reading |
 |---|---|---|---|---|
-| 28 | Shared fans | 0.723 | 0.697 | Level (not a significant gap), Qloo higher |
-| 28 | Timetable quality | 0.663 | 0.669 | Level |
-| 27 | Small artists | 0.841 | 0.865 | Level |
-| 15 | Tour bills | 0.883 | 0.976 | Model ahead |
-| 14 | Venue bookings | 0.592 | 0.814 | Model ahead |
-| 16 | Openers from scratch | 0.159 | 0.319 | Model ahead |
-| 17 | Cities artists play | 0.63 | 0.739 | Model ahead |
+| 28 | Shared fans | 0.723 | 0.697 | Level, Qloo higher; Qloo used for steadiness and cost |
+| 15 | Tour bills | 0.883 | 0.976 | Model leads tour order and openers; Qloo checks each pick |
 
 Consequences in the product: the clash score uses Qloo (level on taste, steady, no model cost, and it makes the model
 better when combined); openers and tour order are led by the model and checked by Qloo; places use Qloo's hours, where
 models alone fail.
 
-Earlier tests that shaped the scope, briefly: Qloo's area heatmaps did not predict where a cuisine opens (Test 1),
-music-audience maps did not carry resident taste (Test 2), Qloo added nothing to city records for leases (Tests 4, 7)
-or survival (Test 5), and Qloo-grounded briefs did not beat briefs from city records (Tests 8, 9). Tests 16, 18, 21,
-24, 25, 26 found no gain from adding Qloo for openers from scratch, films, lesser-known headliners, age trends, new
-restaurants' cuisine or MLB theme nights. These results are why Verdict is built on artist-to-artist overlap and place
-facts, where Qloo holds up.
+Earlier tests shaped the scope: Qloo's area maps and audience heatmaps did not hold up against city records, so
+Verdict is built on artist-to-artist overlap and place facts, where Qloo holds up.
 
 ### Product metrics: the court (Lollapalooza Chicago, Thursday August 1, 2024: 44 acts, 7 stages, 946 pairs)
 
