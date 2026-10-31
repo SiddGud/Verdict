@@ -55,7 +55,7 @@
     $("daybar").hidden = !DAY_ON.has(view);
     document.querySelectorAll(".s-links a").forEach((a) => a.setAttribute("aria-current", String(a.dataset.view === view)));
     document.body.dataset.view = view;
-    if (view === "fans" || view === "promoters") placeDesk(view);
+    if (view === "fans" || view === "promoters") { placeDesk(view); demoMap(view); }
     if (window.askCourt && window.askCourt.suggest) window.askCourt.suggest(SUGGEST[view]);
     if (view === "festivals" && graphStale && window.billGraph) { graphStale = false; window.billGraph.load(); }
     // Leaflet and the graph measure their boxes; a page that was hidden has none until it is shown.
@@ -129,7 +129,34 @@
     });
   }
 
+  // The front page's two calls to action, the agent band, and maps that show their pins on a first visit.
+  function actions() {
+    const $q = (id) => document.getElementById(id);
+    const ask = (q) => { if (!window.askCourt) return; window.askCourt.open(); if (q) setTimeout(() => window.askCourt.send(q), 350); };
+    if ($q("go-court")) $q("go-court").addEventListener("click", () => {
+      $q("court").scrollIntoView({ behavior: "smooth", block: "start" });
+      setTimeout(() => $q("convene").click(), 700);
+    });
+    if ($q("go-agent")) $q("go-agent").addEventListener("click", () => ask());
+    if ($q("agent-form")) $q("agent-form").addEventListener("submit", (e) => {
+      e.preventDefault(); const q = $q("agent-q").value.trim(); if (q) { ask(q); $q("agent-q").value = ""; }
+    });
+    document.querySelectorAll("[data-ask]").forEach((b) => b.addEventListener("click", () => ask(b.dataset.ask)));
+  }
+  const demoed = new Set();
+  function demoMap(view) { // the first time a map page opens, run its example so the pins drop in (cached, no model)
+    if (demoed.has(view)) return;
+    demoed.add(view);
+    setTimeout(() => {
+      if (view === "promoters" && !document.querySelector("#o-book .c-cal")) {
+        document.getElementById("b-artist").value = "Clairo"; document.getElementById("f-book").requestSubmit();
+      }
+      if (view === "fans" && !document.querySelector("#o-friends .s-mcal")) document.getElementById("f-friends").requestSubmit();
+    }, 900);
+  }
+
   function start() {
+    actions();
     document.querySelectorAll(".s-jump [data-go]").forEach((b) => b.addEventListener("click", () => {
       const t = document.getElementById(b.dataset.go);
       if (t) t.scrollIntoView({ behavior: "smooth", block: "start" });

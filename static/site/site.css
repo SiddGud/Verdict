@@ -373,3 +373,47 @@ body.nav-up .s-daybar { transform: translateY(calc(-100% - var(--nav))); }
 @media (prefers-reduced-motion: reduce) { .s-circ::after { animation: none; clip-path: none; } }
 .s-circ { margin-left: .35em; margin-right: .1em; }
 .s-circ::after { left: -9%; right: -9%; }
+
+/* ---------- front page calls to action ---------- */
+.s-cta { display: flex; flex-wrap: wrap; gap: .8rem; margin-top: 1.5rem; }
+.s-cta button { position: relative; overflow: hidden; display: grid; grid-template-columns: auto 1fr; column-gap: .7rem; align-items: center;
+  text-align: left; padding: .85rem 1.3rem; border-radius: 14px; font-weight: 700; font-size: 1.02rem; cursor: pointer;
+  transition: transform .2s ease, box-shadow .2s ease; }
+.s-cta button small { grid-column: 2; font-weight: 400; font-size: .76rem; opacity: .8; }
+.s-cta button > span { grid-row: span 2; }
+.s-cta button:hover { transform: translateY(-2px); }
+.s-cta button::after { content: ""; position: absolute; top: 0; bottom: 0; width: 40%; left: -60%; transform: skewX(-20deg);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .35), transparent); animation: s-shine 3.6s ease-in-out infinite; }
+@keyframes s-shine { 0%, 55% { left: -60%; } 100% { left: 130%; } }
+.s-go1 { background: #FF2E4D; color: #fff; border: 0; box-shadow: 0 10px 30px -10px rgba(255, 46, 77, .7); }
+.s-go2 { background: rgba(255, 255, 255, .06); color: var(--h-ink); border: 1px solid rgba(255, 127, 176, .6); }
+.s-go2::after { animation-delay: 1.8s; }
+.s-gl { font-size: 1.4rem; }
+.s-pulse { width: 12px; height: 12px; border-radius: 50%; background: #FF7FB0; box-shadow: 0 0 0 0 rgba(255, 127, 176, .7); animation: s-ping 1.8s infinite; }
+@keyframes s-ping { 0% { box-shadow: 0 0 0 0 rgba(255, 127, 176, .7); } 80%, 100% { box-shadow: 0 0 0 12px rgba(255, 127, 176, 0); } }
+
+/* ---------- the agent band ---------- */
+.s-agent { background: var(--h-bg); color: var(--h-ink); }
+.s-agent .kicker { color: #FF7FB0; }
+.s-agent .hint { color: var(--h-muted); margin-top: .7rem; max-width: 52ch; }
+.s-agent h2 { font: 400 clamp(2rem, 3.6vw, 3rem)/1.04 var(--display); letter-spacing: -.015em; color: var(--h-ink); }
+.s-agentin { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: 2.4rem; align-items: center; }
+.s-agentbox { border: 1px solid rgba(255, 127, 176, .45); border-radius: 18px; padding: 18px; background: rgba(255, 255, 255, .03);
+  box-shadow: 0 0 60px -20px rgba(255, 46, 77, .45); display: grid; gap: .9rem; }
+.s-trace { display: grid; gap: .35rem; font: 400 .82rem var(--mono); color: var(--h-muted); }
+.s-trace span { opacity: 0; animation: s-type .5s ease forwards; animation-delay: calc(var(--i) * .9s + .4s); }
+.s-trace span:last-child { color: #5FD08F; }
+@keyframes s-type { from { opacity: 0; transform: translateX(-8px); } to { opacity: 1; transform: none; } }
+.s-agentform { display: flex; gap: .5rem; }
+.s-agentform input { flex: 1; min-width: 0; background: rgba(255, 255, 255, .07); border: 1px solid var(--h-rule); color: var(--h-ink); }
+.s-agentform input::placeholder { color: var(--h-muted); }
+.s-agentchips button { background: none; border-color: var(--h-rule); color: var(--h-ink); }
+.s-agentchips button:hover { background: #FF2E4D; border-color: #FF2E4D; color: #fff; }
+@media (max-width: 1000px) { .s-agentin { grid-template-columns: minmax(0, 1fr); } }
+
+/* ---------- the floating agent button: bigger and alive ---------- */
+.c-askbtn { padding: .9rem 1.3rem !important; font-size: 1rem !important; background: linear-gradient(135deg, #FF2E4D, #D4266E) !important;
+  color: #fff !important; box-shadow: 0 12px 34px -10px rgba(255, 46, 77, .75) !important; animation: s-float 3s ease-in-out infinite; }
+.c-askbtn .dot { background: #fff !important; animation: s-ping 1.8s infinite; }
+@keyframes s-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+@media (prefers-reduced-motion: reduce) { .s-cta button::after, .s-pulse, .c-askbtn, .c-askbtn .dot, .s-trace span { animation: none; opacity: 1; } }

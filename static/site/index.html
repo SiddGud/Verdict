@@ -16,7 +16,7 @@ try { var t = localStorage.getItem("ws-theme"); if (t === "light" || t === "dark
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <link rel="stylesheet" href="/static/site/style.css?v=1">
 <link rel="stylesheet" href="/static/site/court.css?v=1">
-<link rel="stylesheet" href="/static/site/site.css?v=20">
+<link rel="stylesheet" href="/static/site/site.css?v=21">
 </head>
 <body>
 <a class="skip" href="#main">Skip to the content</a>
@@ -121,6 +121,10 @@ try { var t = localStorage.getItem("ws-theme"); if (t === "light" || t === "dark
         <p class="lede">A clash is two acts that share many fans, playing at the same time on different stages: someone
           misses one. Verdict uses <span class="src qloo">Qloo's taste data</span> to find every clash, and AI agents
           put each one on trial and fix it without breaking the festival's rules.</p>
+        <div class="s-cta">
+          <button type="button" class="s-go1" id="go-court"><span class="s-gl">&#9878;</span>Enter the courtroom<small>AI agents argue every clash</small></button>
+          <button type="button" class="s-go2" id="go-agent"><span class="s-pulse"></span>Talk to the AI agent<small>it calls Qloo and the timetable for you</small></button>
+        </div>
         <nav class="s-jump" aria-label="On this page">
           <button type="button" data-go="proof">Better than GPT-6 Astra alone</button>
           <button type="button" data-go="market">The $40B problem</button>
@@ -191,6 +195,36 @@ try { var t = localStorage.getItem("ws-theme"); if (t === "light" || t === "dark
           <span class="s-ps">ranking of acts by fans they truly share; significant gain</span></div>
         <div class="s-pt"><span class="s-pk">Same answer twice</span><div class="s-pv"><s>46</s><b>0</b></div>
           <span class="s-ps">of 903 pairs changing between two identical requests, model vs Qloo</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="band s-agent" id="agent">
+    <div class="s-agentin">
+      <div>
+        <p class="kicker big">Agentic, not a chatbot</p>
+        <h2>An AI agent that works the tools.</h2>
+        <p class="hint">Ask in plain words. The agent decides which tools to call (Qloo's fan overlap, the live timetable,
+          Ticketmaster listings, the booker's rules), shows every call as it runs, and checks each number in its answer
+          against the tool results. Orders like a cancellation really change the timetable.</p>
+      </div>
+      <div class="s-agentbox">
+        <div class="s-trace" aria-hidden="true">
+          <span style="--i:0">&#9656; shares_fans_with("Hozier")</span>
+          <span style="--i:1">&#9656; clash_between("Hozier", "Benson Boone")</span>
+          <span style="--i:2">&#9656; booker_order("Tyla just cancelled")</span>
+          <span style="--i:3">&#10003; every number checked against 3 tool results</span>
+        </div>
+        <form class="s-agentform" id="agent-form" autocomplete="off">
+          <input id="agent-q" maxlength="300" placeholder="Ask the agent anything about this festival day" aria-label="Ask the agent">
+          <button type="submit" class="primary c-auto">Ask</button>
+        </form>
+        <div class="chips s-agentchips">
+          <button type="button" data-ask="Who on this bill shares the most fans with Hozier, and do they clash?">Who shares Hozier's fans?</button>
+          <button type="button" data-ask="Tyla just cancelled. What does the court change?">Tyla just cancelled</button>
+          <button type="button" data-ask="Plan my day: I love Hozier, Jungle and Clairo">Plan my day</button>
+          <button type="button" data-ask="Which night in Chicago in November should Clairo play?">Best night for Clairo</button>
+        </div>
       </div>
     </div>
   </section>
@@ -666,7 +700,7 @@ try { var t = localStorage.getItem("ws-theme"); if (t === "light" || t === "dark
     from Last.fm for acts Qloo does not hold; an act neither holds is shown as no data and never guessed.</p>
 </footer>
 <button type="button" class="c-askbtn" id="ask-open" aria-controls="ask-panel" aria-expanded="false">
-  <span class="dot" aria-hidden="true"></span>Ask the court
+  <span class="dot" aria-hidden="true"></span>Ask the AI agent
 </button>
 <aside class="c-ask" id="ask-panel" aria-hidden="true" aria-label="Ask the court">
   <div class="c-askhead">
@@ -711,7 +745,7 @@ try { var t = localStorage.getItem("ws-theme"); if (t === "light" || t === "dark
   <div><strong id="tour-t"></strong><span id="tour-s"></span></div>
   <button type="button" class="quiet small" id="tour-stop">Stop the tour</button>
 </div>
-<script src="/static/site/site.js?v=6"></script>
+<script src="/static/site/site.js?v=7"></script>
 <script src="/static/site/court.js?v=6"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script src="/static/site/city.js?v=7"></script>
