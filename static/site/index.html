@@ -8,6 +8,7 @@
 <meta name="theme-color" content="#0A0A0B">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230A0A0B'/%3E%3Crect x='7' y='9' width='8' height='14' fill='none' stroke='%23fff' stroke-width='2.5'/%3E%3Crect x='17' y='9' width='8' height='14' fill='%23FF7FB0'/%3E%3C/svg%3E">
 <script>
+document.documentElement.dataset.theme = "dark"; // dark by default; a visitor's own choice wins
 try { var t = localStorage.getItem("ws-theme"); if (t === "light" || t === "dark") document.documentElement.dataset.theme = t; } catch (_) {}
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -16,7 +17,7 @@ try { var t = localStorage.getItem("ws-theme"); if (t === "light" || t === "dark
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <link rel="stylesheet" href="/static/site/style.css?v=1">
 <link rel="stylesheet" href="/static/site/court.css?v=1">
-<link rel="stylesheet" href="/static/site/site.css?v=22">
+<link rel="stylesheet" href="/static/site/site.css?v=23">
 </head>
 <body>
 <a class="skip" href="#main">Skip to the content</a>
@@ -123,6 +124,8 @@ try { var t = localStorage.getItem("ws-theme"); if (t === "light" || t === "dark
         <p class="lede">A clash is two acts that share many fans, playing at the same time on different stages: someone
           misses one. Verdict uses <span class="src qloo">Qloo's taste data</span> to find every clash, and AI agents
           put each one on trial and fix it without breaking the festival's rules.</p>
+        <button type="button" id="tour-start" class="s-tour"><span class="s-tring"><span class="c-play" aria-hidden="true"></span></span>
+          <span class="s-ttext"><b>Watch the 2-minute tour</b><small>Start here: the whole product plays itself, no clicks needed</small></span></button>
         <div class="s-cta">
           <button type="button" class="s-go1" id="go-court"><span class="s-gl">&#9878;</span>Enter the courtroom<small>AI agents argue every clash</small></button>
           <button type="button" class="s-go2" id="go-agent"><span class="s-pulse"></span>Talk to the AI agent<small>it calls Qloo and the timetable for you</small></button>
@@ -159,7 +162,6 @@ try { var t = localStorage.getItem("ws-theme"); if (t === "light" || t === "dark
         <p class="hint s-cvhint">Four AI agents argue each clash with Qloo's fan data: one for each act's fans, a booker who
           checks the rules, a judge who rules. You get the final say on the first case.</p>
         <button type="button" id="convene-live" class="quiet small c-live">Run the agents live (about 3 minutes)</button>
-        <button type="button" id="tour-start" class="c-tourbtn"><span class="c-play" aria-hidden="true"></span>Watch the 2-minute tour</button>
         <form id="cmd" class="c-cmd" autocomplete="off">
           <label for="text">Booker's emergency</label>
           <div class="c-row">
