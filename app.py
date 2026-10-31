@@ -69,10 +69,11 @@ def war_room():
 
 
 @app.get("/llms.txt")
+@app.get("/llms-full.txt")
 @app.get("/llms.md")
 def llms():
     """The whole project for readers that are language models: features, architecture, decisions and every test."""
-    return FileResponse(os.path.join(ROOT, "llms.txt"), media_type="text/markdown; charset=utf-8")
+    return FileResponse(os.path.join(ROOT, "llms.txt"), media_type="text/plain; charset=utf-8")
 
 
 @app.api_route("/health", methods=["GET", "HEAD"])

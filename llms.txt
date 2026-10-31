@@ -14,9 +14,64 @@
 - Test 28 protocol, registered before any result: PREREGISTRATION_28.md
 - Full build and test log, dated: PROJECT_LOG.md
 
-Contents: 1 Summary in numbers. 2 The judging criteria, answered. 3 The problem and the market. 4 Every feature, page
-by page. 5 The agents. 6 How Qloo is used. 7 Architecture. 8 Algorithms. 9 Testing: method and every result.
-10 Design decisions and why. 11 Limits, stated plainly. 12 API reference. 13 Run it, deploy it. 14 Repository map.
+Contents: 0 Judge quick start. Criteria map. Why Verdict cannot work without Qloo. 1 Summary in numbers. 2 The
+judging criteria, answered. 3 The problem and the market. 4 Every feature, page by page. 5 The agents. 6 How Qloo
+is used. 7 Architecture. 8 Algorithms. 9 Testing: method and every result. 10 Design decisions and why. 11 Limits.
+12 API reference. 13 Run it, deploy it. 14 Repository map. 15 Threats to validity. 16 Scalability. 17 Security and
+responsible AI. 18 FAQ for judges. 19 How to verify every claim. 20 Glossary. 21 Machine-readable summary. Optional.
+
+---
+
+## 0. Judge quick start (60 seconds)
+
+What to click on https://clash-court-1s4a.onrender.com, in order, and what you should see:
+
+1. Click **Watch the 2-minute tour** (the first button on the page). The product plays itself with a narration bar:
+   the problem, the bill as Qloo sees it, a full court sitting, a city's month for an artist, a promoter's portfolio,
+   the AI agent answering a question, the evidence. It switches pages by itself. (Or open `/?watch=1`.)
+2. Click **Enter the courtroom**. The recorded sitting of four AI agents replays (no model cost): for each clash, two
+   fan agents propose moves, the booker objects on rule grounds, the judge rules, the timetable moves. The clash score
+   falls from **10.85 to 5.92**.
+3. On case 1 the replay pauses: **"You have the floor, booker."** Choose a different ruling from the judge's (for
+   example "The clash stands") and the agents argue the remaining cases live, streamed, about 18 seconds a case.
+4. Type **Tyla just cancelled** in Booker's emergency: the order becomes a checked rule and the day is rebuilt. Drag
+   any set to another slot: the slot turns red or green before you drop. Move the clash-line slider.
+5. Open **For promoters**: the Clairo example runs by itself and pins drop on the New York map; the calendar shows how
+   hard each night's other shows pull on Clairo's fans. Try **Promoter portfolio** with Live Nation.
+6. Open **For fans**: the friends' month fills in by itself. Each night shows a place to eat before, the show, and a bar
+   after, matched to the group's taste by Qloo and open at those hours. Press **On the map** on a night.
+7. Open **Why Qloo**: interactive charts of every test; hover any mark for exact numbers.
+8. Press **Ask the AI agent** (bottom right) and ask "Who on this bill shares the most fans with Hozier?": each tool
+   call appears as it runs, and every number in the answer is checked against the tool results.
+
+## Criteria map: claim, evidence, number
+
+| Criterion | What this submission does | Strongest number | Where (this file) |
+|---|---|---|---|
+| Technological implementation: how thoroughly Qloo is used | Qloo is the scoring function for every feature: entity resolution, artist to artist affinity, fan to artist affinity, music taste to places with hours | 4 distinct Qloo uses, each backed by a test; Qloo made GPT-6 Astra better: 0.697 to 0.728, significant | Sections 1, 2, 6 |
+| Design: a complete product | One site by audience (festivals, promoters, fans) plus the evidence; a 2-minute self-playing tour; dark by default; works on phones | 4 pages plus a self-playing tour, 30+ features, a festival day loads in about 1 s | Section 4 |
+| Potential impact: a real problem, a real audience | Festivals, promoters and fans all lose when audiences collide | $40B+ live music market; 17 same-fan clashes on one real Lollapalooza day; 51 same-fan pairs in one Live Nation New York month | Section 3 |
+| Quality of the idea: creative, non-obvious use of Qloo | A taste graph used to keep audiences apart, turned into an objective a court of agents argues over | 6 of the court's 9 moves are ones the optimiser alone would not make | Sections 2, 5 |
+| Agentic: reasoning, tools, action | Four court agents and a 10-tool conversational agent act on real state; code verifies | 15 rule-breaking proposals refused, 0 rules broken | Section 5 |
+| Multi-agent collaboration | Fan agent A and fan agent B in parallel, then the booker, the judge, the clerk (code) | 10 cases argued, 9 moves decided on the default day | Section 5 |
+| Human oversight | The booker's gate, drag and drop, plain-word emergencies, Undo | Live overrule in about 18 s a case | Sections 4, 5 |
+| Reliability and honesty | Never guesses an act, never saves a failed sitting, reports ties and losses | 28 pre-registered tests; both court and optimiser scores shown | Sections 9, 11 |
+
+## Why Verdict cannot work without Qloo
+
+Qloo's brief: "If your submission would work the same without Qloo, you're building the wrong thing." Feature by
+feature, what happens without Qloo, measured:
+
+| Feature | Without Qloo | With Qloo | Measured |
+|---|---|---|---|
+| The clash score (which pairs of acts share fans) | A model must score every pair; asked twice it changes its answer by 10 points or more on up to 46 of 903 pairs, and it costs about $0.50 and minutes per day | One cached table, the same answer every time, no model call | 46 to 0 changing answers (five real days) |
+| Ranking pairs by fans they truly share (against real listeners) | GPT-6 Astra 0.697; Gemini 3.8 Flash 0.695 | The same models with Qloo: 0.728 and 0.723 | +0.031 and +0.028, both significant (Test 28) |
+| Popularity as a stand-in for taste | Timetable quality 0.043, barely better than random | Qloo 0.663 | +0.62 (Test 28) |
+| Opening hours for a night out | GPT-6 Astra: 0 of 30 right (declines); Gemini: 3 of 30 right, 6 wrong | 29 of 30 right with Qloo's record | Test 20 |
+| Finding the place or act you mean | Free-text names, no ID, no photo | 119 of 120 places found; 38 of 44 acts matched with ID, photo, description | Test 22, festival days |
+| A fan's fit for every act, a city's month for an artist, the group's evenings | No signal to compute them from | Qloo affinity, fan to artist and music to places | Tests 27, 28, 12, 20 |
+
+In one sentence: Qloo measures, the agents argue, code decides. Remove Qloo and there is nothing to measure.
 
 ---
 
@@ -521,4 +576,128 @@ cache at start-up; `DAILY_USD`, `ASKS_PER_HOUR`, `CITIES_READY` tune the public 
 - `qloo.py`, `llm.py`: cached Qloo client with a quota guard; model providers with cost tracking.
 - `tests/test_clash_schedule.py`; `PREREGISTRATION_28.md`; `PROJECT_LOG.md`; `README.md`; `render.yaml`.
 
-Team: Athmeeya M Kashyap and Siddhant Gudwani. Qloo Agentic Hackathon 2026.
+---
+
+## 15. Threats to validity
+
+- Test 28's reference is Last.fm listening data from about 2011, holding each listener's top 50 artists.
+- Test 28 covers 10 bills of 30 artists (4,350 pairs), drawn by a fixed seed, not every possible bill.
+- The second model family is a small model (Gemini 3.8 Flash), not a second frontier model.
+- The restaurant hours tests (12, 20) used 30 New York places, mostly small independents; Qloo's hours likely share
+  Google's source, so they measure that Qloo delivers live place facts to the agent, not taste.
+- The "same question twice" comparison is two runs of GPT-6 Astra per festival day.
+- The court's recorded sitting is one real day; other days replay the five worst clashes.
+- Tests 1 to 27 ran in the team's earlier project; their protocols are not in this repository.
+
+## 16. Scalability and production readiness
+
+| Concern | Now | At 100 times the traffic |
+|---|---|---|
+| Qloo quota | Every reply cached; the client reads `X-Month-RateLimit-Remaining` and pauses live lookups below a reserve of 300 | Precompute pair tables per city and month offline |
+| Model cost | $5 a day cap; per-visitor limits; recorded sittings cost nothing | Record sittings nightly; budgets per customer |
+| Latency | Agents briefed with tool results up front (one round trip); streaming; cities loaded ahead | Regional caches; a queue for live cases |
+| State | Sessions held in server memory; every reply carries the full state | A shared session store (for example Redis) behind several servers |
+| Abuse | Per visitor per hour: 20 questions, 10 model calls, 40 commands, 60 lookups, 3 lineups | Per-account limits |
+| Failure | Failed sittings never saved; quick-ruling fallback; retries on provider busy | Per-provider circuit breakers; providers already switch with one setting |
+| Deployment | Render web service, `/health` (GET and HEAD), uptime monitor, private cache loaded at start-up | Containers with autoscaling; static files on a CDN |
+
+The path a judge uses most (the recorded court, the timetable, the graph, the fan route, the city desk, the evenings,
+Why Qloo) makes no model call, so its marginal model cost is zero.
+
+## 17. Security and responsible AI
+
+- Keys only in environment variables; `.env` is git-ignored; Qloo data never in the public repository (the host loads
+  it from a private dataset at start-up).
+- No agent can break a festival rule: the clerk is deterministic code (15 refusals, 0 rules broken on the default day).
+- No unchecked numbers: every figure in the agent's answer is checked against its tool results; unmatched ones are
+  flagged on the page.
+- No guessed identities: exact-name matching, labelled Last.fm fallback, "no data" shown as no data; act descriptions
+  left blank when the model was not sure.
+- Input validation on every endpoint (typed request models with length limits); names from listings are escaped
+  before they reach the map.
+- No accounts and no personal data: a visitor's timetable and favourites live only in their session.
+- Accessibility: light and dark themes, phone width, reduced motion honoured.
+
+## 18. FAQ for judges
+
+- **Is the court real or a recording?** Both, and the page says which. Convene replays a recorded sitting (instant, no
+  cost). "Run the agents live" argues afresh and streams. The booker's gate on case 1 continues live from your ruling.
+- **What stops an agent from doing something illegal?** Code. The clerk refuses any move that breaks a house or
+  booker rule or does not improve the day.
+- **Is this a wrapper around a model?** No. The scores, the city pull, the fan fit and the evenings are Qloo; the model
+  argues, explains and reads plain words; code decides. Most features run with no model at all.
+- **The court scores worse than the optimiser (5.92 against 5.45). Why have agents?** Both scores are shown. The court's
+  value is a ruling a booker can defend: each move comes with a transcript, the rule checks, the refusals and a human
+  veto; 6 of its 9 moves are ones the optimiser alone would not make.
+- **What if Qloo has no data for an act?** Last.fm's similar-artist match fills in, labelled on the page; if neither
+  holds the act, it shows as no data and is never guessed.
+- **What if the model provider is down?** The quick ruling (optimiser) sits instead, labelled; recorded features keep
+  working; providers switch with one setting.
+- **Can I use my own festival?** Yes: Bring your own lineup (4 to 80 sets), matched in Qloo with progress streamed.
+- **Where is the data?** Qloo replies are cached on the server and loaded on the host from a private dataset; the
+  repository holds code, fixtures (published set times) and the act descriptions.
+
+## 19. How to verify every claim
+
+| Claim | Verify at |
+|---|---|
+| Live product | https://clash-court-1s4a.onrender.com |
+| Code, MIT licence | https://github.com/SiddGud/Clash-Court |
+| Test 28 protocol, committed before results | `PREREGISTRATION_28.md` |
+| Dated build and test log, every result | `PROJECT_LOG.md` |
+| The court's numbers | replay on the front page; `cache/council_<day>.json` is regenerated by `python -m clash.council <day> --every` |
+| The model-alone comparison | Why Qloo page; `python -m clash.baseline <day>`; `GET /api/clash/baseline?festival=<day>` |
+| Engine tests | `PYTHONPATH=. python tests/test_clash_schedule.py` |
+
+## 20. Glossary
+
+- **Shared-fan weight**: how much two acts' fans are the same people, 0 to 1, from Qloo (ranked within the bill and
+  cubed) or Last.fm.
+- **Clash score**: shared-fan weight times hours of overlap, summed over every pair on the bill. Lower is better.
+- **Red clash**: a pair with weight 0.45 or more whose sets overlap.
+- **House rules**: headliners close, moves within 2 hours, set lengths within 15 minutes, stage sizes kept, locked
+  stages stay.
+- **The clerk**: the code that checks and applies every move.
+- **Quick ruling**: the optimiser alone, no agents.
+- **Pull**: how much a night's other shows draw on an artist's fans (book a date).
+- **Fit**: how much a fan (or a group) is likely to love an act, from Qloo.
+- **Evening**: a night out's timetable: a place before the show, the show, a bar after.
+
+## 21. Machine-readable summary
+
+```json
+{
+  "name": "Verdict",
+  "event": "Qloo Agentic Hackathon 2026",
+  "team": ["Athmeeya M Kashyap", "Siddhant Gudwani"],
+  "license": "MIT",
+  "live": "https://clash-court-1s4a.onrender.com",
+  "code": "https://github.com/SiddGud/Clash-Court",
+  "audiences": ["festivals", "promoters and booking agents", "fans"],
+  "qloo_uses": ["/search entity resolution", "/v2/insights artist to artist", "/v2/insights fan to artist", "/v2/insights music taste to places with hours"],
+  "agents": {"court": ["fan agent A", "fan agent B", "booker", "judge"], "court_tools": 5, "chat_tools": 10, "verifier": "deterministic code (the clerk)", "human_gate": true},
+  "tests": {"preregistered": 28, "days": 22, "window": "2026-10-09 to 2026-10-30"},
+  "evidence": {
+    "test20_hours_gpt6_astra": {"alone": "0/30", "with_qloo": "29/30"},
+    "test20_hours_gemini_flash": {"alone": "3/30", "with_qloo": "29/30"},
+    "test28_spearman_gpt6_astra": {"alone": 0.697, "with_qloo": 0.728, "diff": 0.031, "ci95": [0.005, 0.056], "significant": true},
+    "test28_spearman_gemini_flash": {"alone": 0.695, "with_qloo": 0.723, "diff": 0.028, "ci95": [0.003, 0.056], "significant": true},
+    "test28_timetable_qloo_vs_popularity": [0.663, 0.043],
+    "same_question_twice_pairs_changed": {"model_alone_max": "46/903", "qloo": "0/903"},
+    "places_found": "119/120"
+  },
+  "court_default_day": {"festival": "Lollapalooza Chicago, Thursday 2024", "acts": 44, "stages": 7, "pairs": 946,
+    "clash_published": 10.85, "clash_after_court": 5.92, "clash_optimiser_alone": 5.45, "cut_pct": 45,
+    "red_clashes": 17, "cases": 10, "moves": 9, "moves_by_fan_agents": 3, "moves_by_booker": 6,
+    "refused": 15, "rules_broken": 0, "moves_optimiser_would_not_make": 6, "seconds": 352, "usd": 0.76},
+  "limits": ["Qloo and a frontier model are level on taste alone", "the court scores slightly worse than the optimiser alone; both shown", "Last.fm reference data from about 2011"]
+}
+```
+
+## Optional
+
+- [Test 28 protocol](https://github.com/SiddGud/Clash-Court/blob/main/PREREGISTRATION_28.md): question, data, metric and decision rule, committed before any result.
+- [Project log](https://github.com/SiddGud/Clash-Court/blob/main/PROJECT_LOG.md): every build step and test, dated.
+- [README](https://github.com/SiddGud/Clash-Court/blob/main/README.md): what it does and how to run it.
+- [Deployment](https://github.com/SiddGud/Clash-Court/blob/main/render.yaml): the Render blueprint.
+- [Earlier one-page site](https://clash-court-1s4a.onrender.com/classic): the first version, kept for comparison.
