@@ -166,7 +166,7 @@ In one sentence: Qloo measures, the agents argue, code decides. Remove Qloo and 
 | Places a model named that Qloo found | 119 of 120 | Test 22 |
 | Clash on a real Lollapalooza day after the AI court | 10.85 to 5.92, 45% fewer, 0 rules broken | Recorded sitting |
 | Rule-breaking agent proposals refused by code | 15 | Same sitting |
-| Pre-registered tests | 28, over 22 days (Oct 9 to Oct 30, 2026) | Logs |
+| Pre-registered tests | 28 over 22 days (Oct 9 to Oct 30, 2026), 26 run to a result | Logs |
 | Cost to score every pair on a festival day | about 76 cached Qloo calls, no model; a model alone about $0.50 and minutes each time | Measured |
 
 Brackets are 95% bootstrap intervals. "Significant" means the interval of the difference excludes zero.
@@ -479,6 +479,39 @@ in the team's earlier project on New York restaurant, music and listening data; 
 repo with its protocol. References are always outside Qloo: Google Maps hours read by a person, real listeners (Last.fm,
 GroupLens HetRec 2011), real tour bills and bookings (Ticketmaster), published set times, MLB attendance, NYC records.
 Two model families: GPT-6 Astra (frontier) and Gemini 3.8 Flash (small). 95% intervals by bootstrap.
+
+### All 28 tests, one line each (registered before any result; 26 run to a result)
+
+| # | Question | Result |
+|---|---|---|
+| 1 | Do Qloo cuisine heatmaps predict where a cuisine's first restaurant opens? | No (city density does better) |
+| 2 | Do music-audience heatmaps carry residents' taste? | No |
+| 3 | Do Qloo-grounded briefs beat plain ones, by blind human raters? | Not completed |
+| 4 | Does Qloo add to city records for ranking leases? | No |
+| 5 | Does Qloo predict which young restaurants survive? | No claim (a placebo gained as much) |
+| 6 | Do Qloo audience tags match independent data? | 2 of 7 hold |
+| 7 | Does Qloo predict which cuisine opens at a storefront? | No added value |
+| 8 | Does Qloo add to a brief beyond a list of nearby businesses? | No |
+| 9 | Do improved Qloo briefs beat city-record briefs? | Not shown |
+| 10 | Does Qloo's competitor list cover city records? | 37% coverage, 81% exist |
+| 11 | Is a Qloo scene about the restaurant or its location? | Mostly location |
+| 12 | Are Qloo's Friday closing times right (vs Google Maps)? | 29 of 30 |
+| 13 | Which uses of Qloo's graph are stable enough to test? | 3 of 7 pass |
+| 14 | Does Qloo venue-to-artist affinity match real bookings? | Above popularity |
+| 15 | Does Qloo artist-to-artist affinity match real tour bills? | 0.875, above popularity and genre |
+| 16 | Does a model find real openers better with Qloo? | No difference |
+| 17 | Do Qloo city scores match where artists play? | Not above city size |
+| 18 | From five loved films, does Qloo find the next? | Above popularity and genre |
+| 19 | Does Qloo lift models on another team's 115 tours? | Not run (needed model credit) |
+| 20 | Is a model right about closing times more often with Qloo? | 0/30 to 29/30 |
+| 21 | Is Qloo ahead on lesser-known headliners? | No |
+| 22 | Does Qloo find the places a model names? | 119 of 120 |
+| 23 | Does Qloo know which comedians share a crowd? | Not shown |
+| 24 | Does Qloo's age skew find acts young people took up? | No |
+| 25 | Qloo on its home ground: small acts, new restaurants, steadiness | Steady; no gain on new restaurants |
+| 26 | Do Qloo city scores predict MLB theme-night attendance? | No |
+| 27 | Does Qloo find small artists real listeners play? | 0.841 vs popularity 0.516 |
+| 28 | The clash score: which scorer best ranks pairs of acts by real shared listeners (10 bills of 30 artists, Last.fm), and builds the best timetable? | Qloo made GPT-6 Astra (0.697 to 0.728) and Gemini (0.695 to 0.723) better; Qloo 0.663 vs popularity 0.043 on timetables |
 
 ### Where Qloo made a model better (the same model, alone and with Qloo)
 
