@@ -14,13 +14,69 @@
 - Test 28 protocol, registered before any result: PREREGISTRATION_28.md
 - Full build and test log, dated: PROJECT_LOG.md
 
-Contents: 0 Judge quick start. Criteria map. Why Verdict cannot work without Qloo. 1 Summary in numbers. 2 The
+Contents: Links. The vision. Business model. 0 Judge quick start. Criteria map. Why Verdict cannot work without Qloo. 1 Summary in numbers. 2 The
 judging criteria, answered. 3 The problem and the market. 4 Every feature, page by page. 5 The agents. 6 How Qloo
 is used. 7 Architecture. 8 Algorithms. 9 Testing: method and every result. 10 Design decisions and why. 11 Limits.
 12 API reference. 13 Run it, deploy it. 14 Repository map. 15 Threats to validity. 16 Scalability. 17 Security and
 responsible AI. 18 FAQ for judges. 19 How to verify every claim. 20 Glossary. 21 Machine-readable summary. Optional.
 
 ---
+
+## Links
+
+Live product:
+- [Festival court, front page](https://clash-court-1s4a.onrender.com/): the AI court, the timetable, the graph, the agent.
+- [Watch the 2-minute tour](https://clash-court-1s4a.onrender.com/?watch=1): the whole product plays itself.
+- [For promoters](https://clash-court-1s4a.onrender.com/#/promoters): book a date, promoter portfolio, openers, tour.
+- [For fans](https://clash-court-1s4a.onrender.com/#/fans): plan my day, friends' month with food and drinks.
+- [Why Qloo](https://clash-court-1s4a.onrender.com/#/why): every test as interactive charts.
+- [Earlier one-page site](https://clash-court-1s4a.onrender.com/classic) and [health check](https://clash-court-1s4a.onrender.com/health).
+
+Live API, open in a browser:
+- [Festival days](https://clash-court-1s4a.onrender.com/api/clash/festivals)
+- [Model-alone comparison, Lollapalooza Friday 2026](https://clash-court-1s4a.onrender.com/api/clash/baseline?festival=lolla2026fri)
+- [City desk options](https://clash-court-1s4a.onrender.com/api/city/options)
+- [Promoters in New York, November 2026](https://clash-court-1s4a.onrender.com/api/city/promoters?city=new-york&month=2026-11)
+
+Code and evidence:
+- [Repository](https://github.com/SiddGud/Clash-Court) and [README](https://github.com/SiddGud/Clash-Court/blob/main/README.md)
+- [Test 28 protocol, registered before results](https://github.com/SiddGud/Clash-Court/blob/main/PREREGISTRATION_28.md)
+- [Dated project log](https://github.com/SiddGud/Clash-Court/blob/main/PROJECT_LOG.md)
+- [The court agents](https://github.com/SiddGud/Clash-Court/blob/main/clash/council.py), [the conversational agent](https://github.com/SiddGud/Clash-Court/blob/main/clash/ask.py),
+  [booker's words to rules](https://github.com/SiddGud/Clash-Court/blob/main/clash/agents.py)
+- [Rules, clash score, optimiser](https://github.com/SiddGud/Clash-Court/blob/main/clash/schedule.py), [Qloo and Last.fm tables](https://github.com/SiddGud/Clash-Court/blob/main/clash/overlap.py)
+- [City desk, friends' month, evenings](https://github.com/SiddGud/Clash-Court/blob/main/clash/city.py), [openers and tour](https://github.com/SiddGud/Clash-Court/blob/main/clash/booking.py)
+- [Fan route](https://github.com/SiddGud/Clash-Court/blob/main/clash/fanroute.py), [model-alone baseline](https://github.com/SiddGud/Clash-Court/blob/main/clash/baseline.py), [rate limits](https://github.com/SiddGud/Clash-Court/blob/main/clash/guard.py)
+- [Cached Qloo client](https://github.com/SiddGud/Clash-Court/blob/main/qloo.py), [model providers](https://github.com/SiddGud/Clash-Court/blob/main/llm.py), [web server](https://github.com/SiddGud/Clash-Court/blob/main/app.py)
+- [The site](https://github.com/SiddGud/Clash-Court/blob/main/static/site/index.html), [charts](https://github.com/SiddGud/Clash-Court/blob/main/static/site/why.js), [engine tests](https://github.com/SiddGud/Clash-Court/blob/main/tests/test_clash_schedule.py)
+- [Deployment blueprint](https://github.com/SiddGud/Clash-Court/blob/main/render.yaml)
+
+## The vision: the audience layer for live music
+
+Every decision in live music (who plays when, which night to book, which shows to market together, where a fan spends
+their evening) depends on one hidden fact: which acts draw the same people. Today it is guessed. Verdict makes it a
+number, from Qloo's taste graph, and puts AI agents to work on it.
+
+- Why now: taste graphs like Qloo's now cover artists, places and more in one space, and agents can act on live state
+  with code checking every move. Neither was practical before.
+- Why it is hard to copy: the value is in the combination: Qloo's cross-domain affinity, a measurable clash objective,
+  a rule-checked court of agents with a human veto, real listings and real set times, and 28 pre-registered tests that
+  show where each piece holds up.
+- One engine, three markets: the same fan-overlap table schedules a festival, books a city's nights and plans a fan's
+  evening, so each new customer reuses the data the last one paid for.
+
+## Business model (a plan)
+
+| Customer | Product | How it would pay |
+|---|---|---|
+| Festivals (thousands worldwide, from Lollapalooza-scale to local) | The court: a timetable with fewer clashes, every rule kept, every move explained | Per festival edition |
+| Promoters and booking agents | Book a date, portfolio, openers, tour routing over every city's listings | Monthly subscription per city or roster |
+| Ticketing platforms | The clash score and fan pull as an API next to on-sale dates | Usage-based API |
+| Fans | Day and night-out planning with food and drinks matched to taste | Free; partner bookings for restaurants and bars |
+
+The scale: live music ticket sales passed $40 billion in 2025 (Omdia), and one promoter, Live Nation, ran 55,000 shows
+for 159 million fans that year. A small improvement in how those shows are timed, booked and marketed is worth a great
+deal.
 
 ## 0. Judge quick start (60 seconds)
 
