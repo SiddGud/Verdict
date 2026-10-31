@@ -16,7 +16,7 @@ try { var t = localStorage.getItem("ws-theme"); if (t === "light" || t === "dark
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <link rel="stylesheet" href="/static/site/style.css?v=1">
 <link rel="stylesheet" href="/static/site/court.css?v=1">
-<link rel="stylesheet" href="/static/site/site.css?v=18">
+<link rel="stylesheet" href="/static/site/site.css?v=20">
 </head>
 <body>
 <a class="skip" href="#main">Skip to the content</a>
@@ -177,8 +177,9 @@ try { var t = localStorage.getItem("ws-theme"); if (t === "light" || t === "dark
   <section class="band s-proof" id="proof">
     <div class="s-proofin">
       <div class="s-proofhead">
-        <p class="kicker big">The result</p>
-        <h2>Qloo makes <em>GPT-6 Astra</em> better.</h2>
+        <p class="kicker big">28 pre-registered tests over 22 days found</p>
+        <h2>Qloo makes <span class="s-circ">GPT-6 Astra</span> better.</h2>
+        <p class="s-circnote">OpenAI's frontier reasoning model</p>
         <p class="hint">The same frontier model, asked the same questions, alone and with Qloo's data, scored against real-world
           truth. Pre-registered tests; Gemini 3.8 Flash gains the same way.</p>
         <a class="s-proofgo" href="#/why">See every test and chart</a>
@@ -215,30 +216,20 @@ try { var t = localStorage.getItem("ws-theme"); if (t === "light" || t === "dark
       <article class="s-case">
         <span class="kicker">A real clash, festival side</span>
         <h3>Hozier and Benson Boone, 30 minutes at the same time</h3>
-        <p>Lollapalooza Thursday 2024, as published. Hozier (Irish singer-songwriter, "Take Me to Church") and Benson Boone
-          (American pop singer, "Beautiful Things") share a large audience, yet their sets overlapped by 30 minutes on
-          different stages. Multiply by 17 pairs and a day's fans miss shows they paid for. The court moved them apart,
-          with every festival rule kept.</p>
+        <p>Hozier ("Take Me to Church") and Benson Boone ("Beautiful Things") share fans but overlapped at Lollapalooza 2024. The court moved them apart, every rule kept.</p>
       </article>
       <article class="s-case">
         <span class="kicker">A real overlap, promoter side</span>
         <h3>Live Nation against Live Nation, one night apart</h3>
-        <p>New York, November 2026. Live Nation sells Beartooth (Ohio metalcore band) on November 12 and Catch Your Breath
-          (Texas hard rock band) on November 13, two Manhattan shows whose fans Qloo scores as the same people (1.0).
-          Its month there holds 51 pairs like this within a week. The promoter tools find them, and the nights where
-          an act's fans are free.</p>
+        <p>Beartooth on Nov 12, Catch Your Breath on Nov 13: two Manhattan shows, the same fans. 51 pairs like this in one New York month.</p>
       </article>
       <article class="s-case">
         <span class="kicker">The fan side</span>
         <h3>Millions of fans, choosing between acts they love</h3>
-        <p>Every one of those 159 million fans plans a night or a day around a few artists. Verdict plans the day
-          around the acts you love, files the clashes you cannot avoid with the court, and lays out a month of nights
-          out for you and your friends.</p>
+        <p>159 million fans plan around a few artists. Verdict plans their festival day, and their month with friends.</p>
       </article>
     </div>
-    <p class="hint s-src">Sources: Omdia, "Global live music market to exceed $50 billion by 2030" (2026); Live Nation
-      Entertainment, full year 2025 results and Form 10-K; Lollapalooza 2025 lineup coverage (Pollstar, ABC7 Chicago);
-      Verdict's own runs on the published Lollapalooza timetable and Ticketmaster listings.</p>
+    <p class="hint s-src">Sources: Omdia (2026), Live Nation 2025 results, Lollapalooza 2025 coverage, our own runs.</p>
   </section>
 
   <section class="band c-courtband" id="court">
@@ -313,12 +304,12 @@ try { var t = localStorage.getItem("ws-theme"); if (t === "light" || t === "dark
         in a way that breaks a rule.</p>
     </div>
     <ol class="flow">
-      <li><h3>The clerk reads the bill</h3><p>Every act is matched to Qloo by exact name. Qloo scores how much each pair's fans are the same people, for the whole bill.</p></li>
-      <li><h3>Fan agents file cases</h3><p>Every red clash becomes a case. Each act's agent looks up its fans and the moves that would help, and proposes one.</p></li>
-      <li><h3>The booker objects</h3><p>The booker agent checks each proposal against the rules and objects when it breaks one: headliners close, no act moves more than two hours, set lengths and stage sizes stay. It may offer a legal move instead.</p></li>
-      <li><h3>The judge rules</h3><p>The judge scores the proposals and rules. Code checks the move, makes it, and an optimiser tidies the rest of the day with the agents' moves kept.</p></li>
-      <li><h3>Emergencies</h3><p>Type "Tyla just cancelled" or "Kesha arrives at 4pm". The booker reads it into a checked rule and the timetable is rebuilt.</p></li>
-      <li><h3>Fans weigh in</h3><p>A fan's route flags the clashes they cannot avoid. Each report adds weight to that pair the next time the court sits.</p></li>
+      <li><h3>The clerk reads the bill</h3><p>Qloo scores how much every pair of acts shares fans.</p></li>
+      <li><h3>Fan agents file cases</h3><p>Each red clash becomes a case; each act's agent proposes a move.</p></li>
+      <li><h3>The booker objects</h3><p>The booker checks the festival's rules and offers a legal move.</p></li>
+      <li><h3>The judge rules</h3><p>The judge rules; code checks and makes the move.</p></li>
+      <li><h3>Emergencies</h3><p>Type "Tyla just cancelled" and the day is rebuilt.</p></li>
+      <li><h3>Fans weigh in</h3><p>Clashes fans can't avoid weigh on the next ruling.</p></li>
     </ol>
   </section>
   <section class="band s-also" id="also">
