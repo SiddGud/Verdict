@@ -16,7 +16,7 @@ try { var t = localStorage.getItem("ws-theme"); if (t === "light" || t === "dark
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <link rel="stylesheet" href="/static/site/style.css?v=1">
 <link rel="stylesheet" href="/static/site/court.css?v=1">
-<link rel="stylesheet" href="/static/site/site.css?v=8">
+<link rel="stylesheet" href="/static/site/site.css?v=11">
 </head>
 <body>
 <a class="skip" href="#main">Skip to the content</a>
@@ -452,38 +452,69 @@ try { var t = localStorage.getItem("ws-theme"); if (t === "light" || t === "dark
     <div class="band-head">
       <div>
         <p class="kicker big">The same model, with and without Qloo</p>
-        <h2>Two models, two tasks, one result</h2>
+        <h2>Every metric, interactive</h2>
       </div>
       <p class="hint">Each bar is the same model answering the same questions, once alone and once with Qloo's data in its
-        prompt, scored against a source outside Qloo. Pink: with Qloo.</p>
+        prompt, scored against a source outside Qloo. Pink is Qloo. Hover anything for the exact numbers.</p>
     </div>
-    <div class="c-vs s-one" id="vs">
-      <div class="panel c-chart">
-        <p class="ph">Test 20: when does this restaurant close on Friday?</p>
-        <p class="hint">30 real New York restaurants, checked against Google Maps by hand. Right within 30 minutes.</p>
-        <div class="c-bars2">
-          <div class="b"><span>GPT-6 Astra alone</span><i style="--v:0"></i><b>0/30</b></div>
-          <div class="b qb best"><span>GPT-6 Astra with Qloo</span><i style="--v:.967"></i><b>29/30</b></div>
-          <div class="b"><span>Gemini 3.8 Flash alone</span><i style="--v:.1"></i><b>3/30</b></div>
-          <div class="b qb best"><span>Gemini 3.8 Flash with Qloo</span><i style="--v:.967"></i><b>29/30</b></div>
+    <div id="vs" class="w-charts">
+      <div class="panel w-panel">
+        <div class="w-head">
+          <div><p class="ph">Test 20: when does this restaurant close on Friday?</p>
+            <p class="hint">30 real New York restaurants, checked against Google Maps by a person. Each ring is one model's 30
+              answers. Hover a ring for the counts.</p></div>
+          <div class="w-legend"><span><i class="k-right"></i>Right within 30 min</span><span><i class="k-wrong"></i>Wrong time</span><span><i class="k-none"></i>Said it did not know</span></div>
         </div>
-        <p class="hint s-note">Alone, GPT-6 Astra declined every time; Gemini guessed 9 times and was wrong on 6. With Qloo
-          both were right on 29.</p>
+        <div class="w-donuts" id="w-t20"></div>
       </div>
-      <div class="panel c-chart">
-        <p class="ph">Test 28: which acts on a bill really share fans?</p>
-        <p class="hint">10 bills of 30 real artists, scored against how many listeners each pair truly shares (Last.fm).
-          Spearman correlation, higher is closer to real fans. Axis from 0.60 to 0.75.</p>
-        <div class="c-bars2 s-zoom">
-          <div class="b"><span>GPT-6 Astra alone</span><i style="--v:.697"></i><b>0.697</b></div>
-          <div class="b qb best"><span>GPT-6 Astra with Qloo</span><i style="--v:.728"></i><b>0.728</b></div>
-          <div class="b"><span>Gemini 3.8 Flash alone</span><i style="--v:.695"></i><b>0.695</b></div>
-          <div class="b qb best"><span>Gemini 3.8 Flash with Qloo</span><i style="--v:.723"></i><b>0.723</b></div>
+
+      <div class="panel w-panel">
+        <div class="w-head">
+          <div><p class="ph">The same model, alone and with Qloo</p>
+            <p class="hint">Grey dot: the model alone. Pink dot: the same model with Qloo's data. Whiskers: 95% intervals.
+              Every score is against real-world data outside Qloo; higher is better.</p></div>
+          <div class="w-legend"><span><i class="k-none"></i>Model alone</span><span><i class="k-right"></i>Model with Qloo</span></div>
         </div>
-        <p class="hint s-note">Both gains are statistically significant (95% intervals above zero: +0.031 and +0.028).
-          With Qloo, the small Gemini model scored above GPT-6 Astra alone.</p>
+        <div class="w-dumb" id="w-dumb"></div>
+      </div>
+
+      <div class="w-two">
+        <div class="panel w-panel">
+          <div class="w-head">
+            <div><p class="ph">Qloo against popularity, six tests</p>
+              <p class="hint">Booking by fame alone is what most tools do. Qloo's taste graph beats it in every test below.</p></div>
+            <div class="w-legend"><span><i class="k-right"></i>Qloo</span><span><i class="k-none"></i>Popularity</span></div>
+          </div>
+          <div id="w-pop"></div>
+        </div>
+        <div class="panel w-panel">
+          <div class="w-head">
+            <div><p class="ph">Identity: does Qloo find the right one?</p>
+              <p class="hint">Places a model named in its plans (Test 22), and acts on a real Lollapalooza bill.</p></div>
+            <div class="w-legend"><span><i class="k-right"></i>Found in Qloo</span><span><i class="k-alt"></i>Filled from Last.fm</span><span><i class="k-none"></i>Not found</span></div>
+          </div>
+          <div class="w-donuts two" id="w-id"></div>
+        </div>
+      </div>
+
+      <div class="panel w-panel">
+        <div class="w-head">
+          <div><p class="ph">Ask the same question twice: does the answer change?</p>
+            <p class="hint">Each square is one pair of acts on a real festival day. Lit squares are pairs whose shared-fan
+              score moved by 10 points or more between two identical requests. The count is measured; where the lit squares sit is for illustration. Pick a day and a source.</p></div>
+          <div class="w-controls">
+            <div class="toggle" role="radiogroup" aria-label="Festival day" id="w-days"></div>
+            <div class="toggle" role="radiogroup" aria-label="Source" id="w-src">
+              <button type="button" role="radio" aria-checked="true" data-src="model">GPT-6 Astra alone</button>
+              <button type="button" role="radio" aria-checked="false" data-src="qloo">Qloo</button>
+            </div>
+          </div>
+        </div>
+        <div class="w-waffle-wrap"><div class="w-waffle" id="w-waffle" role="img"></div>
+          <div class="w-big"><b id="w-moved">46</b><span id="w-movedlbl">of 903 pairs changed</span></div></div>
       </div>
     </div>
+    <div class="w-tip" id="w-tip" hidden></div>
 
     <div class="band-head second">
       <div>
@@ -666,6 +697,7 @@ try { var t = localStorage.getItem("ws-theme"); if (t === "light" || t === "dark
 <script src="/static/site/tour.js?v=1"></script>
 <script src="/static/site/lineup.js?v=1"></script>
 <script src="/static/site/qloo_adds.js?v=1"></script>
+<script src="/static/site/why.js?v=5"></script>
 <script>window.site && window.site.start();</script>
 </body>
 </html>
